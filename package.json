@@ -1,0 +1,33 @@
+{
+  "name": "cheerio-httpcli",
+  "version": "0.1.0",
+  "description": "html client module with cheerio & iconv",
+  "main": "index.js",
+  "scripts": {
+    "test": "vows --spec test/test.js"
+  },
+   "dependencies": {
+    "request": ">=2.1.4",
+    "cheerio": ">=0.10.0",
+    "iconv": ">=2.0.0"
+  },
+  "engines": {
+    "node": ">=0.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ktty1220/cheerio-httpcli.git"
+  },
+  "keywords": [
+    "cheerio",
+    "http",
+    "dom",
+    "scrape"
+  ],
+   "author": {
+    "name": "ktty1220",
+    "email": "ktty1220@gmail.com"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
