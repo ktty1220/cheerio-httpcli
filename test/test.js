@@ -65,7 +65,7 @@ vows.describe('cheerio-httpcli test')
       cli.fetch('http://gunosy.com/', this.callback);
     },
     'it succeeded in http get, convert to utf-8, parse html': function (topic) {
-      assert.equal(topic('#contact-link').text(), 'お問い合わせ');
+      assert.equal(topic('#box_info').text().trim(), 'お問い合わせ');
     }
   },
   'encoding: sjis': {
@@ -82,6 +82,14 @@ vows.describe('cheerio-httpcli test')
     },
     'it succeeded in http get, convert to utf-8, parse html': function (topic) {
       assert.equal(topic('#svcAshiato1 .svcAshiatoLabel .default').text(), 'サービス一覧');
+    }
+  },
+  'encoding: euc-jp(html5)': {
+    topic: function () {
+      cli.fetch('http://d.hatena.ne.jp/hotkeyword', this.callback);
+    },
+    'it succeeded in http get, convert to utf-8, parse html': function (topic) {
+      assert.equal(topic('h1').text(), '注目キーワード');
     }
   },
   'encoding: iso-2022-jp': {
