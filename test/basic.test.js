@@ -2,7 +2,7 @@ var vows = require('vows');
 var assert = require('assert');
 var cli = require('../lib/cheerio-httpcli');
 
-vows.describe('cheerio-httpcli test')
+vows.describe('basic test')
 .addBatch({
   'not existing page': {
     topic: function () {
@@ -98,6 +98,17 @@ vows.describe('cheerio-httpcli test')
     },
     'it succeeded in http get, convert to utf-8, parse html': function (topic) {
       assert.equal(topic('title').text(), 'Unicode対応 文字コード表');
+    }
+  },
+  'gzip: true(default)': {
+    topic: function () {
+      var _this = this;
+      cli.fetch('http://www.yahoo.co.jp/', function (err, $, res) {
+        _this.callback(err, res);
+      });
+    },
+    'found "content-encoding: gzip" in response header': function (topic) {
+      assert.equal(topic.headers['content-encoding'], 'gzip');
     }
   }
 })
