@@ -1,4 +1,6 @@
-# cheerio-httpcli - iconvによる文字コード変換とcheerioによるHTMLパースを組み込んだNode.js用HTTPクライアントモジュール
+# cheerio-httpcli
+
+#### iconvによる文字コード変換とcheerioによるHTMLパースを組み込んだNode.js用HTTPクライアントモジュール
 
 Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換とHTMLのパースを行った後のオブジェクトを取得できるHTTPクライアントモジュールです。
 
@@ -14,9 +16,13 @@ cheerioはHTMLをjQueryライクにパースしてくれるモジュールです
 
 ### fetch(url[, get-param], callback)
 
-`url`で指定したWEBページをGETメソッドで取得し、文字コードの変換とHTMLパースを行いcallbackに返します。
+`url`で指定したWEBページをGETメソッドで取得し、文字コードの変換とHTMLパースを行い`callback`に返します。
 
-`callback`の引数は、(Errorオブジェクト, `cheerio.load()`の戻り値)です。
+`callback`には以下の3つの引数が渡されます。
+
+* Errorオブジェクト
+* `cheerio.load()`でHTMLコンテンツをパースしたオブジェクト
+* requestモジュールの`response`オブジェクト
 
 GET時にパラメータを付加する場合は、`get-param`に連想配列で指定します。
 
@@ -25,29 +31,34 @@ GET時にパラメータを付加する場合は、`get-param`に連想配列で
     var client = require('cheerio-httpcli');
 
     // Googleで「node.js」について検索する。
-    client.fetch('http://www.google.com/search', { q: 'node.js' }, function (err, $) {
+    client.fetch('http://www.google.com/search', { q: 'node.js' }, function (err, $, res) {
+      // レスポンスヘッダを参照
+      console.log(res.headers);
+
       // HTMLタイトルを表示
       console.log($('title').text());
-       ・
-       ・
-       ・
+
+      // リンク一覧を表示
+      $('a').each(function (idx) {
+        console.log($(this).attr('href'));
+      });
     });
 
-Google検索結果の一覧を取得する方法は「example.js」を参照してください。
+同梱の「example.js」はGoogle検索結果の一覧を取得するサンプルです。参考にしてください。
 
 ## プロパティ
 
 ### headers
 
-`request`で使用するリクエストヘッダ情報の連想配列です。デフォルトでは`User-Agent`のみIE9の情報を指定しています。
+requestモジュールで使用するリクエストヘッダ情報の連想配列です。デフォルトでは`User-Agent`のみIE9の情報を指定しています。
 
 ### timeout
 
-`request`で指定するタイムアウト情報です。デフォルトでは30秒となっています。
+requestモジュールで指定するタイムアウト情報です。デフォルトでは30秒となっています。
 
 ### gzip
 
-サーバーとの通信にgzip転送を使用するかどうかを真偽値で指定します。デフォルトは`true`です。
+サーバーとの通信にgzip転送を使用するかどうかを真偽値で指定します。デフォルトは`true`(gzip転送する)です。
 
 ## その他
 
@@ -60,7 +71,7 @@ Google検索結果の一覧を取得する方法は「example.js」を参照し�
 
 * リクエストヘッダのHostを自動でセットするようにした
 * gzip転送オプション追加
-* fetch()のcallbackの第3引数にrequestモジュールのresponseオブジェクトを追加
+* `fetch()`のcallbackの第3引数にrequestモジュールの`response`オブジェクトを追加
 * HTTPステータスコードが200以外によるエラーでもコンテンツを取得するようにした
 
 ### 0.1.1 (2013-04-11)

@@ -5,7 +5,7 @@
 var client = require('./lib/cheerio-httpcli');
 
 // google-search
-client.fetch('http://www.google.com/search', { q: 'node.js' }, function (err, $) {
+client.fetch('http://www.google.com/search', { q: 'node.js' }, function (err, $, res) {
   if (err) {
     return console.error(err);
   }
