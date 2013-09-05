@@ -4,37 +4,6 @@ var cli = require('../lib/cheerio-httpcli');
 
 vows.describe('basic test')
 .addBatch({
-  'not existing page': {
-    topic: function () {
-      var _this = this;
-      cli.fetch('http://www.google.com/not-existing-page.html', function (err, $) {
-        _this.callback(undefined, err);
-      });
-    },
-    'error message: "server status"': function (topic) {
-      assert.equal(topic.message, 'server status');
-    },
-    'error statusCode: 404': function (topic) {
-      assert.equal(topic.statusCode, 404);
-    },
-    'error url: http://www.google.com/not-existing-page.html': function (topic) {
-      assert.equal(topic.url, 'http://www.google.com/not-existing-page.html');
-    }
-  }, 
-  'not existing host': {
-    topic: function () {
-      var _this = this;
-      cli.fetch('http://not-existing-host/', function (err, $) {
-        _this.callback(undefined, err);
-      });
-    },
-    'error errno: ENOTFOUND': function (topic) {
-      assert.equal(topic.errno, 'ENOTFOUND');
-    },
-    'error url: http://not-existing-host/': function (topic) {
-      assert.equal(topic.url, 'http://not-existing-host/');
-    }
-  },
   'encoding: x-sjis(not supported)': {
     topic: function () {
       var _this = this;
@@ -98,17 +67,6 @@ vows.describe('basic test')
     },
     'it succeeded in http get, convert to utf-8, parse html': function (topic) {
       assert.equal(topic('title').text(), 'Unicode対応 文字コード表');
-    }
-  },
-  'gzip: true(default)': {
-    topic: function () {
-      var _this = this;
-      cli.fetch('http://www.yahoo.co.jp/', function (err, $, res) {
-        _this.callback(err, res);
-      });
-    },
-    'found "content-encoding: gzip" in response header': function (topic) {
-      assert.equal(topic.headers['content-encoding'], 'gzip');
     }
   }
 })
