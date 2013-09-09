@@ -2,7 +2,7 @@ var vows = require('vows');
 var assert = require('assert');
 var cli = require('../lib/cheerio-httpcli');
 
-vows.describe('basic test')
+vows.describe('encoding test')
 .addBatch({
   'encoding: x-sjis(not supported)': {
     topic: function () {

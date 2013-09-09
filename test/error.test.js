@@ -7,7 +7,7 @@ vows.describe('error test')
   'error: not existing page': {
     topic: function () {
       var _this = this;
-      cli.fetch('http://www.google.com/not-existing-page.html', function (err, $) {
+      cli.fetch('http://www.google.com/not-existing-page.html', { hoge: 'fuga' }, function (err, $) {
         _this.callback(undefined, {
           error: err,
           $: $
@@ -23,6 +23,9 @@ vows.describe('error test')
     'error url: http://www.google.com/not-existing-page.html': function (topic) {
       assert.equal(topic.error.url, 'http://www.google.com/not-existing-page.html');
     },
+    'error param: { hoge: "fuga" }': function (topic) {
+      assert.deepEqual(topic.error.param, { hoge: 'fuga' });
+    },
     'error content is defined': function (topic) {
       assert.equal(topic.$('title').text(), 'Error 404 (Not Found)!!1');
     }
@@ -30,7 +33,7 @@ vows.describe('error test')
   'error: not existing host': {
     topic: function () {
       var _this = this;
-      cli.fetch('http://not-existing-host/', function (err, $) {
+      cli.fetch('http://not-existing-host/', { hoge: 'fuga' }, function (err, $) {
         _this.callback(undefined, {
           error: err,
           $: $
@@ -42,6 +45,9 @@ vows.describe('error test')
     },
     'error url: http://not-existing-host/': function (topic) {
       assert.equal(topic.error.url, 'http://not-existing-host/');
+    },
+    'error param: { hoge: "fuga" }': function (topic) {
+      assert.deepEqual(topic.error.param, { hoge: 'fuga' });
     },
     'error content is not defined': function (topic) {
       assert.isUndefined(topic.$);
