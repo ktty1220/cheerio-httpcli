@@ -2,23 +2,17 @@ var vows = require('vows');
 var assert = require('assert');
 var cli = require('../lib/cheerio-httpcli');
 
+// need iconv-jp module for test
+cli.setIconvEngine('iconv-jp');
+
 vows.describe('encoding test')
 .addBatch({
-  'encoding: x-sjis(not supported)': {
+  'encoding: x-sjis(= shift_jis)': {
     topic: function () {
-      var _this = this;
-      cli.fetch('http://info.2ch.net/guide/', function (err, $) {
-        _this.callback(undefined, err);
-      });
+      cli.fetch('http://www2.2ch.net/2ch.html', this.callback);
     },
-    'error errno: 22': function (topic) {
-      assert.equal(topic.errno, 22);
-    },
-    'error charset: "x-sjis"': function (topic) {
-      assert.equal(topic.charset, 'x-sjis');
-    },
-    'error url: http://info.2ch.net/guide/': function (topic) {
-      assert.equal(topic.url, 'http://info.2ch.net/guide/');
+    'it succeeded in http get, convert to utf-8, parse html': function (topic) {
+      assert.equal(topic('title').text(), '　■2ch BBS ..');
     }
   },
   'encoding: utf-8': {

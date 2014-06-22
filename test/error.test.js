@@ -7,7 +7,7 @@ vows.describe('error test')
   'error: not existing page': {
     topic: function () {
       var _this = this;
-      cli.fetch('http://www.google.com/not-existing-page.html', { hoge: 'fuga' }, function (err, $) {
+      cli.fetch('http://www.google.com/not-existing-page.html', { hoge: 'fuga' }, function (err, $, res) {
         _this.callback(undefined, {
           error: err,
           $: $
@@ -33,7 +33,7 @@ vows.describe('error test')
   'error: not existing host': {
     topic: function () {
       var _this = this;
-      cli.fetch('http://not-existing-host/', { hoge: 'fuga' }, function (err, $) {
+      cli.fetch('http://not-existing-host/', { hoge: 'fuga' }, function (err, $, res) {
         _this.callback(undefined, {
           error: err,
           $: $
