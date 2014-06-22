@@ -6,33 +6,18 @@ vows.describe('iconv-module test')
 .addBatch({
   'iconv: invalid module name': {
     'throw exception': function () {
-      assert.throws(function () { cli.setIconvEngine('iconvlite'); });
+      assert.throws(function () { cli.setIconvEngine('iconvjp'); });
     }
   }
 })
 .addBatch({
-  'iconv: iso-2022-jp (iconv-lite not supported)': {
+  'iconv: iso-2022-jp(use iconv-jp)': {
     topic: function () {
-      var _this = this;
-      cli.setIconvEngine('iconv-lite');
-      cli.fetch('http://ash.jp/code/unitbl21.htm', function (err, $, res) {
-        _this.callback(undefined, err);
-      });
+      cli.setIconvEngine('iconv-jp');
+      cli.fetch('http://ash.jp/code/unitbl21.htm', this.callback);
     },
-    'error errno: 22': function (topic) {
-      assert.equal(topic.errno, 22);
-    },
-    'error code: EINVAL': function (topic) {
-      assert.equal(topic.code, 'EINVAL');
-    },
-    'error message: EINVAL, Conversion not supported.': function (topic) {
-      assert.equal(topic.message, 'EINVAL, Conversion not supported.');
-    },
-    'error charset: "iso-2022-jp"': function (topic) {
-      assert.equal(topic.charset, 'iso-2022-jp');
-    },
-    'error url: http://ash.jp/code/unitbl21.htm': function (topic) {
-      assert.equal(topic.url, 'http://ash.jp/code/unitbl21.htm');
+    'it succeeded in http get, convert to utf-8, parse html': function (topic) {
+      assert.equal(topic('title').text(), 'Unicode対応 文字コード表');
     }
   }
 })
