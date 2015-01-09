@@ -1,0 +1,5 @@
+--ui bdd
+--require mocha-clean
+--require intelli-espower-loader
+--reporter spec
+--timeout 60000

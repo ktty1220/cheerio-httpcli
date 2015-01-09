@@ -1,1 +1,1 @@
-module.exports = require('./lib/cheerio-httpcli');
+module.exports = require('./lib/core');

@@ -1,43 +1,58 @@
-# cheerio-httpcli
-
-#### iconv系モジュールによる文字コード変換とcheerioによるHTMLパースを組み込んだNode.js用HTTPクライアントモジュール
+# cheerio-httpcli - Node.js用WEBスクレイピングモジュール
 
 Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換とHTMLのパースを行った後のオブジェクトを取得できるHTTPクライアントモジュールです。
 
 実装にあたり、以下のモジュールを利用しています。
 
 * WEBページの取得: [request](https://npmjs.org/package/request)
-* WEBページの文字コード判定: [jschardet](https://github.com/aadsm/jschardet)
-* 文字コードの変換: [iconv-lite](https://github.com/ashtuchkin/iconv-lite)
-* HTMLのパース: [cheerio](https://npmjs.org/package/cheerio)
+* WEBページの文字コード判定: [jschardet](http://npmjs.org/package/jschardet)
+* 文字コードの変換: [iconv-lite](http://npmjs.org/package/iconv-lite)
+* HTMLのパース: [cheerio](http://npmjs.org/package/cheerio)
+* プロミス形式実行: [rsvp](http://npmjs.org/package/rsvp)
 
-※ cheerioはHTMLをjQueryライクにパースしてくれるモジュールです。パース後のオブジェクトを格納する変数名を「$」にすると、`$('title').text()`のようなjQueryそのままの形で要素の情報を取得できます。
+> cheerioはHTMLをjQueryライクにパースしてくれるモジュールです。パース後のオブジェクトを格納する変数名を「$」にすると、`$('title').text()`のようなjQueryそのままの形で要素の情報を取得できます。
+
+上記npmモジュールの他にURLエンコード用に[ecl_new.js](http://www.drk7.jp/MT/archives/001324.html)も利用しています。
+
+## 特徴
+
+1. 取得先WEBページの文字コードを自動で判定してHTMLをUTF-8に変換してくれる。
+2. UTF-8に変換したHTMLを`cheerio.load()`でパースしたオブジェクトも取得できる。
+3. Node.jsお馴染みのコールバック形式と最近の流行であるプロミス形式どちらにも対応。
+4. cheerioのprototypeを拡張し、フォームの送信やリンクのクリックをエミュレート。
+5. ブラウザ指定による簡単User-Agent切り替え機能。
+6. 現在のクッキーの内容を簡単に取得できる(読み取り専用)。
 
 ## インストール
 
-    npm install cheerio-httpcli
+```
+npm install cheerio-httpcli
+```
 
 ## メソッド
 
-### fetch(url[, get-param], callback)
+### fetch(url[, get-param, callback])
 
-`url`で指定したWEBページをGETメソッドで取得し、文字コードの変換とHTMLパースを行い`callback`に返します。
+`url`で指定したWEBページをGETメソッドで取得し、文字コードの変換とHTMLパースを行い`callback`関数に返します。
 
-`callback`には以下の3つの引数が渡されます。
+`callback`関数には以下の4つの引数が渡されます。
 
 1. Errorオブジェクト
-2. `cheerio.load()`でHTMLコンテンツをパースしたオブジェクト
-3. requestモジュールの`response`オブジェクト
+2. `cheerio.load()`でHTMLコンテンツをパースしたオブジェクト(独自拡張版)
+3. requestモジュールの`response`オブジェクト(独自拡張版)
+4. UTF-8に変換したHTMLコンテンツ
 
-GET時にパラメータを付加する場合は、`get-param`に連想配列で指定します。
+GET時にパラメータを付加する場合は第2引数の`get-param`に連想配列で指定します。
 
-#### サンプル
+##### サンプル
 
 ```
 var client = require('cheerio-httpcli');
 
 // Googleで「node.js」について検索する。
-client.fetch('http://www.google.com/search', { q: 'node.js' }, function (err, $, res) {
+var word = 'node.js';
+
+client.fetch('http://www.google.com/search', { q: word }, function (err, $, res, body) {
   // レスポンスヘッダを参照
   console.log(res.headers);
 
@@ -51,7 +66,128 @@ client.fetch('http://www.google.com/search', { q: 'node.js' }, function (err, $,
 });
 ```
 
-同梱の「example.js」はGoogle検索結果の一覧を取得するサンプルです。参考にしてください。
+同梱の「example/google.js」はGoogle検索結果の一覧を取得するサンプルです。参考にしてください。
+
+#### プロミス形式での呼び出し
+
+`fetch()`の第3引数である`callback`関数を省略すると、戻り値としてPromiseオブジェクトが返ります。先ほどのサンプルをプロミス形式で呼び出すと以下のようになります。
+
+```
+var client = require('cheerio-httpcli');
+
+// Googleで「node.js」について検索する。
+var word = 'node.js';
+
+// callbackを指定しなかったのでPromiseオブジェクトが返る
+var p = client.fetch('http://www.google.com/search', { q: word })
+p.then(function (result) {
+  // レスポンスヘッダを参照
+  console.log(result.response.headers);
+
+  // HTMLタイトルを表示
+  console.log(result.$('title').text());
+
+  // リンク一覧を表示
+  result.$('a').each(function (idx) {
+    console.log(result.$(this).attr('href'));
+  });
+})
+
+p.catch(function (err) {
+  console.log(err);
+});
+
+p.finally(function () {
+  console.log('done');
+});
+```
+
+`callback`関数を指定しない`fetch()`の戻り値を`p`変数が受け取り、その`p`変数を通して`then`(正常終了時)および`catch`(エラー発生時)の処理を行っています。また、正常終了でもエラーでも必ず最後に通る処理である`finally`も使用できます。
+
+`then`に渡されるパラメータはコールバック形式で呼び出した際に`callback`関数に渡されるものと同じですが、第1引数のオブジェクトにまとめて入っているという点で異なるのでご注意ください。
+
+* `error` ... Errorオブジェクト
+* `$` ... `cheerio.load()`でHTMLコンテンツをパースしたオブジェクト(独自拡張版)
+* `response` ... requestモジュールの`response`オブジェクト(独自拡張版)
+* `body` ... UTF-8に変換したHTMLコンテンツ
+
+```
+.then(function (result) {
+  console.log(result); => {                
+                            error: ...,       
+                            $: ...,           
+                            response: ...,    
+                            body: ...         
+                          };                  
+});
+```
+
+##### プロミス形式を活かした使い方
+
+とあるサイトのトップページにアクセスして、その中のとあるページに移動して...というように順を追ってWEBページに潜っていきたい場合などもメソッドチェーンでこんな感じに書くことができます。
+
+```
+var client = require('cheerio-httpcli');
+
+client.fetch(<TOPページのURL>)
+.then(function (result) {
+  // 何か処理
+  return client.fetch(<ページAのURL>);    // Promiseオブジェクトを返す
+})
+.then(function (result) {
+  // 何か処理
+  return client.fetch(<ページA-1のURL>);  // Promiseオブジェクトを返す
+})
+.then(function (result) {
+  // 何か処理
+  return client.fetch(<ページA-2のURL>);  // Promiseオブジェクトを返す
+})
+.catch(function (err) {
+  // どこかでエラーが発生
+  console.log(err);
+})
+.finally(function () {
+  // TOPページ => ページA => ページA-1 => ページA-2の順にアクセスした後に実行される
+  // エラーが発生した場合もcatchの処理後に実行される
+  console.log('done');
+});
+```
+
+実体は[rsvp](http://npmjs.org/package/rsvp)のPromiseオブジェクトなので、詳細はそちらのドキュメントをご覧ください。
+
+> `fetch()`の第3引数の`callback`関数を指定した場合はPromiseオブジェクトは返しません。したがってコールバック形式で呼び出しつつPromiseオブジェクトで何かをするということはできません。
+
+### setBrowser(browser-type)
+
+ブラウザごとのUser-Agentをワンタッチで設定するメソッドです。
+
+```
+var client = require('cheerio-httpcli');
+
+client.setBrowser('chrome');    // GoogleChromeのUser-Agentに変更
+client.setBrowser('android');   // AndroidのUser-Agentに変更
+client.setBrowser('googlebot'); // GooglebotのUser-Agentに変更
+```
+
+User-Agentを指定したブラウザのものに変更した場合は`true`、対応していないブラウザを指定するとUser-Agentは変更されずに`false`が返ります。
+
+対応しているブラウザは以下のとおりです。
+
+* ie `default`
+* chrome
+* firefox
+* opera
+* safari
+* ios
+* android
+* googlebot
+
+なお、細かいバージョンの指定まではできないので、そういった指定も行いたい場合は手動で以下のようにUser-Agentを指定してください。
+
+```
+// IE6のUser-Agentを手動で指定
+client.headers['User-Agent'] = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
+```
 
 ### setIconvEngine(iconv-module-name)
 
@@ -67,7 +203,7 @@ iconv-liteはcheerio-httpcliのインストール時に依存モジュールと�
 
 `iconv-module-name`には使用するiconv系モジュール名(`'iconv-jp'`, `'iconv'`, `'iconv-lite'`)のいずれかの文字列を指定します。
 
-#### サンプル
+##### サンプル
 
 ```
 var client = require('cheerio-httpcli');
@@ -79,49 +215,119 @@ client.fetch( ...
 
 ## プロパティ
 
+### version
+
+cheerio-httpcliのバージョン情報です。
+
 ### headers
 
-requestモジュールで使用するリクエストヘッダ情報の連想配列です。デフォルトでは`User-Agent`のみIE11の情報を指定しています。
+requestモジュールで使用するリクエストヘッダ情報の連想配列です。デフォルトでは何も指定されていませんが、`fetch()`実行時にUser-Agentが空の場合は自動的にUser-AgentにIE11の情報が入ります。
 
 ### timeout
 
-requestモジュールで指定するタイムアウト情報です。デフォルトでは30秒となっています。
+requestモジュールで指定するタイムアウト情報です。デフォルトでは30秒となっています(効いているかどうか不明)。
 
 ### gzip
 
 サーバーとの通信にgzip転送を使用するかどうかを真偽値で指定します。デフォルトは`true`(gzip転送する)です。
 
+### referer
+
+リファラーを自動でセットするかどうかの指定です。`true`にすると1つ前に`fetch()`したページのURLが自動でリクエストヘッダのRefererにセットされます。デフォルトは`true`です。
+
+## cheerioオブジェクトの独自拡張
+
+cheerio-httpcliではcheerioオブジェクトのprototypeを拡張していくつかの便利メソッドを実装しています。
+
+### $.documentInfo()
+
+取得したWEBページに関する情報(URLとエンコーディング)を取得できます。
+
+```
+client.fetch('http://hogehoge/', function (err, $, res, body) {
+  var docInfo = $.documentInfo();
+  console.log(docInfo.url);      // http://hogehoge/
+  console.log(docInfo.encoding); // 'utf-8'
+});
+```
+
+`fetch()`で指定したURLがリダイレクトされた場合はリダイレクト先のURLが`url`に入ります。`encoding`に関しても同様で、最終的に到達したページのエンコーディングが入ります。
+
+### $(link-element).click([ callback ])
+
+`a`タグでのみ使用できます。
+
+`href`属性に指定されているURLと取得したページのURLを組み合わせて移動先のURLを作成し、`fetch()`を実行します。`fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。
+
+```
+client.fetch('http://hogehoge/')
+.then(function (result) {
+  // id="login"の子のリンクをクリック(プロミス形式)
+  return result.$('#login a').click();
+})
+.then(function (result) {
+  // クリックした先のURL取得後の処理
+});
+```
+
+注意点として、この`click()`メソッドはjavascriptリンクや`onclick="..."`などの動的処理には対応していません。あくまでも`href`のURLに簡単にアクセスできるための機能です。
+
+なお、`$(...)`で取得した`a`タグオブジェクトが複数ある場合は先頭のオブジェクトに対してのみ実行されます。
+
+### $(form-element).submit([ param, callback ])
+
+`form`タグでのみ使用できます。
+
+指定したフォーム内に配置されている`input`や`checkbox`などのフォーム部品から送信パラメータを自動作成し、`action`属性のURLに`method`属性でフォームを送信します。`fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。 
+
+また、フォーム送信パラメータは`param`引数で指定した連想配列の内容で上書きできるので、利用する側ではパラメータを変更したい項目だけ指定するだけで済みます。
+
+```
+client.fetch('http://hogehoge/')
+.then(function (result) {
+  // ユーザー名とパスワードだけ入力して、あとはフォームのデフォルト値で送信する
+  var loginInfo = {
+    user: 'guest',
+    pass: '12345678'
+  };
+
+  // name="login"フォームを送信(コールバック形式)
+  result.$('form[name=login]').submit(loginInfo, function (err, $, res, body) {
+    // フォーム送信後に移動したページ取得後の処理
+  });
+})
+```
+
+cheerio-httpcliは内部でクッキーも保持するので、ログインが必要なページの取得なども`submit()`でログイン後に巡回できるようになります。
+
+その他の仕様は`click()`と同様です。
+
+* `onsubmit="xxx"`や送信ボタンの`onclick="..."`で実行される動的処理には対応していません。
+* `$(...)`で取得した`form`タグオブジェクトが複数ある場合は先頭のオブジェクトに対してのみ実行されます。
+
+## responseオブジェクトの独自拡張
+
+`fetch()`、`cheerio.click()`、`cheerio.submit()`などで取得できる`response`オブジェクトはrequestモジュールで取得したものですが、独自拡張として`cookies`プロパティを付け足しています。
+
+```
+client.fetch('http://hogehoge/')
+.then(function (result) {
+  // プロミス形式でログインフォーム送信
+  return result.$('form[name=login]').submit({ user: 'hoge', pass: 'fuga' })
+})
+.then(function (result) {
+  // ログイン後のクッキー内容確認
+  console.log(result.response.cookies);
+});
+```
+
+この`cookies`プロパティには現在取得したページのサーバーから送られてきたクッキーのキーと値が連想配列で入っています。セッションIDやログイン状態の確認などに使えるかもしれません。
+
+なお、この`cookies`の値を変更してもリクエスト処理には反映されません。クッキー確認専用のプロパティです。
+
 ## その他
 
 * 文字コードの判別はjschardetで高精度で判別できた場合はその情報を使用しますが、そうでない場合は`<head>`タグのcharset情報を参照します。後者での判別時においてcharsetで指定された文字コードとWEBページの実際の文字コードが異なる場合は変換エラーや文字化けが発生します。
-
-## Changelog
-
-### 0.2.0 (2014-06-22)
-
-* デフォルトでiconv-liteを使用するように変更(ネイティブモジュールをコンパイルするためのVisualStudioなどの開発環境のないWindowsでもインストールできるようになった)
-* 文字コードの判別にjschardetを利用するようにした
-* requestモジュールのクッキーを有効にした
-* デフォルトのUser-Agent情報をIE11にした
-
-### 0.1.3 (2013-09-09)
-
-* エラーオブジェクトに呼び出し時にセットした`param`を追加
-
-### 0.1.2 (2013-09-06)
-
-* リクエストヘッダのHostを自動でセットするようにした
-* gzip転送オプション追加
-* `fetch()`のcallbackの第3引数にrequestモジュールの`response`オブジェクトを追加
-* HTTPステータスコードが200以外によるエラーでもコンテンツを取得するようにした
-
-### 0.1.1 (2013-04-11)
-
-* charset=xxxというようにダブル(or シングル)クォーテーションがない場合に文字コードの判定に失敗するケースを修正
-
-### 0.1.0 (2013-03-18)
-
-* 初版リリース
 
 ## ライセンス
 

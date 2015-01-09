@@ -1,0 +1,4 @@
+--ui bdd
+--require blanket
+--reporter html-cov
+--timeout 60000

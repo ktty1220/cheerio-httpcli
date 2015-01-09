@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="Shift_JIS">
+    <title>フォームテスト</title>
+  </head>
+  <body>
+    <div>
+      <a class="rel" href="../auto/euc-jp.html">euc-jp</a>
+      <a class="root" href="/~info?hoge=fuga&piyo=">~info</a>
+      <a class="external" href="http://www.google.co.jp/">google</a>
+      <a class="js" href="javascript:history.back();">js:back</a>
+      <a class="hash" href="#hoge">#hoge</a>
+      <a class="error" href="./xxx.html">error</a>
+    </div>
+
+    <form name="get" action="/~info" method="GET">
+      <input type="hidden" name="hoge" value="fuga" />
+    </form>
+
+    <form name="post" action="/~info" method="post">
+      <input type="hidden" name="hoge" value="fuga" />
+    </form>
+
+    <form name="no-method" action="/~info">
+      <input type="hidden" name="hoge" value="fuga" />
+    </form>
+
+    <form name="no-action-no-method">
+      <input type="hidden" name="hoge" value="fuga" />
+    </form>
+
+    <form name="error" action="./xxx.html"></form>
+    <form name="error-post" method="post" action="./xxx.html">
+      <input type="hidden" name="error" value="!!!">
+    </form>
+
+    <form name="select" action="/~info" method="POST">
+      <select>
+        <option value="A">No.A</option>
+        <option value="B">No.B</option>
+        <option value="C">No.C</option>
+        <option value="D">No.D</option>
+        <option value="E">No.E</option>
+      </select>
+      <select name="single">
+        <option value="1">No.1</option>
+        <option value="2" selected>No.2</option>
+        <option value="3">No.3</option>
+        <option value="4">No.4</option>
+        <option value="5">No.5</option>
+      </select>
+      <select name="multi" multiple>
+        <option value="1">No.1</option>
+        <option value="2">No.2</option>
+        <option value="3" selected>No.3</option>
+        <option value="4">No.4</option>
+        <option value="5" selected>No.5</option>
+      </select>
+      <input type="submit">
+    </form>
+
+    <form name="checkbox" action="/~info">
+      <input type="text" value="fuga">
+      <input type="checkbox" name="check1" value="1" checked>
+      <input type="checkbox" name="check2" value="2">
+      <input type="checkbox" name="check3" value="3">
+      <input type="checkbox" name="check3" value="4">
+      <input type="checkbox" name="check3" value="5">
+      <div>
+        <input type="checkbox" name="check4[]" value="あいうえお">
+        <input type="checkbox" name="check4[]" value="かきくけこ">
+        <input type="checkbox" name="check4[]" value="さしすせそ">
+      </div>
+      <input type="submit">
+    </form>
+
+    <form name="radio" action="/~info" method="POST">
+      <input type="radio" name="radio1" value="xxx">
+      <input type="radio" name="radio1" value="yyy" checked>
+      <input type="radio" name="radio1" value="zzz">
+      <input type="radio" name="radio2" value="あいうえお">
+      <input type="radio" name="radio2" value="かきくけこ">
+      <input type="radio" name="radio2" value="さしすせそ">
+      <input type="submit">
+    </form>
+
+    <form name="nothing"></form>
+
+    <form name="default-jp" action="/~info" method="POST">
+      <input type="text" name="text" value="あいうえお">
+      <input type="checkbox" name="checkbox" value="かきくけこ" checked>
+      <input type="checkbox" name="checkbox" value="さしすせそ">
+      <input type="radio" name="radio" value="たちつてと">
+      <input type="radio" name="radio" value="なにぬねの" checked>
+      <select name="select" multiple>
+        <option value="ははははは">ははははは</option>
+        <option value="ひひひひひ">ひひひひひ</option>
+        <option value="ふふふふふ" selected>ふふふふふ</option>
+        <option value="へへへへへ">へへへへへ</option>
+        <option value="ほほほほほ" selected>ほほほほほ</option>
+      </select>
+      <textarea name="textarea">まみむめも</textarea>
+    </form>
+
+    <form name="login" action="/~redirect" method="POST">
+      <input type="hidden" name="session" value="xxxxx">
+      <input type="text" name="user" value="guest">
+      <input type="password" name="password" value="">
+      <textarea name="message">メッセージ</textarea>
+      <input type="submit" value="ログイン">
+    </form>
+  </body>
+</html>

@@ -1,19 +1,46 @@
 {
   "name": "cheerio-httpcli",
-  "version": "0.2.0",
-  "description": "html client module with cheerio & iconv(-jp|-lite)",
+  "version": "0.3.0",
+  "description": "html client module with cheerio & iconv(-jp|-lite) & promise",
   "main": "index.js",
-  "scripts": {
-    "test": "vows --spec"
+  "engines": {
+    "node": ">=0.8.0"
   },
-   "dependencies": {
+  "dependencies": {
     "request": ">=2.1.4",
     "cheerio": ">=0.10.0",
     "iconv-lite": ">=0.4.0",
-    "jschardet": ">=1.1.0"
+    "jschardet": ">=1.1.0",
+    "rsvp": ">=3.0.0"
   },
-  "engines": {
-    "node": ">=0.6.0"
+  "devDependencies": {
+    "blanket": "*",
+    "intelli-espower-loader": "*",
+    "mocha": "*",
+    "mocha-clean": "*",
+    "node-static": "*",
+    "power-assert": "*",
+    "type-of": "*"
+  },
+  "directories": {
+    "test": "test/"
+  },
+  "config": {
+    "blanket": {
+      "pattern": [
+        "lib"
+      ],
+      "data-cover-never": [
+        "node_modules",
+        "test",
+        "vendor"
+      ]
+    }
+  },
+  "scripts": {
+    "test": "mocha --opts test/mocha-cov.opts > coverage.html",
+    "hint": "jshint test lib example ; true",
+    "cs": "jscs test lib example ; true"
   },
   "repository": {
     "type": "git",
@@ -25,7 +52,7 @@
     "dom",
     "scrape"
   ],
-   "author": {
+  "author": {
     "name": "ktty1220",
     "email": "ktty1220@gmail.com"
   },
