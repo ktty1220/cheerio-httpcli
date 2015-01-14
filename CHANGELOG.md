@@ -1,8 +1,8 @@
-# 0.3.0 (2015-01-15)
+# 0.3.0 (2015-01-14)
 
-* `fetch()`をPromise形式と従来のコールバック形式とのハイブリッド化
+* `fetch()`をプロミス形式と従来のコールバック形式とのハイブリッド化
 * `fetch()`のcallback第2引数のcheerioオブジェクトのプロトタイプを独自拡張し、以下のメソッドを追加
-    * `$.root().documentInfo()`
+    * `$.documentInfo()`
     * `$(<form element>).submit()`
     * `$(<link element>).click()`
 * `fetch()`のcallback第3引数のresponseオブジェクトに`cookies`プロパティを追加
