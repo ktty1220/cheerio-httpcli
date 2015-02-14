@@ -1,5 +1,7 @@
 # cheerio-httpcli - Node.js用WEBスクレイピングモジュール
 
+[![NPM](https://nodei.co/npm/cheerio-httpcli.png?downloads=true)](https://npmjs.org/package/cheerio-httpcli)
+
 Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換とHTMLのパースを行った後のオブジェクトを取得できるHTTPクライアントモジュールです。
 
 実装にあたり、以下のモジュールを利用しています。
@@ -113,12 +115,12 @@ p.finally(function () {
 
 ```
 .then(function (result) {
-  console.log(result); => {                
-                            error: ...,       
-                            $: ...,           
-                            response: ...,    
-                            body: ...         
-                          };                  
+  console.log(result); => {
+                            error: ...,
+                            $: ...,
+                            response: ...,
+                            body: ...
+                          };
 });
 ```
 
@@ -278,7 +280,7 @@ client.fetch('http://hogehoge/')
 
 `form`タグでのみ使用できます。
 
-指定したフォーム内に配置されている`input`や`checkbox`などのフォーム部品から送信パラメータを自動作成し、`action`属性のURLに`method`属性でフォームを送信します。`fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。 
+指定したフォーム内に配置されている`input`や`checkbox`などのフォーム部品から送信パラメータを自動作成し、`action`属性のURLに`method`属性でフォームを送信します。`fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。
 
 また、フォーム送信パラメータは`param`引数で指定した連想配列の内容で上書きできるので、利用する側ではパラメータを変更したい項目だけ指定するだけで済みます。
 

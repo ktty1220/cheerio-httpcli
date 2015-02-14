@@ -39,6 +39,21 @@ describe('cheerio:click', function () {
     });
   });
 
+  it('外部URLリンクをclickするとそのURLのリンク先を取得する', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      $('.external').click(function (err, $, res, body) {
+        assert.deepEqual($.documentInfo(), {
+          url: 'http://www.yahoo.co.jp/',
+          encoding: 'utf-8'
+        });
+        assert(type(res) === 'object');
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
+
   it('ルートからの絶対パスリンクをclickするとドキュメントルートを基準にしたリンク先を取得する', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('.root').click(function (err, $, res, body) {
