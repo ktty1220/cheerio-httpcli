@@ -7,11 +7,11 @@
     "node": ">=0.8.0"
   },
   "dependencies": {
-    "request": ">=2.1.4",
-    "cheerio": ">=0.10.0",
-    "iconv-lite": ">=0.4.0",
-    "jschardet": ">=1.1.0",
-    "rsvp": ">=3.0.0"
+    "cheerio": "^0.18.0",
+    "iconv-lite": "^0.4.7",
+    "jschardet": "^1.1.0",
+    "request": "^2.53.0",
+    "rsvp": "^3.0.16"
   },
   "devDependencies": {
     "blanket": "*",
