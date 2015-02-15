@@ -27,7 +27,7 @@ Node.jsでWEBページのスクレイピングを行う際に必要となる文�
 
 ## インストール
 
-```
+```sh
 npm install cheerio-httpcli
 ```
 
@@ -48,7 +48,7 @@ GET時にパラメータを付加する場合は第2引数の`get-param`に連�
 
 ##### サンプル
 
-```
+```js
 var client = require('cheerio-httpcli');
 
 // Googleで「node.js」について検索する。
@@ -74,7 +74,7 @@ client.fetch('http://www.google.com/search', { q: word }, function (err, $, res,
 
 `fetch()`の第3引数である`callback`関数を省略すると、戻り値としてPromiseオブジェクトが返ります。先ほどのサンプルをプロミス形式で呼び出すと以下のようになります。
 
-```
+```js
 var client = require('cheerio-httpcli');
 
 // Googleで「node.js」について検索する。
@@ -113,7 +113,7 @@ p.finally(function () {
 * `response` ... requestモジュールの`response`オブジェクト(独自拡張版)
 * `body` ... UTF-8に変換したHTMLコンテンツ
 
-```
+```js
 .then(function (result) {
   console.log(result); => {
                             error: ...,
@@ -128,7 +128,7 @@ p.finally(function () {
 
 とあるサイトのトップページにアクセスして、その中のとあるページに移動して...というように順を追ってWEBページに潜っていきたい場合などもメソッドチェーンでこんな感じに書くことができます。
 
-```
+```js
 var client = require('cheerio-httpcli');
 
 client.fetch(<TOPページのURL>)
@@ -163,7 +163,7 @@ client.fetch(<TOPページのURL>)
 
 ブラウザごとのUser-Agentをワンタッチで設定するメソッドです。
 
-```
+```js
 var client = require('cheerio-httpcli');
 
 client.setBrowser('chrome');    // GoogleChromeのUser-Agentに変更
@@ -186,7 +186,7 @@ User-Agentを指定したブラウザのものに変更した場合は`true`、�
 
 なお、細かいバージョンの指定まではできないので、そういった指定も行いたい場合は手動で以下のようにUser-Agentを指定してください。
 
-```
+```js
 // IE6のUser-Agentを手動で指定
 client.headers['User-Agent'] = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
 ```
@@ -207,7 +207,7 @@ iconv-liteはcheerio-httpcliのインストール時に依存モジュールと�
 
 ##### サンプル
 
-```
+```js
 var client = require('cheerio-httpcli');
 
 // あえてiconv-liteを使用
@@ -245,7 +245,7 @@ cheerio-httpcliではcheerioオブジェクトのprototypeを拡張していく�
 
 取得したWEBページに関する情報(URLとエンコーディング)を取得できます。
 
-```
+```js
 client.fetch('http://hogehoge/', function (err, $, res, body) {
   var docInfo = $.documentInfo();
   console.log(docInfo.url);      // http://hogehoge/
@@ -261,7 +261,7 @@ client.fetch('http://hogehoge/', function (err, $, res, body) {
 
 `href`属性に指定されているURLと取得したページのURLを組み合わせて移動先のURLを作成し、`fetch()`を実行します。`fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。
 
-```
+```js
 client.fetch('http://hogehoge/')
 .then(function (result) {
   // id="login"の子のリンクをクリック(プロミス形式)
@@ -284,7 +284,7 @@ client.fetch('http://hogehoge/')
 
 また、フォーム送信パラメータは`param`引数で指定した連想配列の内容で上書きできるので、利用する側ではパラメータを変更したい項目だけ指定するだけで済みます。
 
-```
+```js
 client.fetch('http://hogehoge/')
 .then(function (result) {
   // ユーザー名とパスワードだけ入力して、あとはフォームのデフォルト値で送信する
@@ -311,7 +311,7 @@ cheerio-httpcliは内部でクッキーも保持するので、ログインが�
 
 `fetch()`、`cheerio.click()`、`cheerio.submit()`などで取得できる`response`オブジェクトはrequestモジュールで取得したものですが、独自拡張として`cookies`プロパティを付け足しています。
 
-```
+```js
 client.fetch('http://hogehoge/')
 .then(function (result) {
   // プロミス形式でログインフォーム送信
