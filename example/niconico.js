@@ -21,7 +21,7 @@ client.fetch('http://nicovideo.jp/')
 })
 .then(function (result) {
   console.log('ログインフォームを送信します');
-  return result.$('#login_form').submit({
+  return result.$('form').eq(0).submit({
     mail_tel: username,
     password: password
   });

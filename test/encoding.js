@@ -24,6 +24,7 @@ describe('encoding:auto', function () {
           encoding: enc
         });
         assert($('title').text() === '夏目漱石「私の個人主義」');
+        assert($('h1').html() === '<span>夏目漱石「私の個人主義」</span>');
         done();
       });
     });
