@@ -195,15 +195,18 @@ client.headers['User-Agent'] = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.
 
 cheerio-httpcliは、実行時にインストールされているiconv系のモジュールをチェックして利用するモジュールを自動的に決定しています。優先順位は以下のとおりです。
 
-1. iconv-jp
-2. iconv
-3. iconv-lite
+1. iconv
+2. iconv-lite
 
-iconv-liteはcheerio-httpcliのインストール時に依存モジュールとして一緒にインストールされますが、ネイティブモジュールであるiconv-jpやiconvがインストールされている場合、処理速度や対応文字コードの多さというメリットがあるそちらを優先してロードするようになっています。
+iconv-liteはcheerio-httpcliのインストール時に依存モジュールとして一緒にインストールされますが、ネイティブモジュールであるiconvがインストールされている場合、処理速度や対応文字コードの多さというメリットがあるそちらを優先してロードするようになっています。
+
+> バージョン0.3.1までは最優先はiconv-jpでしたが、長期間メンテされていないこととNode.js 0.12系でコンパイルできなくなっている現状を考慮してデフォルトの変換エンジン候補から除外しました。
+>
+> あえて`setIconvEngine()`でiconv-jpを指定することは可能ですが非推奨です。
 
 このメソッドは自動的にロードされたiconv系モジュールを破棄して、使用するiconv系モジュールを手動で指定するためのものです。モジュールテスト時の切り替え用メソッドなので基本的には実用性はありません。
 
-`iconv-module-name`には使用するiconv系モジュール名(`'iconv-jp'`, `'iconv'`, `'iconv-lite'`)のいずれかの文字列を指定します。
+`iconv-module-name`には使用するiconv系モジュール名(`'iconv'`, `'iconv-lite'`, `'iconv-jp'`)のいずれかの文字列を指定します。
 
 ##### サンプル
 
@@ -306,6 +309,37 @@ cheerio-httpcliは内部でクッキーも保持するので、ログインが�
 
 * `onsubmit="xxx"`や送信ボタンの`onclick="..."`で実行される動的処理には対応していません。
 * `$(...)`で取得した`form`タグオブジェクトが複数ある場合は先頭のオブジェクトに対してのみ実行されます。
+
+### $(element).text([ string ]) / $(element).html([ string ])
+
+cheerioデフォルトの`text()`および`html()`は、元からHTMLエンティティで表記している文字列をそのまま返します。
+
+```html
+<span id="hello">&lt;hello&gt;</span>
+```
+
+上記のようなHTMLの場合、以下のようになります。
+
+```js
+console.log($('#hello').text());
+// => &lt;hello&gt;
+```
+
+cheerio-httpcliではこの挙動を変更し、元からHTMLエンティティで表記されている文字列も可読文字にデコードします。数値参照、16進数参照、文字参照すべて変換します。
+
+```js
+console.log($('#hello').text());
+// => <hello>
+```
+
+もし、HTMLエンティティを変換しない元の表記のままのテキストやHTMLを取得したい場合は`_text()`および`_html()`メソッドを使用してください。こちらはcheerioデフォルトの挙動となります。
+
+```js
+console.log($('#hello').text());
+// => <hello>
+console.log($('#hello')._text());
+// => &lt;hello&gt;
+```
 
 ## responseオブジェクトの独自拡張
 

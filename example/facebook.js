@@ -25,7 +25,7 @@ client.fetch('http://www.facebook.com/')
 .then(function (result) {
   console.log('クッキー', result.response.cookies);
   console.log('ユーザー名を取得します');
-  console.log(result.$('#pagelet_bluebar [title="プロフィール"]').text());
+  console.log(result.$('._2dpb').text());
 })
 .catch(function (err) {
   console.log('エラーが発生しました');

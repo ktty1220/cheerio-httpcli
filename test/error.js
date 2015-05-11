@@ -38,7 +38,7 @@ describe('error', function () {
   });
 
   it('サーバーが見つからない場合もHTMLを取得できない', function (done) {
-    var errhost = 'http://localhost:99999/';
+    var errhost = 'http://localhost:59999/';
     cli.fetch(errhost, { hoge: 'fuga' }, function (err, $, res, body) {
       assert(err.errno, 'ENOTFOUND');
       assert(err.url, errhost);

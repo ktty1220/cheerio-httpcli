@@ -32,21 +32,3 @@ describe('iconv:iconv', function () {
     });
   });
 });
-
-describe('iconv:iconv-jp', function () {
-  before(function () {
-    this.server = helper.server();
-    cli.setIconvEngine('iconv-jp');
-  });
-  after(function () {
-    this.server.close();
-  });
-
-  it('iconv-liteで未対応のページでもiconv-jpを使用するとUTF-8に変換される(iso-2022-jp)', function (done) {
-    cli.fetch(helper.url('error', 'iso-2022-jp'), function (err, $, res, body) {
-      assert($.documentInfo().encoding === 'iso-2022-jp');
-      assert($('title').text() === '夏目漱石「私の個人主義」');
-      done();
-    });
-  });
-});

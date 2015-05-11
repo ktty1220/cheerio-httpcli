@@ -77,11 +77,11 @@ module.exports = {
           for (var i = 0; i < props.length; i++) {
             var p = props[i];
             if (req.headers[p]) {
-              headers.push([p, req.headers[p] ]);
+              headers.push([ p, req.headers[p] ]);
             }
           }
           if (pdata.length > 0) {
-            headers.push(['post-data', pdata ]);
+            headers.push([ 'post-data', pdata ]);
           }
           res.writeHead(200, headers);
           res.end('<html></html>');

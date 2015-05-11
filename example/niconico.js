@@ -17,18 +17,18 @@ console.log('ニコニコTOPページにアクセスします');
 client.fetch('http://nicovideo.jp/')
 .then(function (result) {
   console.log('ログインリンクをクリックします');
-  return result.$('#siteHeaderNotification a').click();
+  return result.$('#sideNav .loginBtn').click();
 })
 .then(function (result) {
   console.log('ログインフォームを送信します');
-  return result.$('form').eq(0).submit({
+  return result.$('#login_form').submit({
     mail_tel: username,
     password: password
   });
 })
 .then(function (result) {
   console.log('ログイン可否をチェックします');
-  if (! Number(result.response.headers['x-niconico-authflag'])) {
+  if (! result.response.headers['x-niconico-id']) {
     throw new Error('login failed');
   }
   console.log('クッキー', result.response.cookies);

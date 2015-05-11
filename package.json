@@ -1,17 +1,18 @@
 {
   "name": "cheerio-httpcli",
-  "version": "0.3.1",
-  "description": "html client module with cheerio & iconv(-jp|-lite) & promise",
+  "version": "0.3.2",
+  "description": "html client module with cheerio & iconv(-lite) & promise",
   "main": "index.js",
   "engines": {
-    "node": ">=0.8.0"
+    "node": ">=0.10.0"
   },
   "dependencies": {
-    "cheerio": "^0.18.0",
-    "iconv-lite": "^0.4.7",
-    "jschardet": "^1.1.0",
-    "request": "^2.53.0",
-    "rsvp": "^3.0.16"
+    "cheerio": "^0.19.0",
+    "ent": "^2.2.0",
+    "iconv-lite": "^0.4.8",
+    "jschardet": "^1.1.1",
+    "request": "^2.55.0",
+    "rsvp": "^3.0.18"
   },
   "devDependencies": {
     "blanket": "*",
@@ -38,9 +39,9 @@
     }
   },
   "scripts": {
-    "test": "mocha --opts test/mocha-cov.opts > coverage.html",
-    "hint": "jshint test lib example ; true",
-    "cs": "jscs test lib example ; true"
+    "test": "mocha --opts test/mocha-cov.opts > coverage.html && true || true",
+    "hint": "jshint test lib example && true || true",
+    "cs": "jscs test lib example && true || true"
   },
   "repository": {
     "type": "git",
