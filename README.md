@@ -175,10 +175,12 @@ User-Agentを指定したブラウザのものに変更した場合は`true`、�
 
 対応しているブラウザは以下のとおりです。
 
-* ie `default`
-* chrome
+* ie
+* edge
+* chrome `default`
 * firefox
 * opera
+* vivaldi
 * safari
 * ios
 * android
@@ -239,6 +241,18 @@ requestモジュールで指定するタイムアウト情報です。デフォ�
 ### referer
 
 リファラーを自動でセットするかどうかの指定です。`true`にすると1つ前に`fetch()`したページのURLが自動でリクエストヘッダのRefererにセットされます。デフォルトは`true`です。
+
+### debug
+
+`true`にするとリクエストの度にデバッグ情報を出力します(`stderr`)。デフォルトは`false`です。
+
+```js
+var client = require('cheerio-httpcli');
+
+// デバッグ表示ON
+client.debug = true;
+client.fetch( ...
+```
 
 ## cheerioオブジェクトの独自拡張
 

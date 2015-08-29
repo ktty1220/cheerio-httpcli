@@ -12,6 +12,9 @@ var str = 'お前はもう死んでいる';
 
 var client = require('../index');
 
+console.log('デバッグオプションを有効にします');
+client.debug = true;
+
 console.log('excite翻訳ページにアクセスします');
 client.fetch('http://www.excite.co.jp/world/')
 .then(function (result) {

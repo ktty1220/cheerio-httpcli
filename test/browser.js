@@ -12,9 +12,9 @@ describe('browser', function () {
     this.server.close();
   });
 
-  it('デフォルトはIEのUser-Agentがセットされる', function (done) {
+  it('デフォルトはChromeのUser-Agentがセットされる', function (done) {
     cli.fetch(helper.url('~info'), function (err, $, res, body) {
-      assert(browsers.ie === res.headers['user-agent']);
+      assert(browsers.chrome === res.headers['user-agent']);
       done();
     });
   });
