@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*eslint max-len:[1, 150, 2] no-invalid-this:0*/
+/*eslint max-len:[1, 150, 2], no-invalid-this:0*/
 var assert = require('power-assert');
 var helper = require('./_helper');
 var cli    = require('../index');

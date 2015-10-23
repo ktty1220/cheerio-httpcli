@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*eslint no-console:0 no-invalid-this:0*/
+/*eslint no-console:0, no-invalid-this:0*/
 'use strict';
 
 /**
