@@ -42,8 +42,7 @@
   },
   "scripts": {
     "test": "mocha --opts test/mocha-cov.opts > coverage.html && true || true",
-    "hint": "jshint test lib example && true || true",
-    "lint": "eslint test/*.js lib/**/*.js example/**/*.js && true || true",
+    "lint": "eslint test/*.js lib/*.js example/*.js && true || true",
     "cs": "jscs test lib example && true || true"
   },
   "repository": {

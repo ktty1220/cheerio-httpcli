@@ -1,4 +1,3 @@
-/*jshint node:true,strict:false */
 var nstatic = require('node-static');
 var http    = require('http');
 var fs      = require('fs');

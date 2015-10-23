@@ -1,6 +1,5 @@
-/*jshint node:true,mocha:true,strict:false */
 /*eslint-env mocha*/
-/*eslint max-len:[1, 150, 2], no-invalid-this:0*/
+/*eslint max-len:[1, 150, 2] no-invalid-this:0*/
 var assert = require('power-assert');
 var helper = require('./_helper');
 var cli    = require('../index');
@@ -62,6 +61,7 @@ describe('entities:plain', function () {
     this.server.close();
   });
 
+  // jscs:disable maximumLineLength
   it('16進数エンティティが文字列に変換されない', function (done) {
     cli.fetch(helper.url('entities', 'hex'), function (err, $, res, body) {
       assert($('h1')._text() === '夏目漱石「&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;」');
@@ -85,6 +85,7 @@ describe('entities:plain', function () {
       done();
     });
   });
+  // jscs:enable maximumLineLength
 
   it('文字参照エンティティが文字列に変換されない', function (done) {
     cli.fetch(helper.url('entities', 'sign'), function (err, $, res, body) {

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*jshint node:true */
 /*eslint no-console:0 no-invalid-this:0*/
 'use strict';
 
