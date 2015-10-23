@@ -1,4 +1,6 @@
 /*jshint node:true,mocha:true,strict:false */
+/*eslint-env mocha*/
+/*eslint no-invalid-this:0*/
 var assert   = require('power-assert');
 var helper   = require('./_helper');
 var cli      = require('../index');

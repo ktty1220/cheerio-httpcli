@@ -1,4 +1,6 @@
 /*jshint node:true,mocha:true,strict:false */
+/*eslint-env mocha*/
+/*eslint max-len:[1, 150, 2], no-invalid-this:0*/
 var assert = require('power-assert');
 var helper = require('./_helper');
 var cli    = require('../index');
@@ -12,9 +14,9 @@ describe('entities:decode', function () {
   });
 
   var expected = {
-    text: '夏目漱石「私の個人主義」', 
+    text: '夏目漱石「私の個人主義」',
     html: '夏目漱石「<strong>私の個人主義</strong>」',
-    sign: '<"私の個人主義"&' + "'吾輩は猫である'>"
+    sign: '<"私の個人主義"&\'吾輩は猫である\'>'
   };
 
   it('16進数エンティティが文字列に変換されている', function (done) {

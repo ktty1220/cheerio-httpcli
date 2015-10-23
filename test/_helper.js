@@ -1,8 +1,8 @@
 /*jshint node:true,strict:false */
-var static = require('node-static');
-var http   = require('http');
-var fs     = require('fs');
-var qs     = require('querystring');
+var nstatic = require('node-static');
+var http    = require('http');
+var fs      = require('fs');
+var qs      = require('querystring');
 
 /**
  * テスト用のヘルパーモジュール本体
@@ -56,7 +56,7 @@ module.exports = {
    */
   server: function () {
     var _this = this;
-    var file = new static.Server(this.root, {
+    var file = new nstatic.Server(this.root, {
       gzip: true
     });
     return http.createServer(function (req, res) {
