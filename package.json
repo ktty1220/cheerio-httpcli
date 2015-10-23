@@ -16,32 +16,20 @@
     "rsvp": "^3.1.0"
   },
   "devDependencies": {
-    "blanket": "*",
-    "espower-loader": "*",
-    "intelli-espower-loader": "*",
-    "mocha": "*",
-    "mocha-clean": "*",
-    "node-static": "*",
-    "power-assert": "*",
-    "type-of": "*"
+    "espower-loader": "^1.0.0",
+    "intelli-espower-loader": "^1.0.0",
+    "istanbul": "^0.4.0",
+    "mocha": "^2.3.3",
+    "mocha-clean": "^0.4.0",
+    "node-static": "^0.7.7",
+    "power-assert": "^1.1.0",
+    "type-of": "^2.0.1"
   },
   "directories": {
     "test": "test/"
   },
-  "config": {
-    "blanket": {
-      "pattern": [
-        "lib"
-      ],
-      "data-cover-never": [
-        "node_modules",
-        "test",
-        "vendor"
-      ]
-    }
-  },
   "scripts": {
-    "test": "mocha --opts test/mocha-cov.opts > coverage.html && true || true",
+    "test": "istanbul cover ./node_modules/mocha/bin/_mocha -x lib/vendor/** -x index.js && true || true", 
     "lint": "eslint test/*.js lib/*.js example/*.js && true || true",
     "cs": "jscs test lib example && true || true"
   },
