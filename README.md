@@ -375,6 +375,41 @@ client.fetch('http://hogehoge/')
 
 なお、この`cookies`の値を変更してもリクエスト処理には反映されません。クッキー確認専用のプロパティです。
 
+## Tips
+
+### Basic認証
+
+Basic認証が必要なページには以下の二通りの方法でアクセスできます。
+
+#### リクエストヘッダに認証情報をセット
+
+```js
+var client = require('cheerio-httpcli');
+var user = 'hoge';
+var password = 'foobarbaz';
+
+client.headers['Authorization'] = 'Basic ' + new Buffer(user + ':' + password).toString('base64');
+client.fetch('http://securet.example.com', function (err, $, res, body) {
+  .
+  .
+  .
+  // 不要になったら消去
+  delete(client.headers['Authorization']);
+});
+```
+
+#### URLに認証情報をセット
+
+```js
+var client = require('cheerio-httpcli');
+var user = 'hoge';
+var password = 'foobarbaz';
+
+client.fetch('http://' + user + ':' + password + '@securet.example.com', function (err, $, res, body) {
+```
+
+詳細は[こちら](http://qiita.com/ktty1220/items/e9e42247ede476d04ce2#comment-02b5b12c8be4f193834b)
+
 ## その他
 
 * 文字コードの判別はjschardetで高精度で判別できた場合はその情報を使用しますが、そうでない場合は`<head>`タグのcharset情報を参照します。後者での判別時においてcharsetで指定された文字コードとWEBページの実際の文字コードが異なる場合は変換エラーや文字化けが発生します。
