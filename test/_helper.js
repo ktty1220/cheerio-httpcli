@@ -55,15 +55,17 @@ module.exports = {
    */
   server: function () {
     var _this = this;
+    var _traceRoute = [];
     var file = new nstatic.Server(this.root, {
       gzip: true
     });
-    return http.createServer(function (req, res) {
+    var server = http.createServer(function (req, res) {
       var pdata = '';
       req.on('data', function (data) {
         pdata += data;
       });
       req.on('end', function () {
+        _traceRoute.push(req.url);
         if (/~info/.test(req.url)) {
           // アクセス元のヘッダ情報などをレスポンスヘッダにセットして返す
           var headers = [
@@ -106,6 +108,13 @@ module.exports = {
         }
       }).resume();
     }).listen(this.port);
+    server.resetTraceRoute = function () {
+      _traceRoute = [];
+    };
+    server.getTraceRoute = function () {
+      return _traceRoute;
+    };
+    return server;
   },
 
   /**

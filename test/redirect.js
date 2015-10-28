@@ -22,12 +22,19 @@ describe('redirect', function () {
   });
 
   it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ', function (done) {
+    var server = this.server;
+    server.resetTraceRoute();
     var url = helper.url('manual', 'euc-jp');
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=login]').submit(function (err, $, res, body) {
         assert(type(res.cookies) === 'object');
         assert(res.cookies.user === 'guest');
         assert($.documentInfo().url === url);
+        assert.deepEqual(server.getTraceRoute(), [
+          '/form/utf-8.html',
+          '/~redirect',
+          '/manual/euc-jp.html'
+        ]);
         done();
       });
     });
