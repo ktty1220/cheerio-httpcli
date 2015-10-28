@@ -77,87 +77,175 @@ describe('promise:click', function () {
     this.server.close();
   });
 
-  it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      assert(! $('a').click(function () {
-        done();
-      }));
+  describe('a要素', function () {
+    it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        assert(! $('a').click(function () {
+          done();
+        }));
+      });
+    });
+
+    it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var promise = $('a').click();
+        assert(type(promise) === 'object');
+        assert(type(promise.then) === 'function');
+        assert(type(promise.catch) === 'function');
+        assert(type(promise.finally) === 'function');
+        promise.finally(done);
+      });
+    });
+
+    it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function () {
+      var called = 0;
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        return result.$('.rel').click();
+      })
+      .then(function (result) {
+        called++;
+        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
+        assert(type(result) === 'object');
+        assert(type(result.response) === 'object');
+        assert(type(result.$) === 'function');
+        assert(type(result.body) === 'string');
+        assert(result.$('title').text() === '夏目漱石「私の個人主義」');
+      })
+      .finally(function () {
+        assert(called === 1);
+      });
+    });
+
+    it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function () {
+      var called = { then: 0, catch: 0 };
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        return result.$('.error').click();
+      })
+      .then(function (result) {
+        called.then++;
+      })
+      .catch(function (err) {
+        called.catch++;
+        assert(err instanceof Error);
+        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
+        assert(err.message === 'no content');
+        assert(err.statusCode === 404);
+        assert(err.url === helper.url('form', 'xxx'));
+        assert(type(err.response) === 'object');
+      })
+      .finally(function () {
+        assert.deepEqual(called, { then: 0, catch: 1 });
+      });
+    });
+
+    it('promise作成前にclickエラーが発生してもcatch->finallyが呼ばれる', function () {
+      var called = { then: 0, catch: 0 };
+      var url = helper.url('form', 'utf-8');
+      return cli.fetch(url)
+      .then(function (result) {
+        return result.$('div').click();
+      })
+      .then(function (result) {
+        called.then++;
+      })
+      .catch(function (err) {
+        called.catch++;
+        assert(err instanceof Error);
+        assert.deepEqual(Object.keys(err).sort(), [ 'url' ]);
+        assert(err.message === 'element is not clickable');
+        assert(err.url === url);
+      })
+      .finally(function () {
+        assert.deepEqual(called, { then: 0, catch: 1 });
+      });
     });
   });
 
-  it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var promise = $('a').click();
-      assert(type(promise) === 'object');
-      assert(type(promise.then) === 'function');
-      assert(type(promise.catch) === 'function');
-      assert(type(promise.finally) === 'function');
-      promise.finally(done);
+  describe('input[type=submit]要素', function () {
+    it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        assert(! $('input[type=submit]').click(function () {
+          done();
+        }));
+      });
     });
-  });
 
-  it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function () {
-    var called = 0;
-    return cli.fetch(helper.url('form', 'utf-8'))
-    .then(function (result) {
-      return result.$('.rel').click();
-    })
-    .then(function (result) {
-      called++;
-      assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-      assert(type(result) === 'object');
-      assert(type(result.response) === 'object');
-      assert(type(result.$) === 'function');
-      assert(type(result.body) === 'string');
-      assert(result.$('title').text() === '夏目漱石「私の個人主義」');
-    })
-    .finally(function () {
-      assert(called === 1);
+    it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var promise = $('input[type=submit]').click();
+        assert(type(promise) === 'object');
+        assert(type(promise.then) === 'function');
+        assert(type(promise.catch) === 'function');
+        assert(type(promise.finally) === 'function');
+        promise.finally(done);
+      });
     });
-  });
 
-  it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function () {
-    var called = { then: 0, catch: 0 };
-    return cli.fetch(helper.url('form', 'utf-8'))
-    .then(function (result) {
-      return result.$('.error').click();
-    })
-    .then(function (result) {
-      called.then++;
-    })
-    .catch(function (err) {
-      called.catch++;
-      assert(err instanceof Error);
-      assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
-      assert(err.message === 'no content');
-      assert(err.statusCode === 404);
-      assert(err.url === helper.url('form', 'xxx'));
-      assert(type(err.response) === 'object');
-    })
-    .finally(function () {
-      assert.deepEqual(called, { then: 0, catch: 1 });
+    it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function () {
+      var called = 0;
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        return result.$('input[type=submit]').click();
+      })
+      .then(function (result) {
+        called++;
+        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
+        assert(type(result) === 'object');
+        assert(type(result.response) === 'object');
+        assert(type(result.$) === 'function');
+        assert(type(result.body) === 'string');
+        assert(result.$('title').text() === '夏目漱石「私の個人主義」');
+      })
+      .finally(function () {
+        assert(called === 1);
+      });
     });
-  });
 
-  it('promise作成前にclickエラーが発生してもcatch->finallyが呼ばれる', function () {
-    var called = { then: 0, catch: 0 };
-    var url = helper.url('form', 'utf-8');
-    return cli.fetch(url)
-    .then(function (result) {
-      return result.$('div').click();
-    })
-    .then(function (result) {
-      called.then++;
-    })
-    .catch(function (err) {
-      called.catch++;
-      assert(err instanceof Error);
-      assert.deepEqual(Object.keys(err).sort(), [ 'url' ]);
-      assert(err.message === 'element is not link');
-      assert(err.url === url);
-    })
-    .finally(function () {
-      assert.deepEqual(called, { then: 0, catch: 1 });
+    it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function () {
+      var called = { then: 0, catch: 0 };
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        return result.$('input[type=submit]').click();
+      })
+      .then(function (result) {
+        called.then++;
+      })
+      .catch(function (err) {
+        called.catch++;
+        assert(err instanceof Error);
+        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
+        assert(err.message === 'no content');
+        assert(err.statusCode === 404);
+        assert(err.url === helper.url('form', 'xxx'));
+        assert(type(err.response) === 'object');
+      })
+      .finally(function () {
+        assert.deepEqual(called, { then: 0, catch: 1 });
+      });
+    });
+
+    it('promise作成前にclickエラーが発生してもcatch->finallyが呼ばれる', function () {
+      var called = { then: 0, catch: 0 };
+      var url = helper.url('form', 'utf-8');
+      return cli.fetch(url)
+      .then(function (result) {
+        return result.$('form').click();
+      })
+      .then(function (result) {
+        called.then++;
+      })
+      .catch(function (err) {
+        called.catch++;
+        assert(err instanceof Error);
+        assert.deepEqual(Object.keys(err).sort(), [ 'url' ]);
+        assert(err.message === 'element is not form');
+        assert(err.url === url);
+      })
+      .finally(function () {
+        assert.deepEqual(called, { then: 0, catch: 1 });
+      });
     });
   });
 });

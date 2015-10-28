@@ -95,6 +95,7 @@
       <input type="radio" name="radio2" value="かきくけこ">
       <input type="radio" name="radio2" value="さしすせそ">
       <input type="submit">
+      <input type="reset">
     </form>
 
     <form name="no-input-value" action="/~info" method="POST">
@@ -117,6 +118,15 @@
         <option value="ほほほほほ" selected>ほほほほほ</option>
       </select>
       <textarea name="textarea">まみむめも</textarea>
+    </form>
+
+    <form name="multi-submit" action="/~info" method="POST">
+      <input type="text" name="text" value="あいうえお">
+      <input type="checkbox" name="checkbox" value="bbb" checked>
+      <input type="checkbox" name="checkbox" value="ccc">
+      <input type="submit" name="edit" value="編集">
+      <input type="submit" name="delete" value="削除">
+      <input type="image" name="tweet" value="ツイート">
     </form>
 
     <form name="login" action="/~redirect" method="POST">
