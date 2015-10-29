@@ -129,31 +129,55 @@ describe('cheerio:click', function () {
     });
   });
 
-  // jscs:disable maximumLineLength
   describe('input[type=submit]要素', function () {
-    var submits = {
-      edit: '編集',
-      delete: '削除'
-    };
-    Object.keys(submits).forEach(function (s) {
-      it('所属しているformのsubmit()を実行する(' + submits[s] + 'ボタンのパラメータがセットされる)', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          $('form[name="multi-submit"]').find('input[name=' + s + ']').click(function (err, $, res, body) {
-            assert(! err);
-            assert($.documentInfo().url === helper.url('~info'));
-            var h = res.headers;
-            assert(h['request-url'] === '/~info');
-            assert(h['request-method'] === 'POST');
-            assert(h['post-data'] === 'text=%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A&checkbox=bbb&' + s + '=' + encodeURIComponent(submits[s]));
-            assert(type($) === 'function');
-            assert(type(body) === 'string');
-            done();
-          });
+    it('所属しているformのsubmit()を実行する(編集ボタンのパラメータがセットされる)', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        $('form[name="multi-submit"] input[name=edit]').click(function (err, $, res, body) {
+          assert(! err);
+          assert($.documentInfo().url === helper.url('~info'));
+          var h = res.headers;
+          assert(h['request-url'] === '/~info');
+          assert(h['request-method'] === 'POST');
+          var data = [
+            [ 'text', 'あいうえお' ],
+            [ 'checkbox', 'bbb' ],
+            [ 'edit', '編集' ]
+          ].map(function (v, i, a) {
+            return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
+          }).join('&');
+          assert(h['post-data'] === data);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
         });
       });
     });
   });
-  // jscs:enable maximumLineLength
+
+  describe('button[type=submit]要素', function () {
+    it('所属しているformのsubmit()を実行する(削除ボタンのパラメータがセットされる)', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        $('form[name="multi-submit"] button[name=delete]').click(function (err, $, res, body) {
+          assert(! err);
+          assert($.documentInfo().url === helper.url('~info'));
+          var h = res.headers;
+          assert(h['request-url'] === '/~info');
+          assert(h['request-method'] === 'POST');
+          var data = [
+            [ 'text', 'あいうえお' ],
+            [ 'checkbox', 'bbb' ],
+            [ 'delete', '削除' ]
+          ].map(function (v, i, a) {
+            return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
+          }).join('&');
+          assert(h['post-data'] === data);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+  });
 
   describe('input[type=image]要素', function () {
     it('所属しているformのsubmit()を実行する(パラメータとしてx,y座標がセットされる)', function (done) {
@@ -164,7 +188,15 @@ describe('cheerio:click', function () {
           var h = res.headers;
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === 'text=%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A&checkbox=bbb&tweet.x=0&tweet.y=0');
+          var data = [
+            [ 'text', 'あいうえお' ],
+            [ 'checkbox', 'bbb' ],
+            [ 'tweet.x', 0 ],
+            [ 'tweet.y', 0 ]
+          ].map(function (v, i, a) {
+            return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
+          }).join('&');
+          assert(h['post-data'] === data);
           assert(type($) === 'function');
           assert(type(body) === 'string');
           done();
