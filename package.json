@@ -29,8 +29,7 @@
     "test": "test/"
   },
   "scripts": {
-    "test": "mocha && true || true",
-    "cov": "istanbul cover ./node_modules/mocha/bin/_mocha -x lib/vendor/** -x index.js && true || true",
+    "test": "istanbul cover ./node_modules/mocha/bin/_mocha -x lib/vendor/** -x index.js && true || true",
     "lint": "eslint test/*.js lib/*.js example/*.js && true || true",
     "cs": "jscs test lib example && true || true"
   },

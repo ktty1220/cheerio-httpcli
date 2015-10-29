@@ -497,3 +497,224 @@ describe('cheerio:submit', function () {
     });
   });
 });
+
+describe('cheerio:tick', function () {
+  before(function () {
+    this.server = helper.server();
+  });
+  after(function () {
+    this.server.close();
+  });
+
+  describe('input[type=checkbox]要素', function () {
+    it('input[type=checkbox]要素以外を指定すると例外が発生する', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        try {
+          $('input[type=text]').eq(0).tick();
+          assert.fail('not thrown');
+        } catch (e) {
+          assert(e.message === 'element is not checkbox and radio');
+        }
+        done();
+      });
+    });
+
+    it('すでに選択済みのcheckboxは変化なし', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=checkbox]');
+        var $checkbox = $form.find('input[name=check1]');
+        var state = $checkbox.attr('checked');
+        assert(state === 'checked');
+        $checkbox.tick();
+        assert($checkbox.attr('checked') === state);
+        $form.find('input[type=submit]').click(function (err, $, res, body) {
+          var param = '?check1=1&check2=&check3=&check4%5B0%5D=';
+          assert($.documentInfo().url === helper.url('~info') + param);
+          var h = res.headers;
+          assert(h['request-url'] === '/~info' + param);
+          assert(h['request-method'] === 'GET');
+          assert(! h['post-data']);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+
+    it('未選択のcheckboxは選択状態になる', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=checkbox]');
+        var $checkbox = $form.find('input[name=check2]');
+        var state = $checkbox.attr('checked');
+        assert(typeof state === 'undefined');
+        $checkbox.tick();
+        assert($checkbox.attr('checked') === 'checked');
+        $form.submit(function (err, $, res, body) {
+          var param = '?check1=1&check2=2&check3=&check4%5B0%5D=';
+          assert($.documentInfo().url === helper.url('~info') + param);
+          var h = res.headers;
+          assert(h['request-url'] === '/~info' + param);
+          assert(h['request-method'] === 'GET');
+          assert(! h['post-data']);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+
+    it('複数要素に対してtick()するとその要素すべてが選択状態になる', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=checkbox]');
+        var $checkboxes = $form.find('input[type=checkbox]');
+        $checkboxes.tick().each(function (i) {
+          assert($(this).attr('checked') === 'checked');
+        });
+        $form.submit(function (err, $, res, body) {
+          var param = '?' + [
+            [ 'check1', 1 ],
+            [ 'check2', 2 ],
+            [ 'check3[0]', 3 ],  // TODO: 暇な時に調査
+            [ 'check3[1]', 4 ],  // nameはcheck3 x 3だがrequestモジュールから
+            [ 'check3[2]', 5 ],  // 送信する際にcheck3[]に変換されている模様
+            [ 'check4[0]', 'あいうえお' ],
+            [ 'check4[1]', 'かきくけこ' ],
+            [ 'check4[2]', 'さしすせそ' ]
+          ].map(function (v, i, a) {
+            return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
+          }).join('&');
+          assert($.documentInfo().url === helper.url('~info') + param);
+          var h = res.headers;
+          assert(h['request-url'] === '/~info' + param);
+          assert(h['request-method'] === 'GET');
+          assert(! h['post-data']);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('input[type=radio]要素', function () {
+    it('グループが未選択の場合はクリックされたradioを選択状態にする', function (done) {
+      assert.fail('not implement');
+      done();
+    });
+
+    it('選択されているradioの場合は変化なし', function (done) {
+      assert.fail('not implement');
+      done();
+    });
+
+    it('グループ内ですでに選択されているradioがある場合は選択状態を解除してクリックされたradioを選択状態にする', function (done) {
+      assert.fail('not implement');
+      done();
+    });
+  });
+});
+
+describe('cheerio:untick', function () {
+  before(function () {
+    this.server = helper.server();
+  });
+  after(function () {
+    this.server.close();
+  });
+
+  describe('input[type=checkbox]要素', function () {
+    it('input[type=checkbox]要素以外を指定すると例外が発生する', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        try {
+          $('input[type=text]').eq(0).untick();
+          assert.fail('not implement');
+        } catch (e) {
+          assert(e.message === 'element is not checkbox and radio');
+        }
+        done();
+      });
+    });
+
+    it('もともと未選択のcheckboxは変化なし', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=checkbox]');
+        var $checkbox = $form.find('input[name=check2]');
+        var state = $checkbox.attr('checked');
+        assert(typeof state === 'undefined');
+        $checkbox.untick();
+        assert($checkbox.attr('checked') === state);
+        $form.find('input[type=submit]').click(function (err, $, res, body) {
+          var param = '?check1=1&check2=&check3=&check4%5B0%5D=';
+          assert($.documentInfo().url === helper.url('~info') + param);
+          var h = res.headers;
+          assert(h['request-url'] === '/~info' + param);
+          assert(h['request-method'] === 'GET');
+          assert(! h['post-data']);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+
+    it('選択状態のcheckboxは未選択になる', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=checkbox]');
+        var $checkbox = $form.find('input[name=check1]');
+        var state = $checkbox.attr('checked');
+        assert(state === 'checked');
+        $checkbox.untick();
+        assert(typeof $checkbox.attr('checked') === 'undefined');
+        $form.submit(function (err, $, res, body) {
+          var param = '?check1=&check2=&check3=&check4%5B0%5D=';
+          assert($.documentInfo().url === helper.url('~info') + param);
+          var h = res.headers;
+          assert(h['request-url'] === '/~info' + param);
+          assert(h['request-method'] === 'GET');
+          assert(! h['post-data']);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+
+    it('複数要素に対してuntick()するとその要素すべてが未選択になる', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=checkbox]');
+        var $checkboxes = $form.find('input[type=checkbox]');
+        $checkboxes.untick().each(function (i) {
+          assert(typeof $(this).attr('checked') === 'undefined');
+        });
+        $form.submit(function (err, $, res, body) {
+          var param = '?check1=&check2=&check3=&check4%5B0%5D=';
+          assert($.documentInfo().url === helper.url('~info') + param);
+          var h = res.headers;
+          assert(h['request-url'] === '/~info' + param);
+          assert(h['request-method'] === 'GET');
+          assert(! h['post-data']);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('input[type=radio]要素', function () {
+    it('グループが未選択の場合は変化なし', function (done) {
+      assert.fail('not implement');
+      done();
+    });
+
+    it('選択されているradioの場合は選択状態を解除する', function (done) {
+      assert.fail('not implement');
+      done();
+    });
+
+    it('選択されていないradioの場合は変化なし(選択状態のradioもそのまま)', function (done) {
+      assert.fail('not implement');
+      done();
+    });
+  });
+});
