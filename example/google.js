@@ -22,11 +22,14 @@ client.fetch('http://www.google.co.jp/search', { q: word }, function (err, $, re
   $('#rso .g').each(function (idx) {
     // 各検索結果のタイトル部分とURL、概要を取得
     var $h3 = $(this).find('h3');
-    results.push({
-      title: $h3.text(),
-      url: $h3.find('a').attr('href'),
-      description: $(this).find('.st').text()
-    });
+    var url = $h3.find('a').attr('href');
+    if (url) {
+      results.push({
+        title: $h3.text(),
+        url: url,
+        description: $(this).find('.st').text()
+      });
+    }
   });
 
   console.log(results);
