@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*eslint no-invalid-this:0, quote-props:0*/
+/*eslint no-invalid-this:0, quote-props:0, no-undefined:0*/
 var assert   = require('power-assert');
 var type     = require('type-of');
 var helper   = require('./_helper');
@@ -225,6 +225,38 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'radio1=yyy&radio2=');
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
+
+  it('submit()時に指定するパラメータのvalueがnull/undefined/emptyの場合は"name="という形でURLに追加される', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      $('form[name=post]').submit({
+        foo: null, bar: undefined, baz: ''
+      }, function (err, $, res, body) {
+        assert($.documentInfo().url === helper.url('~info'));
+        var h = res.headers;
+        assert(h['request-url'] === '/~info');
+        assert(h['request-method'] === 'POST');
+        assert(h['post-data'] === 'hoge=fuga&foo=&bar=&baz=');
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
+
+  it('submit()時に指定するパラメータが数字の0の場合は"name=0"という形でURLに追加される', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      $('form[name=post]').submit({ hoge: 0 }, function (err, $, res, body) {
+        assert($.documentInfo().url === helper.url('~info'));
+        var h = res.headers;
+        assert(h['request-url'] === '/~info');
+        assert(h['request-method'] === 'POST');
+        assert(h['post-data'] === 'hoge=0');
         assert(type($) === 'function');
         assert(type(body) === 'string');
         done();
