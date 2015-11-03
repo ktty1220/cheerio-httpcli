@@ -232,6 +232,21 @@ describe('cheerio:submit', function () {
     });
   });
 
+  it('input要素のvalueがない場合空文字となる', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      $('form[name=no-input-value]').submit(function (err, $, res, body) {
+        assert($.documentInfo().url === helper.url('~info'));
+        var h = res.headers;
+        assert(h['request-url'] === '/~info');
+        assert(h['request-method'] === 'POST');
+        assert(h['post-data'] === 'hoge=');
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
+
   it('submit()時に指定するパラメータのvalueがnull/undefined/emptyの場合は"name="という形でURLに追加される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=post]').submit({
