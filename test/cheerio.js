@@ -106,6 +106,23 @@ describe('cheerio:click', function () {
       });
     });
   });
+
+  [ 0, 1, 2 ].forEach(function (idx) {
+    it('[EXPERIMENT]生のa要素をclickしてもリンク先を取得できる(' + idx + '番目)', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        $($('.rel')[idx]).click(function (err, $, res, body) {
+          assert.deepEqual($.documentInfo(), {
+            url: helper.url('auto', 'euc-jp'),
+            encoding: 'euc-jp'
+          });
+          assert(type(res) === 'object');
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+  });
 });
 
 describe('cheerio:submit', function () {
