@@ -10,7 +10,7 @@
       <a class="rel" href="../auto/euc-jp.html">euc-jp</a>
       <a class="rel" href="../auto/euc-jp.html">euc-jp</a>
       <a class="root" href="/~info?hoge=fuga&piyo=">~info</a>
-      <a class="external" href="http://www.yahoo.co.jp/">google</a>
+      <a class="external" href="http://www.yahoo.co.jp/">yahoo</a>
       <a class="js" href="javascript:history.back();">js:back</a>
       <a class="hash" href="#hoge">#hoge</a>
       <a class="error" href="./xxx.html">error</a>
@@ -42,7 +42,12 @@
       <input type="hidden" name="hoge" value="fuga" />
     </form>
 
-    <form name="error" action="./xxx.html"></form>
+    <form name="error" action="./xxx.html">
+      <input type="submit">
+      <input type="image">
+      <button type="submit"></button>
+    </form>
+
     <form name="error-post" method="post" action="./xxx.html">
       <input type="hidden" name="error" value="!!!">
     </form>
@@ -99,6 +104,10 @@
     </form>
 
     <form name="nothing"></form>
+
+    <form name="no-input-value" action="/~info" method="POST">
+      <input type="text" name="hoge">
+    </form>
 
     <form name="default-jp" action="/~info" method="POST">
       <input type="text" name="text" value="‚ ‚¢‚¤‚¦‚¨">

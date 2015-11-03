@@ -171,62 +171,219 @@ describe('promise:click', function () {
   describe('input[type=submit]要素', function () {
     it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        assert.fail('not implement');
-        done();
+        var $form = $('form[name=multi-submit]');
+        assert(! $form.find('[name=edit]').click(function () {
+          done();
+        }));
       });
     });
 
     it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        assert.fail('not implement');
-        done();
+        var $form = $('form[name=multi-submit]');
+        var promise = $form.find('[name=edit]').click();
+        assert(type(promise) === 'object');
+        assert(type(promise.then) === 'function');
+        assert(type(promise.catch) === 'function');
+        assert(type(promise.finally) === 'function');
+        promise.finally(done);
       });
     });
 
     it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function (done) {
-      assert.fail('not implement');
-      done();
+      var called = 0;
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        var $form = result.$('form[name=multi-submit]');
+        return $form.find('[name=edit]').click();
+      })
+      .then(function (result) {
+        called++;
+        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
+        assert(type(result) === 'object');
+        assert(type(result.response) === 'object');
+        assert(type(result.$) === 'function');
+        assert(result.body === '<html></html>');
+        var h = result.response.headers;
+        assert(h['request-url'] === '/~info');
+        assert(h['request-method'] === 'POST');
+        assert(h['post-data'] === 'checkbox=bbb&edit=' + encodeURIComponent('編集'));
+      })
+      .finally(function () {
+        assert(called === 1);
+        done();
+      });
     });
 
     it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
-      assert.fail('not implement');
-      done();
+      var called = { then: 0, catch: 0 };
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        var $form = result.$('form[name=error]');
+        return $form.find('input[type=submit]').click();
+      })
+      .then(function (result) {
+        called.then++;
+      })
+      .catch(function (err) {
+        called.catch++;
+        assert(err instanceof Error);
+        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
+        assert(err.message === 'no content');
+        assert(err.statusCode === 404);
+        assert(err.url === helper.url('form', 'xxx'));
+        assert(type(err.response) === 'object');
+      })
+      .finally(function () {
+        assert.deepEqual(called, { then: 0, catch: 1 });
+        done();
+      });
+    });
+  });
+
+  describe('button[type=submit]要素', function () {
+    it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=multi-submit]');
+        assert(! $form.find('[name=delete]').click(function () {
+          done();
+        }));
+      });
     });
 
-    it('promise作成前にclickエラーが発生してもcatch->finallyが呼ばれる', function (done) {
-      assert.fail('not implement');
-      done();
+    it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=multi-submit]');
+        var promise = $form.find('[name=delete]').click();
+        assert(type(promise) === 'object');
+        assert(type(promise.then) === 'function');
+        assert(type(promise.catch) === 'function');
+        assert(type(promise.finally) === 'function');
+        promise.finally(done);
+      });
+    });
+
+    it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function (done) {
+      var called = 0;
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        var $form = result.$('form[name=multi-submit]');
+        return $form.find('[name=delete]').click();
+      })
+      .then(function (result) {
+        called++;
+        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
+        assert(type(result) === 'object');
+        assert(type(result.response) === 'object');
+        assert(type(result.$) === 'function');
+        assert(result.body === '<html></html>');
+        var h = result.response.headers;
+        assert(h['request-url'] === '/~info');
+        assert(h['request-method'] === 'POST');
+        assert(h['post-data'] === 'checkbox=bbb&delete=' + encodeURIComponent('削除'));
+      })
+      .finally(function () {
+        assert(called === 1);
+        done();
+      });
+    });
+
+    it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
+      var called = { then: 0, catch: 0 };
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        var $form = result.$('form[name=error]');
+        return $form.find('button[type=submit]').click();
+      })
+      .then(function (result) {
+        called.then++;
+      })
+      .catch(function (err) {
+        called.catch++;
+        assert(err instanceof Error);
+        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
+        assert(err.message === 'no content');
+        assert(err.statusCode === 404);
+        assert(err.url === helper.url('form', 'xxx'));
+        assert(type(err.response) === 'object');
+      })
+      .finally(function () {
+        assert.deepEqual(called, { then: 0, catch: 1 });
+        done();
+      });
     });
   });
 
   describe('input[type=image]要素', function () {
     it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        assert.fail('not implement');
-        done();
+        var $form = $('form[name=multi-submit]');
+        assert(! $form.find('[name=tweet]').click(function () {
+          done();
+        }));
       });
     });
 
     it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        assert.fail('not implement');
-        done();
+        var $form = $('form[name=multi-submit]');
+        var promise = $form.find('[name=tweet]').click();
+        assert(type(promise) === 'object');
+        assert(type(promise.then) === 'function');
+        assert(type(promise.catch) === 'function');
+        assert(type(promise.finally) === 'function');
+        promise.finally(done);
       });
     });
 
     it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function (done) {
-      assert.fail('not implement');
-      done();
+      var called = 0;
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        var $form = result.$('form[name=multi-submit]');
+        return $form.find('[name=tweet]').click();
+      })
+      .then(function (result) {
+        called++;
+        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
+        assert(type(result) === 'object');
+        assert(type(result.response) === 'object');
+        assert(type(result.$) === 'function');
+        assert(result.body === '<html></html>');
+        var h = result.response.headers;
+        assert(h['request-url'] === '/~info');
+        assert(h['request-method'] === 'POST');
+        assert(h['post-data'] === 'checkbox=bbb&tweet=' + encodeURIComponent('ツイート'));
+      })
+      .finally(function () {
+        assert(called === 1);
+        done();
+      });
     });
 
     it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
-      assert.fail('not implement');
-      done();
-    });
-
-    it('promise作成前にclickエラーが発生してもcatch->finallyが呼ばれる', function (done) {
-      assert.fail('not implement');
-      done();
+      var called = { then: 0, catch: 0 };
+      return cli.fetch(helper.url('form', 'utf-8'))
+      .then(function (result) {
+        var $form = result.$('form[name=error]');
+        return $form.find('input[type=image]').click();
+      })
+      .then(function (result) {
+        called.then++;
+      })
+      .catch(function (err) {
+        called.catch++;
+        assert(err instanceof Error);
+        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
+        assert(err.message === 'no content');
+        assert(err.statusCode === 404);
+        assert(err.url === helper.url('form', 'xxx'));
+        assert(type(err.response) === 'object');
+      })
+      .finally(function () {
+        assert.deepEqual(called, { then: 0, catch: 1 });
+        done();
+      });
     });
   });
 });

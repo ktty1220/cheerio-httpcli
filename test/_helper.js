@@ -74,7 +74,7 @@ module.exports = {
             [ 'Set-Cookie', 'session_id=hahahaha' ],
             [ 'Set-Cookie', 'login=1' ]
           ];
-          var props = [ 'user-agent', 'referer' ];
+          var props = [ 'user-agent', 'referer', 'accept-language' ];
           for (var i = 0; i < props.length; i++) {
             var p = props[i];
             if (req.headers[p]) {

@@ -4,7 +4,6 @@ node_modules
 *~
 node_modules/
 bower_components/
-.gitignore
 coverage/
 coverage.html
 >>>>>>> merge 0.3.4
