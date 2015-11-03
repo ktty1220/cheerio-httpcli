@@ -123,6 +123,38 @@ describe('cheerio:click', function () {
       });
     });
   });
+
+  it('[EXPERIMENT]無から作成したa要素をclickしてもリンク先を取得できる(jQuery型)', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      var url = helper.url('auto', 'utf-8');
+      $('<a/>').attr('href', url).click(function (err, $, res, body) {
+        assert.deepEqual($.documentInfo(), {
+          url: url,
+          encoding: 'utf-8'
+        });
+        assert(type(res) === 'object');
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
+
+  it('[EXPERIMENT]無から作成したa要素をclickしてもリンク先を取得できる(HTML型)', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      var url = helper.url('auto', 'shift_jis');
+      $('<a href="' + url + '">link</a>').click(function (err, $, res, body) {
+        assert.deepEqual($.documentInfo(), {
+          url: url,
+          encoding: 'shift_jis'
+        });
+        assert(type(res) === 'object');
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
 });
 
 describe('cheerio:submit', function () {
