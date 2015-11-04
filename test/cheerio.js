@@ -108,7 +108,7 @@ describe('cheerio:click', function () {
   });
 
   [ 0, 1, 2 ].forEach(function (idx) {
-    it('[EXPERIMENT]生のa要素をclickしてもリンク先を取得できる(' + idx + '番目)', function (done) {
+    it('生のa要素をclickしてもリンク先を取得できる(' + idx + '番目)', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $($('.rel')[idx]).click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
@@ -124,7 +124,7 @@ describe('cheerio:click', function () {
     });
   });
 
-  it('[EXPERIMENT]無から作成したa要素をclickしてもリンク先を取得できる(jQuery型)', function (done) {
+  it('無から作成したa要素をclickしてもリンク先を取得できる(jQuery形式)', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       var url = helper.url('auto', 'utf-8');
       $('<a/>').attr('href', url).click(function (err, $, res, body) {
@@ -140,7 +140,7 @@ describe('cheerio:click', function () {
     });
   });
 
-  it('[EXPERIMENT]無から作成したa要素をclickしてもリンク先を取得できる(HTML型)', function (done) {
+  it('無から作成したa要素をclickしてもリンク先を取得できる(HTML形式)', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       var url = helper.url('auto', 'shift_jis');
       $('<a href="' + url + '">link</a>').click(function (err, $, res, body) {
@@ -296,7 +296,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('submit()時に指定するパラメータのvalueがnull/undefined/emptyの場合は"name="という形でURLに追加される', function (done) {
+  it('submit時に指定するパラメータのvalueがnull/undefined/emptyの場合は"name="という形でURLに追加される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=post]').submit({
         foo: null, bar: undefined, baz: ''
@@ -313,7 +313,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('submit()時に指定するパラメータが数字の0の場合は"name=0"という形でURLに追加される', function (done) {
+  it('submit時に指定するパラメータが数字の0の場合は"name=0"という形でURLに追加される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=post]').submit({ hoge: 0 }, function (err, $, res, body) {
         assert($.documentInfo().url === helper.url('~info'));
@@ -321,6 +321,76 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'hoge=0');
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
+
+  [ 0, 1, 2 ].forEach(function (idx) {
+    it('生のform要素をsubmitしてもフォーム送信される(' + idx + '番目)', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        $($('.form-group form')[idx]).submit(function (err, $, res, body) {
+          assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga');
+          var h = res.headers;
+          assert(h['request-url'] === '/~info?hoge=fuga');
+          assert(h['request-method'] === 'GET');
+          assert(! h['post-data']);
+          assert(type($) === 'function');
+          assert(type(body) === 'string');
+          done();
+        });
+      });
+    });
+  });
+
+  it('無から作成したform要素をsubmitしてもフォーム送信される(jQuery形式)', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      var $form = $('<form/>').attr({
+        method: 'GET',
+        action: '/~info'
+      })
+      .append($('<input/>').attr({
+        type: 'hidden',
+        name: 'hoge',
+        value: 'fuga'
+      }))
+      .append($('<input/>').attr({
+        type: 'text',
+        name: 'foo',
+        value: 'あいうえお'
+      }));
+
+      $form.submit(function (err, $, res, body) {
+        var param = 'hoge=fuga&foo=' + encodeURIComponent('あいうえお');
+        assert($.documentInfo().url === helper.url('~info') + '?' + param);
+        var h = res.headers;
+        assert(h['request-url'] === '/~info?' + param);
+        assert(h['request-method'] === 'GET');
+        assert(! h['post-data']);
+        assert(type($) === 'function');
+        assert(type(body) === 'string');
+        done();
+      });
+    });
+  });
+
+  it('無から作成したform要素をsubmitしてもフォーム送信される(HTML形式)', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      var $form = $([
+        '<form method="POST" action="/~info">',
+        '<input type="hidden" name="hoge" value="fuga" />',
+        '<input type="text" name="foo" value="あいうえお" />',
+        '</form>'
+      ].join('\n'));
+      $form.submit({ foo: 'かきくけこ' }, function (err, $, res, body) {
+        var param = 'hoge=fuga&foo=' + encodeURIComponent('かきくけこ');
+        assert($.documentInfo().url === helper.url('~info'));
+        var h = res.headers;
+        assert(h['request-url'] === '/~info');
+        assert(h['request-method'] === 'POST');
+        assert(h['post-data'] === param);
         assert(type($) === 'function');
         assert(type(body) === 'string');
         done();
