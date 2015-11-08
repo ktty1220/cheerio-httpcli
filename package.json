@@ -1,6 +1,6 @@
 {
   "name": "cheerio-httpcli",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "http client module with cheerio & iconv(-lite) & promise",
   "main": "index.js",
   "engines": {
