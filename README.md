@@ -242,6 +242,26 @@ requestモジュールで指定するタイムアウト情報です。デフォ�
 
 リファラーを自動でセットするかどうかの指定です。`true`にすると1つ前に`fetch()`したページのURLが自動でリクエストヘッダのRefererにセットされます。デフォルトは`true`です。
 
+### maxDataSize
+
+`fetch()`などで受信するデータの限界量を数値(バイト数)で指定します。この値を超えるサイズを受信した段階でエラーが発生します。ユーザーから入力されたURLを解析する用途などにおいて、不用意に大きいデータを読み込んでしまい回線を占有する可能性がある場合に指定しておいた方が良いでしょう。
+
+デフォルトは`null`(制限なし)です。
+
+```js
+var client = require('cheerio-httpcli');
+
+// 受信料制限を1MBに指定
+client.maxDataSize = 1024 * 1024;
+
+// 1MB以上ののHTMLを指定
+client.fetch('http://big.large.huge/data.html', function (err, $, res, body) {
+  console.log(err.message);  // => 'data size limit over'
+});
+```
+
+なお、maxDataSizeを超えた場合は途中まで受信したデータは破棄されます。
+
 ### debug
 
 `true`にするとリクエストの度にデバッグ情報を出力します(`stderr`)。デフォルトは`false`です。
