@@ -251,7 +251,7 @@ describe('cheerio:submit', function () {
   });
 
   it('checkbox要素を含んだフォームのcheckedがフォーム送信パラメータのデフォルトになっている', function (done) {
-    var param = '?check1=1&check2=&check3=&check4%5B0%5D=';
+    var param = '?check1=1&check2=&check3=&check4%5B%5D=';
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=checkbox]').submit(function (err, $, res, body) {
         assert($.documentInfo().url === helper.url('~info') + param);

@@ -225,7 +225,7 @@ describe('promise:submit', function () {
     .catch(function (err) {
       called.catch++;
       assert(err instanceof Error);
-      assert.deepEqual(Object.keys(err).sort(), [ 'param', 'response', 'statusCode', 'url' ]);
+      assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
       assert(err.message === 'no content');
       assert(err.statusCode === 404);
       assert(err.url === helper.url('form', 'xxx'));
