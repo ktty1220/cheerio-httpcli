@@ -102,6 +102,13 @@ module.exports = {
         } else if (/~404/.test(req.url)) {
           // ソフト404ページ
           file.serveFile('/error/404.html', 404, {}, req, res);
+        } else if (/~mega/.test(req.url)) {
+          // 巨大サイズ
+          res.writeHead(200);
+          var buf = new Array(1024 * 1024).join().split(',').map(function (v, i, a) {
+            return 'a';
+          }).join('');
+          res.end(buf);
         } else {
           // 通常HTMLファイル
           file.serve(req, res);
