@@ -64,24 +64,24 @@ describe('entities:plain', function () {
   /*jscs:disable maximumLineLength*/
   it('16進数エンティティが文字列に変換されない', function (done) {
     cli.fetch(helper.url('entities', 'hex'), function (err, $, res, body) {
-      assert($('h1')._text() === '夏目漱石「&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;」');
-      assert($('h1')._html() === '夏目漱石「<strong>&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;</strong>」');
+      assert($('h1').rawText() === '夏目漱石「&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;」');
+      assert($('h1').rawHtml() === '夏目漱石「<strong>&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;</strong>」');
       done();
     });
   });
 
   it('10進数エンティティが文字列に変換されない', function (done) {
     cli.fetch(helper.url('entities', 'num'), function (err, $, res, body) {
-      assert($('h1')._text() === '夏目漱石「&#31169;&#12398;&#20491;&#20154;&#20027;&#32681;」');
-      assert($('h1')._html() === '夏目漱石「<strong>&#31169;&#12398;&#20491;&#20154;&#20027;&#32681;</strong>」');
+      assert($('h1').rawText() === '夏目漱石「&#31169;&#12398;&#20491;&#20154;&#20027;&#32681;」');
+      assert($('h1').rawHtml() === '夏目漱石「<strong>&#31169;&#12398;&#20491;&#20154;&#20027;&#32681;</strong>」');
       done();
     });
   });
 
   it('16進数と10進数混在エンティティが文字列に変換されない', function (done) {
     cli.fetch(helper.url('entities', 'hex&num'), function (err, $, res, body) {
-      assert($('h1')._text() === '&#22799;&#30446;&#28465;&#30707;「&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;」');
-      assert($('h1')._html() === '&#22799;&#30446;&#28465;&#30707;「<strong>&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;</strong>」');
+      assert($('h1').rawText() === '&#22799;&#30446;&#28465;&#30707;「&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;」');
+      assert($('h1').rawHtml() === '&#22799;&#30446;&#28465;&#30707;「<strong>&#x79c1;&#x306e;&#x500b;&#x4eba;&#x4e3b;&#x7fa9;</strong>」');
       done();
     });
   });
@@ -97,8 +97,8 @@ describe('entities:plain', function () {
       for (var i = 0; i < 3; i++) {
         var h = 'h' + (i + 1);
         var x = expected[i];
-        assert($(h)._text() === x);
-        assert($(h)._html() === x);
+        assert($(h).rawText() === x);
+        assert($(h).rawHtml() === x);
       }
       done();
     });

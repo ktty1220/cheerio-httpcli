@@ -18,7 +18,6 @@ Node.jsでWEBページのスクレイピングを行う際に必要となる文�
 * HTMLのパース: [cheerio](http://npmjs.org/package/cheerio)
 * プロミス形式実行: [rsvp](http://npmjs.org/package/rsvp)
 * HTMLエンティティ変換 [ent](http://npmjs.org/package/ent)
-* デバッグ情報表示 [prettyjson](http://npmjs.org/package/prettyjson)
 
 > cheerioはHTMLをjQueryライクにパースしてくれるモジュールです。パース後のオブジェクトを格納する変数名を「$」にすると、`$('title').text()`のようなjQueryそのままの形で要素の情報を取得できます。
 

@@ -16,6 +16,8 @@ describe('iconv:load', function () {
   });
 });
 
+// This test will be failed when executed on below environment.
+// - 'iconv' module is not installed
 describe('iconv:iconv', function () {
   before(function () {
     this.server = helper.server();

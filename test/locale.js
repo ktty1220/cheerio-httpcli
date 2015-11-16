@@ -14,7 +14,9 @@ describe('locale', function () {
 
   it('デフォルトは実行環境のロケールがセットされる', function (done) {
     cli.fetch(helper.url('~info'), function (err, $, res, body) {
-      // This test will fail when executed outside Japan.
+      // This test will be failed when executed on below environment.
+      // - System language is not ja-JP
+      // - Windows and Node.js v0.10 or lower
       assert(res.headers['accept-language'] === 'ja-JP,en-US');
       done();
     });

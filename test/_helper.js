@@ -1,5 +1,6 @@
 var nstatic = require('node-static');
 var http    = require('http');
+var path    = require('path');
 var fs      = require('fs');
 var qs      = require('querystring');
 
@@ -128,8 +129,15 @@ module.exports = {
    * 指定したディレクトリのファイル一覧(拡張子なし)を返す
    */
   files: function (dir) {
-    return fs.readdirSync(this.root + '/' + dir).map(function (v) {
+    return fs.readdirSync(path.join(this.root, dir)).map(function (v) {
       return v.replace(/\.html$/i, '');
     });
+  },
+
+  /**
+   * 指定したファイルの内容をBase64エンコードした文字列を返す
+   */
+  toBase64: function (file) {
+    return fs.readFileSync(path.join(__dirname, file)).toString('base64');
   }
 };

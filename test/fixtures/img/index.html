@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>画像テスト</title>
+  </head>
+  <body>
+    <div>
+      <img class="rel" src="./img/cat.png">
+      <img class="undef">
+      <img class="empty" src="">
+      <img class="root" src="/img/img/food.jpg?hoge=fuga&piyo=">
+      <img class="external" src="http://www.yahoo.co.jp/favicon.ico">
+      <img class="js" src="javascript:getPicture();">
+      <img class="error" src="./not-found.gif">
+      <img class="base64" src="data:image/jpg;base64,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">
+    </div>
+
+    <a href="http://www.google.co.jp/">google</a>
+    <a href="/~info?foo=1&bar=2&baz=3">~info</a>
+  </body>
+</html>
