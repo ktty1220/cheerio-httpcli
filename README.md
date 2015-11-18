@@ -1,12 +1,12 @@
 # cheerio-httpcli - Node.js用WEBスクレイピングモジュール
 
-[![npm-version](https://img.shields.io/npm/v/cheerio-httpcli.svg?style=flat-square)](https://npmjs.org/package/cheerio-httpcli)
-[![npm-download](https://img.shields.io/npm/dm/cheerio-httpcli.svg?style=flat-square)](https://npmjs.org/package/cheerio-httpcli)
-[![npm-deps](https://david-dm.org/ktty1220/cheerio-httpcli.svg?style=flat-square)](https://david-dm.org/ktty1220/cheerio-httpcli)
+[![npm-version](https://img.shields.io/npm/v/cheerio-httpcli.svg)](https://npmjs.org/package/cheerio-httpcli)
+[![npm-download](https://img.shields.io/npm/dm/cheerio-httpcli.svg)](https://npmjs.org/package/cheerio-httpcli)
+[![npm-deps](https://david-dm.org/ktty1220/cheerio-httpcli.svg)](https://david-dm.org/ktty1220/cheerio-httpcli)
 [![node-version](https://img.shields.io/node/v/gh-badges.svg)](https://npmjs.org/package/cheerio-httpcli)
 [![test-coverage](https://codeclimate.com/github/ktty1220/cheerio-httpcli/badges/coverage.svg)](https://codeclimate.com/github/ktty1220/cheerio-httpcli/coverage)
 [![code-climate](https://codeclimate.com/github/ktty1220/cheerio-httpcli/badges/gpa.svg)](https://codeclimate.com/github/ktty1220/cheerio-httpcli)
-[![license](https://img.shields.io/npm/l/cheerio-httpcli.svg?style=flat-square)](https://github.com/ktty1220/cheerio-httpcli/blob/master/LICENSE)
+[![license](https://img.shields.io/npm/l/cheerio-httpcli.svg)](https://github.com/ktty1220/cheerio-httpcli/blob/master/LICENSE)
 
 Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換と、[cheerio](http://npmjs.org/package/cheerio)によってパースしたHTMLをjQueryのように操作できるHTTPクライアントモジュールです。
 
@@ -429,8 +429,6 @@ client.fetch('http://' + user + ':' + password + '@securet.example.com', functio
 ## その他
 
 * 文字コードの判別はjschardetで高精度で判別できた場合はその情報を使用しますが、そうでない場合は`<head>`タグのcharset情報を参照します。後者での判別時においてcharsetで指定された文字コードとWEBページの実際の文字コードが異なる場合は変換エラーや文字化けが発生します。
-
-* npmモジュールの他にURLエンコード用に[ecl_new.js](http://www.drk7.jp/MT/archives/001324.html)も利用しています。
 
 ## ライセンス
 

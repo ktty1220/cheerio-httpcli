@@ -1,9 +1,6 @@
-<<<<<<< 8c953bafd6eb04768c918e25aa38565c22ecef9c
-node_modules
-=======
 *~
 node_modules/
 bower_components/
 coverage/
 coverage.html
->>>>>>> merge 0.3.4
+codeclimate.sh

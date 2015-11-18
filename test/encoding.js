@@ -88,7 +88,7 @@ describe('encoding:unknown', function () {
     this.server.close();
   });
 
-  it('自動判定でも<head>タグからも文字コードが判別できない場合はUTF-8として処理される(utf-8)', function (done) {
+  it('xxx自動判定でも<head>タグからも文字コードが判別できない場合はUTF-8として処理される(utf-8)', function (done) {
     var url = helper.url('unknown', 'utf-8');
     cli.fetch(url, function (err, $, res, body) {
       assert.deepEqual($.documentInfo(), {

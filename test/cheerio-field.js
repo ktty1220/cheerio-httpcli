@@ -71,11 +71,12 @@ describe('cheerio:field', function () {
   });
 
   describe('name,valueを指定(nameにvalueをセット)', function () {
-    it('valueが文字列 => name部品にvalueをセット', function (done) {
+    it('valueが文字列(複数値を受け付けない部品) => name部品にvalueをセット', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=login]');
         var user = 'hoge';
         $form.field('user', user);
+        // TODO 他の部品が変更されていないか見る
         assert($form.find('[name=user]').val() === user);
         $form.submit(function (err, $, res, body) {
           assert(res.cookies.user === user);
@@ -83,6 +84,11 @@ describe('cheerio:field', function () {
         });
       });
     });
+    // TODO valueが文字列: 複数値を受け付ける部品 => [ value ]
+    // TODO valueが配列: 複数値を受け付けない部品 => throw
+    // TODO valueが配列: 複数値を受け付ける部品 => OK
+    // TODO checkbox: 選択状態が変わっている
+    // TODO radio: 選択状態が変わっている
 
     /*jscs:disable requireBlocksOnNewline*/
     it('valueが関数 => name部品にvalueの関数結果をセット', function (done) {
@@ -91,6 +97,7 @@ describe('cheerio:field', function () {
         var user = 'fuga';
         $form.field('user', function () { return user; });
         assert($form.find('[name=user]').val() === user);
+        // TODO 他の部品が変更されていないか見る
         $form.submit(function (err, $, res, body) {
           assert(res.cookies.user === user);
           done();
@@ -104,6 +111,7 @@ describe('cheerio:field', function () {
         var $form = $('form[name=login]');
         var user = null;
         $form.field('user', user);
+        // TODO 他の部品が変更されていないか見る
         assert(typeOf($form.find('[name=user]').val()) === 'undefined');
         $form.submit(function (err, $, res, body) {
           assert(res.cookies.user === '');
@@ -119,18 +127,22 @@ describe('cheerio:field', function () {
         var $form = $('form[name=login]');
         var name = '__user';
         $form.field(name, 'hoge');
+        // TODO 他の部品が変更されていないか見る
         assert(name in $('form[name=login]').field() === false);
+        // TODO submit結果も見る
         done();
       });
     });
 
-    it('onNotFound [append] => valueはセットされない', function (done) {
+    it('onNotFound [append] => 新規に__user部品(hidden)が作成される', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=login]');
         var name = '__user';
         var value = 'hoge';
         $form.field(name, value, 'append');
+        // TODO 他の部品が変更されていないか見る
         assert($('form[name=login]').field()[name] === value);
+        // TODO submit結果も見る
         done();
       });
     });
@@ -147,5 +159,9 @@ describe('cheerio:field', function () {
         done();
       });
     });
+
+    // TODO checkbox/radioで指定したvalueを持つ部品がない場合(onNotFoundそれぞれ)
   });
+
+  // TODO 連想配列による値セット
 });
