@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0*/
 var assert = require('power-assert');
-var type   = require('type-of');
+var typeOf = require('type-of');
 var helper = require('./_helper');
 var cli    = require('../index');
 
@@ -21,10 +21,10 @@ describe('promise:fetch', function () {
 
   it('fetch時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
     var promise = cli.fetch(helper.url('~info'));
-    assert(type(promise) === 'object');
-    assert(type(promise.then) === 'function');
-    assert(type(promise.catch) === 'function');
-    assert(type(promise.finally) === 'function');
+    assert(typeOf(promise) === 'object');
+    assert(typeOf(promise.then) === 'function');
+    assert(typeOf(promise.catch) === 'function');
+    assert(typeOf(promise.finally) === 'function');
     promise.finally(done);
   });
 
@@ -34,10 +34,10 @@ describe('promise:fetch', function () {
     .then(function (result) {
       called++;
       assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-      assert(type(result) === 'object');
-      assert(type(result.response) === 'object');
-      assert(type(result.$) === 'function');
-      assert(type(result.body) === 'string');
+      assert(typeOf(result) === 'object');
+      assert(typeOf(result.response) === 'object');
+      assert(typeOf(result.$) === 'function');
+      assert(typeOf(result.body) === 'string');
       assert(result.$('title').text() === '夏目漱石「私の個人主義」');
     })
     .finally(function () {
@@ -62,7 +62,7 @@ describe('promise:fetch', function () {
       assert(err.message === 'no content');
       assert(err.statusCode === 404);
       assert(err.url === url);
-      assert(type(err.response) === 'object');
+      assert(typeOf(err.response) === 'object');
     })
     .finally(function () {
       assert.deepEqual(called, { then: 0, catch: 1 });
@@ -91,10 +91,10 @@ describe('promise:click', function () {
     it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var promise = $('a').click();
-        assert(type(promise) === 'object');
-        assert(type(promise.then) === 'function');
-        assert(type(promise.catch) === 'function');
-        assert(type(promise.finally) === 'function');
+        assert(typeOf(promise) === 'object');
+        assert(typeOf(promise.then) === 'function');
+        assert(typeOf(promise.catch) === 'function');
+        assert(typeOf(promise.finally) === 'function');
         promise.finally(done);
       });
     });
@@ -108,10 +108,10 @@ describe('promise:click', function () {
       .then(function (result) {
         called++;
         assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(type(result) === 'object');
-        assert(type(result.response) === 'object');
-        assert(type(result.$) === 'function');
-        assert(type(result.body) === 'string');
+        assert(typeOf(result) === 'object');
+        assert(typeOf(result.response) === 'object');
+        assert(typeOf(result.$) === 'function');
+        assert(typeOf(result.body) === 'string');
         assert(result.$('title').text() === '夏目漱石「私の個人主義」');
       })
       .finally(function () {
@@ -136,7 +136,7 @@ describe('promise:click', function () {
         assert(err.message === 'no content');
         assert(err.statusCode === 404);
         assert(err.url === helper.url('form', 'xxx'));
-        assert(type(err.response) === 'object');
+        assert(typeOf(err.response) === 'object');
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
@@ -182,10 +182,10 @@ describe('promise:click', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         var promise = $form.find('[name=edit]').click();
-        assert(type(promise) === 'object');
-        assert(type(promise.then) === 'function');
-        assert(type(promise.catch) === 'function');
-        assert(type(promise.finally) === 'function');
+        assert(typeOf(promise) === 'object');
+        assert(typeOf(promise.then) === 'function');
+        assert(typeOf(promise.catch) === 'function');
+        assert(typeOf(promise.finally) === 'function');
         promise.finally(done);
       });
     });
@@ -200,9 +200,9 @@ describe('promise:click', function () {
       .then(function (result) {
         called++;
         assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(type(result) === 'object');
-        assert(type(result.response) === 'object');
-        assert(type(result.$) === 'function');
+        assert(typeOf(result) === 'object');
+        assert(typeOf(result.response) === 'object');
+        assert(typeOf(result.$) === 'function');
         assert(result.body === '<html></html>');
         var h = result.response.headers;
         assert(h['request-url'] === '/~info');
@@ -232,7 +232,7 @@ describe('promise:click', function () {
         assert(err.message === 'no content');
         assert(err.statusCode === 404);
         assert(err.url === helper.url('form', 'xxx'));
-        assert(type(err.response) === 'object');
+        assert(typeOf(err.response) === 'object');
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
@@ -255,10 +255,10 @@ describe('promise:click', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         var promise = $form.find('[name=delete]').click();
-        assert(type(promise) === 'object');
-        assert(type(promise.then) === 'function');
-        assert(type(promise.catch) === 'function');
-        assert(type(promise.finally) === 'function');
+        assert(typeOf(promise) === 'object');
+        assert(typeOf(promise.then) === 'function');
+        assert(typeOf(promise.catch) === 'function');
+        assert(typeOf(promise.finally) === 'function');
         promise.finally(done);
       });
     });
@@ -273,9 +273,9 @@ describe('promise:click', function () {
       .then(function (result) {
         called++;
         assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(type(result) === 'object');
-        assert(type(result.response) === 'object');
-        assert(type(result.$) === 'function');
+        assert(typeOf(result) === 'object');
+        assert(typeOf(result.response) === 'object');
+        assert(typeOf(result.$) === 'function');
         assert(result.body === '<html></html>');
         var h = result.response.headers;
         assert(h['request-url'] === '/~info');
@@ -305,7 +305,7 @@ describe('promise:click', function () {
         assert(err.message === 'no content');
         assert(err.statusCode === 404);
         assert(err.url === helper.url('form', 'xxx'));
-        assert(type(err.response) === 'object');
+        assert(typeOf(err.response) === 'object');
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
@@ -328,10 +328,10 @@ describe('promise:click', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         var promise = $form.find('[name=tweet]').click();
-        assert(type(promise) === 'object');
-        assert(type(promise.then) === 'function');
-        assert(type(promise.catch) === 'function');
-        assert(type(promise.finally) === 'function');
+        assert(typeOf(promise) === 'object');
+        assert(typeOf(promise.then) === 'function');
+        assert(typeOf(promise.catch) === 'function');
+        assert(typeOf(promise.finally) === 'function');
         promise.finally(done);
       });
     });
@@ -346,9 +346,9 @@ describe('promise:click', function () {
       .then(function (result) {
         called++;
         assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(type(result) === 'object');
-        assert(type(result.response) === 'object');
-        assert(type(result.$) === 'function');
+        assert(typeOf(result) === 'object');
+        assert(typeOf(result.response) === 'object');
+        assert(typeOf(result.$) === 'function');
         assert(result.body === '<html></html>');
         var h = result.response.headers;
         assert(h['request-url'] === '/~info');
@@ -378,7 +378,7 @@ describe('promise:click', function () {
         assert(err.message === 'no content');
         assert(err.statusCode === 404);
         assert(err.url === helper.url('form', 'xxx'));
-        assert(type(err.response) === 'object');
+        assert(typeOf(err.response) === 'object');
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
@@ -407,10 +407,10 @@ describe('promise:submit', function () {
   it('submit時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       var promise = $('form').submit();
-      assert(type(promise) === 'object');
-      assert(type(promise.then) === 'function');
-      assert(type(promise.catch) === 'function');
-      assert(type(promise.finally) === 'function');
+      assert(typeOf(promise) === 'object');
+      assert(typeOf(promise.then) === 'function');
+      assert(typeOf(promise.catch) === 'function');
+      assert(typeOf(promise.finally) === 'function');
       promise.finally(done);
     });
   });
@@ -427,11 +427,11 @@ describe('promise:submit', function () {
     .then(function (result) {
       called++;
       assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-      assert(type(result) === 'object');
-      assert(type(result.response) === 'object');
-      assert(type(result.$) === 'function');
-      assert(type(result.body) === 'string');
-      assert(type(result.response.cookies) === 'object');
+      assert(typeOf(result) === 'object');
+      assert(typeOf(result.response) === 'object');
+      assert(typeOf(result.$) === 'function');
+      assert(typeOf(result.body) === 'string');
+      assert(typeOf(result.response.cookies) === 'object');
       assert(result.response.cookies.user === 'hogehoge');
     })
     .finally(function () {
@@ -455,7 +455,7 @@ describe('promise:submit', function () {
       assert(err.message === 'no content');
       assert(err.statusCode === 404);
       assert(err.url === helper.url('form', 'xxx'));
-      assert(type(err.response) === 'object');
+      assert(typeOf(err.response) === 'object');
     })
     .finally(function () {
       assert.deepEqual(called, { then: 0, catch: 1 });
@@ -478,7 +478,7 @@ describe('promise:submit', function () {
       assert(err.message === 'no content');
       assert(err.statusCode === 404);
       assert(err.url === helper.url('form', 'xxx'));
-      assert(type(err.response) === 'object');
+      assert(typeOf(err.response) === 'object');
     })
     .finally(function () {
       assert.deepEqual(called, { then: 0, catch: 1 });

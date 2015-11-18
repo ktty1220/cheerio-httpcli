@@ -2,7 +2,8 @@
 /*eslint no-invalid-this:0, quote-props:0, no-undefined:0, max-len:[1, 150, 2]*/
 /*jscs:disable requireDotNotation*/
 var assert = require('power-assert');
-var type   = require('type-of');
+var typeOf = require('type-of');
+var each   = require('foreach');
 var helper = require('./_helper');
 var cli    = require('../index');
 
@@ -46,8 +47,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info?hoge=fuga');
         assert(h['request-method'] === 'GET');
         assert(! h['post-data']);
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -61,8 +62,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'hoge=fuga');
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -76,8 +77,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info?hoge=fuga');
         assert(h['request-method'] === 'GET');
         assert(! h['post-data']);
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -89,8 +90,8 @@ describe('cheerio:submit', function () {
       $('form[name="no-action-no-method"]').submit(function (err, $, res, body) {
         assert($.documentInfo().url === url + '?hoge=fuga');
         var h = res.headers;
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -104,8 +105,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'single=2&multi=3&multi=5');
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -120,8 +121,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info' + param);
         assert(h['request-method'] === 'GET');
         assert(! h['post-data']);
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -135,8 +136,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'radio1=yyy&radio2=');
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -150,8 +151,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'text=%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A&checkbox=bbb');
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -165,8 +166,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'hoge=');
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -182,8 +183,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'hoge=fuga&foo=&bar=&baz=');
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -197,14 +198,14 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === 'hoge=0');
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
   });
 
-  [ 0, 1, 2 ].forEach(function (idx) {
+  each([ 0, 1, 2 ], function (idx) {
     it('生のform要素をsubmitしてもフォーム送信される(' + idx + '番目)', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $($('.form-group form')[idx]).submit(function (err, $, res, body) {
@@ -213,8 +214,8 @@ describe('cheerio:submit', function () {
           assert(h['request-url'] === '/~info?hoge=fuga');
           assert(h['request-method'] === 'GET');
           assert(! h['post-data']);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -245,8 +246,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info?' + param);
         assert(h['request-method'] === 'GET');
         assert(! h['post-data']);
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -267,8 +268,8 @@ describe('cheerio:submit', function () {
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
         assert(h['post-data'] === param);
-        assert(type($) === 'function');
-        assert(type(body) === 'string');
+        assert(typeOf($) === 'function');
+        assert(typeOf(body) === 'string');
         done();
       });
     });
@@ -334,7 +335,7 @@ describe('cheerio:submit', function () {
   };
   /*jscs:enable disallowQuotedKeysInObjects*/
 
-  helper.files('form').forEach(function (enc) {
+  each(helper.files('form'), function (enc) {
     describe('cheerio:submit(' + enc + ')', function () {
       it('デフォルトパラメータが日本語の場合はページのエンコーディングに合わせたURLエンコードで送信される', function (done) {
         cli.fetch(helper.url('form', enc), function (err, $, res, body) {

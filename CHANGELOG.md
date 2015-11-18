@@ -4,7 +4,7 @@
 * submit系ボタンに`click()`メソッドを実装(押されたボタンの情報がフォーム送信時にパラメータとしてセットされる)
 * `a`要素、`img`要素に`absoluteUrl()`メソッド実装
 * `checkbox`要素、`radio`要素に`tick()`/`untick()`メソッド実装
-* [TODO] `form`要素に`field()`メソッド実装
+* [WIP] `form`要素に`field()`メソッド実装
 * [TODO] `img`要素に`download()`メソッド実装
 * Accept-Languageヘッダを指定していない場合は実行環境のロケールから言語を取得してセットするように変更(WindowsかつNode.js v0.10以下の場合は動作しない)
 * Acceptヘッダを指定していない場合は一般的なブラウザのAcceptヘッダをセットするように変更

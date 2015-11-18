@@ -1,7 +1,8 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0, max-len:[1, 150, 2]*/
 var assert = require('power-assert');
-var type   = require('type-of');
+var typeOf = require('type-of');
+var each   = require('foreach');
 var helper = require('./_helper');
 var cli    = require('../index');
 
@@ -14,7 +15,7 @@ describe('cheerio:click', function () {
   });
 
   describe('対応している要素以外を指定してclickするとエラーとなる', function () {
-    [
+    each([
       'html',
       'body',
       'div',
@@ -24,7 +25,7 @@ describe('cheerio:click', function () {
       'input[type=checkbox]',
       'input[type=radio]',
       'select'
-    ].forEach(function (elem) {
+    ], function (elem) {
       it(elem, function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           $(elem).eq(0).click(function (err, $, res, body) {
@@ -40,12 +41,12 @@ describe('cheerio:click', function () {
   });
 
   describe('要素数0のclickはエラーとなる', function () {
-    [
+    each([
       'header',
       'p',
       'span',
       'input[type=button]'
-    ].forEach(function (elem) {
+    ], function (elem) {
       it(elem, function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           $(elem).click(function (err, $, res, body) {
@@ -68,9 +69,9 @@ describe('cheerio:click', function () {
             url: helper.url('auto', 'euc-jp'),
             encoding: 'euc-jp'
           });
-          assert(type(res) === 'object');
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf(res) === 'object');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -83,9 +84,9 @@ describe('cheerio:click', function () {
             url: 'http://www.yahoo.co.jp/',
             encoding: 'utf-8'
           });
-          assert(type(res) === 'object');
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf(res) === 'object');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -95,9 +96,9 @@ describe('cheerio:click', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $('.root').click(function (err, $, res, body) {
           assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga&piyo=');
-          assert(type(res) === 'object');
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf(res) === 'object');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -120,9 +121,9 @@ describe('cheerio:click', function () {
       cli.fetch(url, function (err, $, res, body) {
         $('.hash').click(function (err, $, res, body) {
           assert($.documentInfo().url === url + '#hoge');
-          assert(type(res) === 'object');
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf(res) === 'object');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -135,15 +136,15 @@ describe('cheerio:click', function () {
             url: helper.url('auto', 'euc-jp'),
             encoding: 'euc-jp'
           });
-          assert(type(res) === 'object');
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf(res) === 'object');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
     });
 
-    [ 0, 1, 2 ].forEach(function (idx) {
+    each([ 0, 1, 2 ], function (idx) {
       it('生のa要素をclickしてもリンク先を取得できる(' + idx + '番目)', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           $($('.rel')[idx]).click(function (err, $, res, body) {
@@ -151,9 +152,9 @@ describe('cheerio:click', function () {
               url: helper.url('auto', 'euc-jp'),
               encoding: 'euc-jp'
             });
-            assert(type(res) === 'object');
-            assert(type($) === 'function');
-            assert(type(body) === 'string');
+            assert(typeOf(res) === 'object');
+            assert(typeOf($) === 'function');
+            assert(typeOf(body) === 'string');
             done();
           });
         });
@@ -168,9 +169,9 @@ describe('cheerio:click', function () {
             url: url,
             encoding: 'utf-8'
           });
-          assert(type(res) === 'object');
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf(res) === 'object');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -184,9 +185,9 @@ describe('cheerio:click', function () {
             url: url,
             encoding: 'shift_jis'
           });
-          assert(type(res) === 'object');
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf(res) === 'object');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -210,8 +211,8 @@ describe('cheerio:click', function () {
             return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
           }).join('&');
           assert(h['post-data'] === data);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -235,8 +236,8 @@ describe('cheerio:click', function () {
             return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
           }).join('&');
           assert(h['post-data'] === data);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -261,8 +262,8 @@ describe('cheerio:click', function () {
             return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
           }).join('&');
           assert(h['post-data'] === data);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });

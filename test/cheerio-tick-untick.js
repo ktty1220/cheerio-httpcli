@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0, max-len:[1, 150, 2]*/
 var assert = require('power-assert');
-var type   = require('type-of');
+var typeOf = require('type-of');
 var helper = require('./_helper');
 var cli    = require('../index');
 
@@ -53,8 +53,8 @@ describe('cheerio:tick', function () {
           assert(h['request-url'] === '/~info' + param);
           assert(h['request-method'] === 'GET');
           assert(! h['post-data']);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -65,7 +65,7 @@ describe('cheerio:tick', function () {
         var $form = $('form[name=checkbox]');
         var $checkbox = $form.find('input[name=check2]');
         var state = $checkbox.attr('checked');
-        assert(typeof state === 'undefined');
+        assert(typeOf(state) === 'undefined');
         $checkbox.tick();
         assert($checkbox.attr('checked') === 'checked');
         $form.submit(function (err, $, res, body) {
@@ -75,8 +75,8 @@ describe('cheerio:tick', function () {
           assert(h['request-url'] === '/~info' + param);
           assert(h['request-method'] === 'GET');
           assert(! h['post-data']);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -107,8 +107,8 @@ describe('cheerio:tick', function () {
           assert(h['request-url'] === '/~info' + param);
           assert(h['request-method'] === 'GET');
           assert(! h['post-data']);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -121,7 +121,7 @@ describe('cheerio:tick', function () {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio2]:checked');
         assert($before.length === 0);
-        assert(typeof $before.val() === 'undefined');
+        assert(typeOf($before.val()) === 'undefined');
         $form.find('input[name=radio2]').eq(0).tick();
         var $after = $form.find('input[name=radio2]:checked');
         assert($after.length === 1);
@@ -133,8 +133,8 @@ describe('cheerio:tick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -157,8 +157,8 @@ describe('cheerio:tick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -181,8 +181,8 @@ describe('cheerio:tick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -205,8 +205,8 @@ describe('cheerio:tick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -284,7 +284,7 @@ describe('cheerio:untick', function () {
         var $form = $('form[name=checkbox]');
         var $checkbox = $form.find('input[name=check2]');
         var state = $checkbox.attr('checked');
-        assert(typeof state === 'undefined');
+        assert(typeOf(state) === 'undefined');
         $checkbox.untick();
         assert($checkbox.attr('checked') === state);
         $form.find('input[type=submit]').click(function (err, $, res, body) {
@@ -294,8 +294,8 @@ describe('cheerio:untick', function () {
           assert(h['request-url'] === '/~info' + param);
           assert(h['request-method'] === 'GET');
           assert(! h['post-data']);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -308,7 +308,7 @@ describe('cheerio:untick', function () {
         var state = $checkbox.attr('checked');
         assert(state === 'checked');
         $checkbox.untick();
-        assert(typeof $checkbox.attr('checked') === 'undefined');
+        assert(typeOf($checkbox.attr('checked')) === 'undefined');
         $form.submit(function (err, $, res, body) {
           var param = '?check1=&check2=&check3=&check4%5B%5D=';
           assert($.documentInfo().url === helper.url('~info') + param);
@@ -316,8 +316,8 @@ describe('cheerio:untick', function () {
           assert(h['request-url'] === '/~info' + param);
           assert(h['request-method'] === 'GET');
           assert(! h['post-data']);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -328,7 +328,7 @@ describe('cheerio:untick', function () {
         var $form = $('form[name=checkbox]');
         var $checkboxes = $form.find('input[type=checkbox]');
         $checkboxes.untick().each(function (i) {
-          assert(typeof $(this).attr('checked') === 'undefined');
+          assert(typeOf($(this).attr('checked')) === 'undefined');
         });
         $form.submit(function (err, $, res, body) {
           var param = '?check1=&check2=&check3=&check4%5B%5D=';
@@ -337,8 +337,8 @@ describe('cheerio:untick', function () {
           assert(h['request-url'] === '/~info' + param);
           assert(h['request-method'] === 'GET');
           assert(! h['post-data']);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -351,11 +351,11 @@ describe('cheerio:untick', function () {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio2]:checked');
         assert($before.length === 0);
-        assert(typeof $before.val() === 'undefined');
+        assert(typeOf($before.val()) === 'undefined');
         $form.find('input[name=radio2]').eq(0).untick();
         var $after = $form.find('input[name=radio2]:checked');
         assert($after.length === 0);
-        assert(typeof $after.val() === 'undefined');
+        assert(typeOf($after.val()) === 'undefined');
         $form.find('input[type=submit]').click(function (err, $, res, body) {
           var param = 'radio1=yyy&radio2=';
           assert($.documentInfo().url === helper.url('~info'));
@@ -363,8 +363,8 @@ describe('cheerio:untick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -379,7 +379,7 @@ describe('cheerio:untick', function () {
         $before.untick();
         var $after = $form.find('input[name=radio1]:checked');
         assert($after.length === 0);
-        assert(typeof $after.val() === 'undefined');
+        assert(typeOf($after.val()) === 'undefined');
         $form.find('input[type=submit]').click(function (err, $, res, body) {
           var param = 'radio1=&radio2=';
           assert($.documentInfo().url === helper.url('~info'));
@@ -387,8 +387,8 @@ describe('cheerio:untick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -411,8 +411,8 @@ describe('cheerio:untick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });
@@ -427,7 +427,7 @@ describe('cheerio:untick', function () {
         $form.find('input[name=radio1]').untick();
         var $after = $form.find('input[name=radio1]:checked');
         assert($after.length === 0);
-        assert(typeof $after.val() === 'undefined');
+        assert(typeOf($after.val()) === 'undefined');
         $form.find('input[type=submit]').click(function (err, $, res, body) {
           var param = 'radio1=&radio2=';
           assert($.documentInfo().url === helper.url('~info'));
@@ -435,8 +435,8 @@ describe('cheerio:untick', function () {
           assert(h['request-url'] === '/~info');
           assert(h['request-method'] === 'POST');
           assert(h['post-data'] === param);
-          assert(type($) === 'function');
-          assert(type(body) === 'string');
+          assert(typeOf($) === 'function');
+          assert(typeOf(body) === 'string');
           done();
         });
       });

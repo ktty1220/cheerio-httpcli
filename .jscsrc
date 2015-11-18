@@ -80,6 +80,6 @@
   "validateQuoteMarks": { "mark": "'", "escape": true },
   "validateIndentation": 2,
   "safeContextKeyword": [ "_this" ],
-  "validateLineBreaks": "LF",
+  //"validateLineBreaks": "LF",
   "validateIndentation": 2
 }

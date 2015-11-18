@@ -1,6 +1,7 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0*/
 var assert = require('power-assert');
+var each   = require('foreach');
 var helper = require('./_helper');
 var cli    = require('../index');
 
@@ -13,7 +14,7 @@ describe('encoding:auto', function () {
     this.server.close();
   });
 
-  helper.files('auto').forEach(function (enc) {
+  each(helper.files('auto'), function (enc) {
     it('エンコーディング自動判定により正常にUTF-8に変換される(' + enc + ')', function (done) {
       var url = helper.url('auto', enc);
       cli.fetch(url, function (err, $, res, body) {
@@ -41,7 +42,7 @@ describe('encoding:manual', function () {
     this.server.close();
   });
 
-  helper.files('manual').forEach(function (enc) {
+  each(helper.files('manual'), function (enc) {
     it('<head>タグのcharsetからエンコーディングが判定され正常にUTF-8に変換される(' + enc + ')', function (done) {
       var url = helper.url('manual', enc);
       cli.fetch(url, function (err, $, res, body) {

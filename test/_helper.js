@@ -1,6 +1,7 @@
 var nstatic = require('node-static');
 var http    = require('http');
 var path    = require('path');
+var each    = require('foreach');
 var fs      = require('fs');
 var qs      = require('querystring');
 
@@ -38,14 +39,14 @@ module.exports = {
    */
   qsparse: function (qs) {
     var q = {};
-    qs.split(/&/).forEach(function (ps) {
+    each(qs.split(/&/), function (ps) {
       var p = ps.split(/=/);
       q[p[0]] = q[p[0]] || [];
       q[p[0]].push(p[1]);
     });
-    Object.keys(q).forEach(function (p) {
-      if (q[p].length === 1) {
-        q[p] = q[p][0];
+    each(q, function (val, name) {
+      if (val.length === 1) {
+        q[name] = q[name][0];
       }
     });
     return q;

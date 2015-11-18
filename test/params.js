@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0*/
 var assert = require('power-assert');
-var type   = require('type-of');
+var typeOf = require('type-of');
 var helper = require('./_helper');
 var cli    = require('../index');
 
@@ -23,7 +23,7 @@ describe('params', function () {
 
   it('クッキーがセットされている', function (done) {
     cli.fetch(helper.url('~info'), function (err, $, res, body) {
-      assert(type(res.cookies) === 'object');
+      assert(typeOf(res.cookies) === 'object');
       assert(res.cookies.session_id === 'hahahaha');
       assert(res.cookies.login === '1');
       done();

@@ -1,7 +1,8 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0, no-undefined:0*/
 var assert = require('power-assert');
-var type   = require('type-of');
+var typeOf = require('type-of');
+var each   = require('foreach');
 var helper = require('./_helper');
 var cli    = require('../index');
 
@@ -14,7 +15,7 @@ describe('cheerio:absoluteUrl', function () {
   });
 
   describe('対応していない要素のabsoluteUrlはエラーとなる', function () {
-    [
+    each([
       'html',
       'body',
       'div',
@@ -24,7 +25,7 @@ describe('cheerio:absoluteUrl', function () {
       'input[type=checkbox]',
       'input[type=radio]',
       'select'
-    ].forEach(function (elem) {
+    ], function (elem) {
       it(elem, function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           try {
@@ -40,16 +41,16 @@ describe('cheerio:absoluteUrl', function () {
   });
 
   describe('要素数0のabsoluteUrlは[]を返す', function () {
-    [
+    each([
       'header',
       'p',
       'span',
       'input[type=button]'
-    ].forEach(function (elem) {
+    ], function (elem) {
       it(elem, function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var actual = $(elem).eq(0).absoluteUrl();
-          assert(type(actual) === 'array');
+          assert(typeOf(actual) === 'array');
           assert(actual.length === 0);
           done();
         });
@@ -121,7 +122,7 @@ describe('cheerio:absoluteUrl', function () {
   it('hrefが指定されたいないa要素を指定してabsoluteUrlするとundefinedを返す', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       var actual = $('.undef').absoluteUrl();
-      assert(type(actual) === 'undefined');
+      assert(typeOf(actual) === 'undefined');
       done();
     });
   });
@@ -134,7 +135,7 @@ describe('cheerio:absoluteUrl', function () {
     });
   });
 
-  [ 0, 1, 2 ].forEach(function (idx) {
+  each([ 0, 1, 2 ], function (idx) {
     it('生のa要素のabsoluteUrlでも絶対URLを取得できる(' + idx + '番目)', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var actual = $($('.rel')[idx]).absoluteUrl();
@@ -165,7 +166,7 @@ describe('cheerio:absoluteUrl', function () {
       it('単一要素 => undefined', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var actual = $('.external').absoluteUrl({ absolute: false });
-          assert(type(actual) === 'undefined');
+          assert(typeOf(actual) === 'undefined');
           done();
         });
       });
@@ -194,7 +195,7 @@ describe('cheerio:absoluteUrl', function () {
       it('単一要素 => undefined', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var actual = $('.rel').eq(0).absoluteUrl({ relative: false });
-          assert(type(actual) === 'undefined');
+          assert(typeOf(actual) === 'undefined');
           done();
         });
       });
@@ -218,7 +219,7 @@ describe('cheerio:absoluteUrl', function () {
       it('単一要素(hrefなし) => undefined', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var actual = $('.undef').absoluteUrl({ invalid: false });
-          assert(type(actual) === 'undefined');
+          assert(typeOf(actual) === 'undefined');
           done();
         });
       });
@@ -226,7 +227,7 @@ describe('cheerio:absoluteUrl', function () {
       it('単一要素(空) => undefined', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var actual = $('.empty').absoluteUrl({ invalid: false });
-          assert(type(actual) === 'undefined');
+          assert(typeOf(actual) === 'undefined');
           done();
         });
       });
@@ -234,7 +235,7 @@ describe('cheerio:absoluteUrl', function () {
       it('単一要素(javascript) => undefined', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var actual = $('.js').absoluteUrl({ invalid: false });
-          assert(type(actual) === 'undefined');
+          assert(typeOf(actual) === 'undefined');
           done();
         });
       });
@@ -348,7 +349,7 @@ describe('cheerio:absoluteUrl', function () {
       var _this = this;
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
         var actual = $('.base64').absoluteUrl({ invalid: false });
-        assert(type(actual) === 'undefined');
+        assert(typeOf(actual) === 'undefined');
         done();
       });
     });

@@ -8,29 +8,18 @@
 [![code-climate](https://codeclimate.com/github/ktty1220/cheerio-httpcli/badges/gpa.svg)](https://codeclimate.com/github/ktty1220/cheerio-httpcli)
 [![license](https://img.shields.io/npm/l/cheerio-httpcli.svg?style=flat-square)](https://github.com/ktty1220/cheerio-httpcli/blob/master/LICENSE)
 
-Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換とHTMLのパースを行った後のオブジェクトを取得できるHTTPクライアントモジュールです。
-
-実装にあたり、以下のモジュールを利用しています。
-
-* WEBページの取得: [request](https://npmjs.org/package/request)
-* WEBページの文字コード判定: [jschardet](http://npmjs.org/package/jschardet)
-* 文字コードの変換: [iconv-lite](http://npmjs.org/package/iconv-lite)
-* HTMLのパース: [cheerio](http://npmjs.org/package/cheerio)
-* プロミス形式実行: [rsvp](http://npmjs.org/package/rsvp)
-* HTMLエンティティ変換 [ent](http://npmjs.org/package/ent)
-
-> cheerioはHTMLをjQueryライクにパースしてくれるモジュールです。パース後のオブジェクトを格納する変数名を「$」にすると、`$('title').text()`のようなjQueryそのままの形で要素の情報を取得できます。
-
-上記npmモジュールの他にURLエンコード用に[ecl_new.js](http://www.drk7.jp/MT/archives/001324.html)も利用しています。
+Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換と、[cheerio](http://npmjs.org/package/cheerio)によってパースしたHTMLをjQueryのように操作できるHTTPクライアントモジュールです。
 
 ## 特徴
 
-1. 取得先WEBページの文字コードを自動で判定してHTMLをUTF-8に変換してくれる。
-2. UTF-8に変換したHTMLを`cheerio.load()`でパースしたオブジェクトも取得できる。
-3. Node.jsお馴染みのコールバック形式と最近の流行であるプロミス形式どちらにも対応。
-4. cheerioのprototypeを拡張し、フォームの送信やリンクのクリックをエミュレート。
-5. ブラウザ指定による簡単User-Agent切り替え機能。
-6. 現在のクッキーの内容を簡単に取得できる(読み取り専用)。
+1. 取得先WEBページの文字コードを自動で判定してHTMLをUTF-8に変換してくれる
+2. UTF-8に変換したHTMLをjQueryのように操作することが可能
+3. Node.jsお馴染みのコールバック形式と最近の流行であるプロミス形式どちらにも対応
+4. フォームの送信やリンクのクリックをエミュレート
+5. ブラウザ指定による簡単User-Agent切り替え機能
+6. 現在のクッキーの内容を簡単に取得できる(読み取り専用)
+
+> 静的なHTMLをベースに処理するモジュールなのでSPAなどクライアントサイドのJavaScriptによってコンテンツを取得/変更するタイプのWEBページには対応していません。
 
 ## インストール
 
@@ -441,8 +430,10 @@ client.fetch('http://' + user + ':' + password + '@securet.example.com', functio
 
 * 文字コードの判別はjschardetで高精度で判別できた場合はその情報を使用しますが、そうでない場合は`<head>`タグのcharset情報を参照します。後者での判別時においてcharsetで指定された文字コードとWEBページの実際の文字コードが異なる場合は変換エラーや文字化けが発生します。
 
+* npmモジュールの他にURLエンコード用に[ecl_new.js](http://www.drk7.jp/MT/archives/001324.html)も利用しています。
+
 ## ライセンス
 
 [MIT license](http://www.opensource.org/licenses/mit-license)で配布します。
 
-&copy; 2013 [ktty1220](mailto:ktty1220@gmail.com)
+&copy; 2013-2015 [ktty1220](mailto:ktty1220@gmail.com)
