@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*eslint no-invalid-this:0, no-undefined:0*/
+/*eslint no-invalid-this:0*/
 var assert = require('power-assert');
 var helper = require('./_helper');
 var cli    = require('../index');
@@ -92,7 +92,7 @@ describe('encoding:unknown', function () {
     cli.fetch(url, function (err, $, res, body) {
       assert.deepEqual($.documentInfo(), {
         url: url,
-        encoding: undefined
+        encoding: null
       });
       assert($('title').text() === '１');
       done();
@@ -104,7 +104,7 @@ describe('encoding:unknown', function () {
     cli.fetch(url, function (err, $, res, body) {
       assert.deepEqual($.documentInfo(), {
         url: url,
-        encoding: undefined
+        encoding: null
       });
       assert($('title').text() !== '１');
       done();
