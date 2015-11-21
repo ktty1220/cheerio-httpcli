@@ -1,6 +1,11 @@
 # cheerio-httpcli - Node.js用WEBスクレイピングモジュール
 
-[![NPM](https://nodei.co/npm/cheerio-httpcli.png?downloads=true)](https://npmjs.org/package/cheerio-httpcli)
+[![npm-version](https://img.shields.io/npm/v/cheerio-httpcli.svg?style=flat-square)](https://npmjs.org/package/cheerio-httpcli)
+[![npm-download](https://img.shields.io/npm/dm/cheerio-httpcli.svg?style=flat-square)](https://npmjs.org/package/cheerio-httpcli)
+[![npm-deps](https://david-dm.org/ktty1220/cheerio-httpcli.svg?style=flat-square)](https://david-dm.org/ktty1220/cheerio-httpcli)
+[![node-version](https://img.shields.io/node/v/gh-badges.svg)](https://npmjs.org/package/cheerio-httpcli)
+[![code-climate](https://codeclimate.com/github/ktty1220/cheerio-httpcli/badges/gpa.svg)](https://codeclimate.com/github/ktty1220/cheerio-httpcli)
+[![license](https://img.shields.io/npm/l/cheerio-httpcli.svg?style=flat-square)](https://github.com/ktty1220/cheerio-httpcli/blob/master/LICENSE)
 
 Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換とHTMLのパースを行った後のオブジェクトを取得できるHTTPクライアントモジュールです。
 
