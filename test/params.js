@@ -6,13 +6,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('params', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('パラメータの指定がURLに反映されている', function (done) {
     var param = { hoge: 'fuga', piyo: 999, doya: true };
     cli.fetch(helper.url('~info'), param, function (err, $, res, body) {

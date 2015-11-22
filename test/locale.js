@@ -5,13 +5,6 @@ var helper   = require('./_helper');
 var cli      = require('../index');
 
 describe('locale', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('デフォルトは実行環境のロケールがセットされる', function (done) {
     cli.fetch(helper.url('~info'), function (err, $, res, body) {
       // This test will be failed when executed on below environment.

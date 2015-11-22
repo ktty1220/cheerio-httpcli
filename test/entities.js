@@ -6,13 +6,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('entities:decode', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   var expected = {
     text: '夏目漱石「私の個人主義」',
     html: '夏目漱石「<strong>私の個人主義</strong>」',

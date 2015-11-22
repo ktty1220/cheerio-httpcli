@@ -20,11 +20,7 @@ describe('iconv:load', function () {
 // - 'iconv' module is not installed
 describe('iconv:iconv', function () {
   before(function () {
-    this.server = helper.server();
     cli.setIconvEngine('iconv');
-  });
-  after(function () {
-    this.server.close();
   });
 
   it('iconv-liteで未対応のページでもiconvを使用 => UTF-8に変換される(iso-2022-jp)', function (done) {

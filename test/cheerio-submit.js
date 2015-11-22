@@ -8,13 +8,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('cheerio:submit', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('form要素以外 => エラー', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('div').eq(0).submit({ hoge: 'fuga' }, function (err, $, res, body) {

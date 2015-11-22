@@ -6,10 +6,7 @@ var cli      = require('../index');
 
 describe('maxdatasize', function () {
   before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
+    cli.timeout = 30000;
   });
 
   it('デフォルトは受信無制限', function (done) {

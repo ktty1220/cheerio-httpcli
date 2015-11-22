@@ -5,13 +5,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('referer:enable', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('Referer自動設定を有効 => リクエストの度にRefererがセットされる', function (done) {
     cli.referer = true;
     var url = helper.url('auto', 'euc-jp');
@@ -38,13 +31,6 @@ describe('referer:enable', function () {
 });
 
 describe('referer:disable', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('Referer自動設定を無効 => Refererはセットされない', function (done) {
     cli.referer = false;
     delete(cli.headers.Referer);

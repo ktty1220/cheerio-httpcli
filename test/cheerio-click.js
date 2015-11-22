@@ -7,13 +7,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('cheerio:click', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   describe('対応している要素以外 => エラー', function () {
     each([
       'html',

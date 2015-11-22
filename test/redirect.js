@@ -6,13 +6,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('redirect', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('documentInfoにリダイレクト先のURLが登録される', function (done) {
     var url = helper.url('manual', 'euc-jp');
     cli.fetch(helper.url('~redirect'), function (err, $, res, body) {
@@ -22,16 +15,14 @@ describe('redirect', function () {
   });
 
   it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ', function (done) {
-    var server = this.server;
-    server.resetTraceRoute();
     var url = helper.url('manual', 'euc-jp');
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+    cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
       $('form[name=login]').submit(function (err, $, res, body) {
         assert(typeOf(res.cookies) === 'object');
         assert(res.cookies.user === 'guest');
         assert($.documentInfo().url === url);
-        assert.deepEqual(server.getTraceRoute(), [
-          '/form/utf-8.html',
+        assert.deepEqual(JSON.parse(res.headers['trace-route']), [
+          '/form/utf-8.html?reset_trace_route',
           '/~redirect',
           '/manual/euc-jp.html'
         ]);

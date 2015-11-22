@@ -1,3 +1,4 @@
+/*eslint max-statements:[1, 50]*/
 var nstatic = require('node-static');
 var http    = require('http');
 var path    = require('path');
@@ -61,16 +62,21 @@ module.exports = {
     var file = new nstatic.Server(this.root, {
       gzip: true
     });
-    var server = http.createServer(function (req, res) {
+    return http.createServer(function (req, res) {
       var pdata = '';
       req.on('data', function (data) {
         pdata += data;
       });
       req.on('end', function () {
+        if (req.url.indexOf('?reset_trace_route') !== -1) {
+          _traceRoute.length = 0;
+        }
         _traceRoute.push(req.url);
+
+        var headers = [];
         if (/~info/.test(req.url)) {
           // アクセス元のヘッダ情報などをレスポンスヘッダにセットして返す
-          var headers = [
+          headers = [
             [ 'request-url', req.url ],
             [ 'request-method', req.method.toUpperCase() ],
             [ 'Set-Cookie', 'session_id=hahahaha' ],
@@ -87,43 +93,51 @@ module.exports = {
             headers.push([ 'post-data', pdata ]);
           }
           res.writeHead(200, headers);
-          res.end('<html></html>');
-        } else if (/~redirect/.test(req.url)) {
+          return res.end('<html></html>');
+        }
+
+        if (/~redirect/.test(req.url)) {
           // リダイレクト
           var loc = _this.url('manual', 'euc-jp');
-          var header = [
+          headers = [
             [ 'location', loc ]
           ];
           // ログインフォームから来た場合はログイン情報も
           if (pdata.length > 0) {
             var pq = qs.parse(pdata);
-            header.push([ 'Set-Cookie', 'user=' + pq.user ]);
+            headers.push([ 'Set-Cookie', 'user=' + pq.user ]);
           }
-          res.writeHead(301, header);
-          res.end('location: ' + loc);
-        } else if (/~404/.test(req.url)) {
+          res.writeHead(301, headers);
+          return res.end('location: ' + loc);
+        }
+
+        if (/~404/.test(req.url)) {
           // ソフト404ページ
-          file.serveFile('/error/404.html', 404, {}, req, res);
-        } else if (/~mega/.test(req.url)) {
+          return file.serveFile('/error/404.html', 404, {}, req, res);
+        }
+
+        if (/~slow/.test(req.url)) {
+          // レスポンスに5秒かかるページ
+          return setTimeout(function () {
+            res.writeHead(200, headers);
+            res.end('<html></html>');
+          }, 5000);
+        }
+
+        if (/~mega/.test(req.url)) {
           // 巨大サイズ
           res.writeHead(200);
           var buf = new Array(1024 * 1024).join().split(',').map(function (v, i, a) {
             return 'a';
           }).join('');
-          res.end(buf);
-        } else {
-          // 通常HTMLファイル
-          file.serve(req, res);
+          return res.end(buf);
         }
+
+        // 通常HTMLファイル
+        res.setHeader('trace-route', JSON.stringify(_traceRoute));
+        file.serve(req, res);
       }).resume();
-    }).listen(this.port);
-    server.resetTraceRoute = function () {
-      _traceRoute = [];
-    };
-    server.getTraceRoute = function () {
-      return _traceRoute;
-    };
-    return server;
+    }).listen(this.port, '0.0.0.0');
   },
 
   /**

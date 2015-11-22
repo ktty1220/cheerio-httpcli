@@ -8,13 +8,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('cheerio:field', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   describe('根本的エラー', function () {
     it('form要素以外 => element is not form', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {

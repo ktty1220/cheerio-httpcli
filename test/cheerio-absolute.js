@@ -7,13 +7,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('cheerio:absoluteUrl', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   describe('対応していない要素 => エラー', function () {
     each([
       'html',
@@ -314,7 +307,6 @@ describe('cheerio:absoluteUrl', function () {
     before(function () {
       this.base64img = helper.toBase64('fixtures/img/img/sports.jpg');
     });
-    after(function () { });
 
     it('単一要素 => srcに指定したURLを絶対URLにして返す', function (done) {
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
@@ -358,7 +350,6 @@ describe('cheerio:absoluteUrl', function () {
     before(function () {
       this.base64img = helper.toBase64('fixtures/img/img/sports.jpg');
     });
-    after(function () { });
 
     it('各要素のhref/srcのURLを絶対URLにした配列を返す', function (done) {
       var _this = this;

@@ -6,13 +6,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('promise:fetch', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('fetch時にコールバックを指定 => undefinedを返す', function (done) {
     assert(! cli.fetch(helper.url('~info'), function () {
       done();
@@ -72,13 +65,6 @@ describe('promise:fetch', function () {
 });
 
 describe('promise:click', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   describe('a要素', function () {
     it('click時にコールバックを指定 => undefinedを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
@@ -389,13 +375,6 @@ describe('promise:click', function () {
 });
 
 describe('promise:submit', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('submit時にコールバックを指定 => undefinedを返す', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       assert(! $('form').submit(function () {

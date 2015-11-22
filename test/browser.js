@@ -7,13 +7,6 @@ var cli      = require('../index');
 var browsers = require('../lib/browsers.json');
 
 describe('browser', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('デフォルトはChromeのUser-Agentがセットされる', function (done) {
     cli.fetch(helper.url('~info'), function (err, $, res, body) {
       assert(browsers.chrome === res.headers['user-agent']);

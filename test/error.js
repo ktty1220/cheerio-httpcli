@@ -5,13 +5,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('error', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   it('ソフト404 => エラーだがHTMLを取得できる', function (done) {
     var url = helper.url('~404');
     cli.fetch(url, { hoge: 'fuga' }, function (err, $, res, body) {
@@ -45,6 +38,18 @@ describe('error', function () {
       assert(err.url, errhost);
       assert.deepEqual(err.param, { hoge: 'fuga' });
       assert(! $);
+      assert(! body);
+      done();
+    });
+  });
+
+  it('タイムアウトの値を超えるとエラーになる', function (done) {
+    cli.timeout = 300;
+    var url = helper.url('~slow');
+    cli.fetch(url, function (err, $, res, body) {
+      assert(err.message === 'ETIMEDOUT');
+      assert(! err.statusCode);
+      assert(err.url === url);
       assert(! body);
       done();
     });

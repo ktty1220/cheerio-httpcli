@@ -6,13 +6,6 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('cheerio:tick', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   describe('input[type=checkbox]要素', function () {
     it('input[type=checkbox]要素以外 => 例外発生', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
@@ -247,13 +240,6 @@ describe('cheerio:tick', function () {
 });
 
 describe('cheerio:untick', function () {
-  before(function () {
-    this.server = helper.server();
-  });
-  after(function () {
-    this.server.close();
-  });
-
   describe('input[type=checkbox]要素', function () {
     it('input[type=checkbox]要素以外 => 例外発生', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {

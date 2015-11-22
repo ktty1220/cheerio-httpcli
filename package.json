@@ -19,8 +19,11 @@
     "prettyjson": "^1.1.3",
     "request": "^2.67.0",
     "rsvp": "^3.1.0",
+    "spawn-sync": "^1.0.14",
+    "tough-cookie": "^2.2.1",
     "type-of": "^2.0.1",
-    "valid-url": "^1.0.9"
+    "valid-url": "^1.0.9",
+    "which": "^1.2.0"
   },
   "devDependencies": {
     "eslint": "^1.10.2",
@@ -32,11 +35,12 @@
     "mocha": "^2.3.4",
     "mocha-clean": "^1.0.0",
     "node-static": "^0.7.7",
+    "optimist": "^0.6.1",
     "power-assert": "^1.2.0"
   },
   "scripts": {
-    "test": "mocha && true || true",
-    "cov": "istanbul cover -x index.js ./node_modules/mocha/bin/_mocha -- -R nyan && true || true",
+    "test": "node testrunner.js && true || true",
+    "cov": "istanbul cover -x index.js -x testrunner.js testrunner.js -- -R nyan && true || true",
     "lint": "eslint lib test example --ext .js && true || true",
     "cs": "jscs lib test example && true || true",
     "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=*espower*,mocha*,iconv-lite && true || true",
