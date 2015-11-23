@@ -12,7 +12,7 @@ describe('referer:enable', function () {
     this.server.close();
   });
 
-  it('Referer自動設定を有効にするとリクエストの度にRefererがセットされる', function (done) {
+  it('Referer自動設定を有効 => リクエストの度にRefererがセットされる', function (done) {
     cli.referer = true;
     var url = helper.url('auto', 'euc-jp');
     cli.fetch(url, function (err, $, res, body) {
@@ -45,7 +45,7 @@ describe('referer:disable', function () {
     this.server.close();
   });
 
-  it('Referer自動設定を無効にするとRefererはセットされない', function (done) {
+  it('Referer自動設定を無効 => Refererはセットされない', function (done) {
     cli.referer = false;
     delete(cli.headers.Referer);
     var url = helper.url('auto', 'euc-jp');

@@ -22,7 +22,7 @@ describe('locale', function () {
     });
   });
 
-  it('手動でAccept-Languageを指定した場合はそれが使用される', function (done) {
+  it('手動でAccept-Languageを指定 => 指定値が使用される', function (done) {
     var lang = 'en_US';
     cli.headers['Accept-Language'] = lang;
     cli.fetch(helper.url('~info'), function (err, $, res, body) {

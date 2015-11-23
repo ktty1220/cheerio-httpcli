@@ -14,7 +14,7 @@ describe('cheerio:click', function () {
     this.server.close();
   });
 
-  describe('対応している要素以外を指定してclickするとエラーとなる', function () {
+  describe('対応している要素以外 => エラー', function () {
     each([
       'html',
       'body',
@@ -40,7 +40,7 @@ describe('cheerio:click', function () {
     });
   });
 
-  describe('要素数0のclickはエラーとなる', function () {
+  describe('要素数0 => エラー', function () {
     each([
       'header',
       'p',
@@ -62,7 +62,7 @@ describe('cheerio:click', function () {
   });
 
   describe('a要素', function () {
-    it('相対パスリンクをclickすると現在のページを基準にしたリンク先を取得する', function (done) {
+    it('相対パスリンク => 現在のページを基準にしたリンク先を取得する', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $('.rel').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
@@ -77,7 +77,7 @@ describe('cheerio:click', function () {
       });
     });
 
-    it('外部URLリンクをclickするとそのURLのリンク先を取得する', function (done) {
+    it('外部URLリンク => そのURLのリンク先を取得する', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $('.external').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
@@ -92,7 +92,7 @@ describe('cheerio:click', function () {
       });
     });
 
-    it('ルートからの絶対パスリンクをclickするとドキュメントルートを基準にしたリンク先を取得する', function (done) {
+    it('ルートからの絶対パスリンク => ドキュメントルートを基準にしたリンク先を取得する', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $('.root').click(function (err, $, res, body) {
           assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga&piyo=');
@@ -104,7 +104,7 @@ describe('cheerio:click', function () {
       });
     });
 
-    it('javascriptリンクをclickするとエラーとなる', function (done) {
+    it('javascriptリンク => エラー', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $('.js').click(function (err, $, res, body) {
           assert(err.message === 'Invalid URI "javascript:history.back();"');
@@ -116,7 +116,7 @@ describe('cheerio:click', function () {
       });
     });
 
-    it('ハッシュリンクをclickすると結果的に同じページを取得するが現在のページ情報にハッシュが追加される', function (done) {
+    it('ハッシュリンク => 結果的に同じページを取得するが現在のページ情報にハッシュが追加される', function (done) {
       var url = helper.url('form', 'utf-8');
       cli.fetch(url, function (err, $, res, body) {
         $('.hash').click(function (err, $, res, body) {
@@ -129,7 +129,7 @@ describe('cheerio:click', function () {
       });
     });
 
-    it('複数のa要素を指定してclickすると先頭のリンクのみが対象となる', function (done) {
+    it('複数のa要素 => 先頭のリンクのみが対象となる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $('a').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
@@ -145,7 +145,7 @@ describe('cheerio:click', function () {
     });
 
     each([ 0, 1, 2 ], function (idx) {
-      it('生のa要素をclickしてもリンク先を取得できる(' + idx + '番目)', function (done) {
+      it('生のa要素 => リンク先を取得できる(' + idx + '番目)', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           $($('.rel')[idx]).click(function (err, $, res, body) {
             assert.deepEqual($.documentInfo(), {
@@ -161,7 +161,7 @@ describe('cheerio:click', function () {
       });
     });
 
-    it('無から作成したa要素をclickしてもリンク先を取得できる(jQuery形式)', function (done) {
+    it('無から作成したa要素(jQuery形式) => リンク先を取得できる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var url = helper.url('auto', 'utf-8');
         $('<a/>').attr('href', url).click(function (err, $, res, body) {
@@ -177,7 +177,7 @@ describe('cheerio:click', function () {
       });
     });
 
-    it('無から作成したa要素をclickしてもリンク先を取得できる(HTML形式)', function (done) {
+    it('無から作成したa要素(HTML形式) => リンク先を取得できる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var url = helper.url('auto', 'shift_jis');
         $('<a href="' + url + '">link</a>').click(function (err, $, res, body) {

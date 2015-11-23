@@ -12,7 +12,7 @@ describe('error', function () {
     this.server.close();
   });
 
-  it('ソフト404の場合はエラーだがHTMLを取得できる', function (done) {
+  it('ソフト404 => エラーだがHTMLを取得できる', function (done) {
     var url = helper.url('~404');
     cli.fetch(url, { hoge: 'fuga' }, function (err, $, res, body) {
       assert(err.message === 'server status');
@@ -25,7 +25,7 @@ describe('error', function () {
     });
   });
 
-  it('ハード404の場合はHTMLを取得できない', function (done) {
+  it('ハード404 => HTMLを取得できない', function (done) {
     var url = helper.url('error', 'not-found');
     cli.fetch(url, { hoge: 'fuga' }, function (err, $, res, body) {
       assert(err.message === 'no content');
@@ -38,7 +38,7 @@ describe('error', function () {
     });
   });
 
-  it('サーバーが見つからない場合もHTMLを取得できない', function (done) {
+  it('サーバーが見つからない => HTMLを取得できない', function (done) {
     var errhost = 'http://localhost:59999/';
     cli.fetch(errhost, { hoge: 'fuga' }, function (err, $, res, body) {
       assert(err.errno, 'ENOTFOUND');

@@ -21,11 +21,13 @@ describe('params', function () {
     });
   });
 
-  it('クッキーがセットされている', function (done) {
+  it('クッキーがセットされている & 変更不可', function (done) {
     cli.fetch(helper.url('~info'), function (err, $, res, body) {
       assert(typeOf(res.cookies) === 'object');
       assert(res.cookies.session_id === 'hahahaha');
       assert(res.cookies.login === '1');
+      res.cookies.session_id = 'fooooooo';
+      assert(res.cookies.session_id === 'hahahaha');
       done();
     });
   });

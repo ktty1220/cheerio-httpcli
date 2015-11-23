@@ -31,7 +31,7 @@ describe('browser', function () {
     });
   });
 
-  it('対応していないブラウザを指定してもUser-Agentは変更されない', function (done) {
+  it('対応していないブラウザ => User-Agentは変更されない', function (done) {
     var now = cli.headers['User-Agent'];
     assert(! cli.setBrowser('w3m'));
     cli.fetch(helper.url('~info'), function (err, $, res, body) {

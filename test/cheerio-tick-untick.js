@@ -14,7 +14,7 @@ describe('cheerio:tick', function () {
   });
 
   describe('input[type=checkbox]要素', function () {
-    it('input[type=checkbox]要素以外を指定すると例外が発生する', function (done) {
+    it('input[type=checkbox]要素以外 => 例外発生', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[type=text]').eq(0).tick();
@@ -26,7 +26,7 @@ describe('cheerio:tick', function () {
       });
     });
 
-    it('要素数0のtickは例外が発生する', function (done) {
+    it('要素数0 => 例外発生', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[name=not_found]').tick();
@@ -38,7 +38,7 @@ describe('cheerio:tick', function () {
       });
     });
 
-    it('すでに選択済みのcheckboxをtickしても変化なし', function (done) {
+    it('すでに選択済みのcheckbox => 変化なし', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=checkbox]');
         var $checkbox = $form.find('input[name=check1]');
@@ -60,7 +60,7 @@ describe('cheerio:tick', function () {
       });
     });
 
-    it('未選択のcheckboxをtickすると選択状態になる', function (done) {
+    it('未選択のcheckbox => 選択状態になる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=checkbox]');
         var $checkbox = $form.find('input[name=check2]');
@@ -82,7 +82,7 @@ describe('cheerio:tick', function () {
       });
     });
 
-    it('複数要素に対してtickするとその要素すべてが選択状態になる', function (done) {
+    it('複数要素 => 要素すべてが選択状態になる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=checkbox]');
         var $checkboxes = $form.find('input[type=checkbox]');
@@ -116,7 +116,7 @@ describe('cheerio:tick', function () {
   });
 
   describe('input[type=radio]要素', function () {
-    it('グループが未選択の場合はクリックされたradioを選択状態にする', function (done) {
+    it('グループが未選択 => radioを選択状態にする', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio2]:checked');
@@ -140,7 +140,7 @@ describe('cheerio:tick', function () {
       });
     });
 
-    it('すでに選択されているradioをtickしても変化なし', function (done) {
+    it('すでに選択されているradio => 変化なし', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio1]:checked');
@@ -164,7 +164,7 @@ describe('cheerio:tick', function () {
       });
     });
 
-    it('グループ内ですでに選択されている別のradioがある場合はその選択状態を解除してクリックされたradioを選択状態にする', function (done) {
+    it('グループ内ですでに選択されている別のradioがある => その選択状態を解除して指定されたradioを選択状態にする', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio1]:checked');
@@ -188,7 +188,7 @@ describe('cheerio:tick', function () {
       });
     });
 
-    it('複数要素に対してtickすると先頭の要素のみが選択状態になる', function (done) {
+    it('複数要素 => 先頭の要素のみが選択状態になる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio1]:checked');
@@ -214,7 +214,7 @@ describe('cheerio:tick', function () {
   });
 
   describe('input[type=checkbox]要素とinput[type=radio]要素の複合', function () {
-    it('checkboxとradioが混在した複数要素に対してtickするとcheckboxは指定した全要素を選択、radioは先頭の要素のみが選択状態になる', function (done) {
+    it('checkboxとradioが混在した複数要素 => checkboxは指定した全要素を選択、radioは先頭の要素のみが選択状態になる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=default-jp]');
         $form.find('input[type=checkbox],input[type=radio]').tick();
@@ -255,7 +255,7 @@ describe('cheerio:untick', function () {
   });
 
   describe('input[type=checkbox]要素', function () {
-    it('input[type=checkbox]要素以外を指定すると例外が発生する', function (done) {
+    it('input[type=checkbox]要素以外 => 例外発生', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[type=text]').eq(0).untick();
@@ -267,7 +267,7 @@ describe('cheerio:untick', function () {
       });
     });
 
-    it('要素数0のuntickは例外が発生する', function (done) {
+    it('要素数0 => 例外発生', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[name=not_found]').untick();
@@ -279,7 +279,7 @@ describe('cheerio:untick', function () {
       });
     });
 
-    it('もともと未選択のcheckboxをtickしても変化なし', function (done) {
+    it('未選択状態のcheckbox => 変化なし', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=checkbox]');
         var $checkbox = $form.find('input[name=check2]');
@@ -301,7 +301,7 @@ describe('cheerio:untick', function () {
       });
     });
 
-    it('選択状態のcheckboxをtickすると未選択になる', function (done) {
+    it('選択状態のcheckbox => 未選択状態になる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=checkbox]');
         var $checkbox = $form.find('input[name=check1]');
@@ -323,7 +323,7 @@ describe('cheerio:untick', function () {
       });
     });
 
-    it('複数要素に対してuntickするとその要素すべてが未選択になる', function (done) {
+    it('複数要素 => 要素すべてが未選択状態になる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=checkbox]');
         var $checkboxes = $form.find('input[type=checkbox]');
@@ -346,7 +346,7 @@ describe('cheerio:untick', function () {
   });
 
   describe('input[type=radio]要素', function () {
-    it('グループが未選択の場合は変化なし', function (done) {
+    it('グループが未選択状態 => 変化なし', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio2]:checked');
@@ -370,7 +370,7 @@ describe('cheerio:untick', function () {
       });
     });
 
-    it('選択されているradioをuntickすると選択状態を解除する', function (done) {
+    it('選択状態のradio => 選択状態を解除する', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio1]:checked');
@@ -394,7 +394,7 @@ describe('cheerio:untick', function () {
       });
     });
 
-    it('選択されていないradioをuntickしても変化なし(選択状態のradioもそのまま)', function (done) {
+    it('未選択状態のradio => 変化なし(選択状態のradioもそのまま)', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio1]:checked');
@@ -418,7 +418,7 @@ describe('cheerio:untick', function () {
       });
     });
 
-    it('複数要素に対してuntickすると指定した全要素が未選択状態になる', function (done) {
+    it('複数要素 => 要素すべてが未選択状態になる', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=radio]');
         var $before = $form.find('input[name=radio1]:checked');
@@ -444,7 +444,7 @@ describe('cheerio:untick', function () {
   });
 
   describe('input[type=checkbox]要素とinput[type=radio]要素の複合', function () {
-    it('checkboxとradioが混在した複数要素に対してuntickするとcheckboxもradioも指定した全要素の選択が解除される', function (done) {
+    it('checkboxとradioが混在した複数要素 => checkboxもradioも指定した全要素の選択状態が解除される', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=default-jp]');
         $form.find('input[type=checkbox],input[type=radio]').untick();

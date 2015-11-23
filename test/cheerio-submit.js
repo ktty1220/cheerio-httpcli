@@ -15,7 +15,7 @@ describe('cheerio:submit', function () {
     this.server.close();
   });
 
-  it('form要素以外を指定してsubmitするとエラーとなる', function (done) {
+  it('form要素以外 => エラー', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('div').eq(0).submit({ hoge: 'fuga' }, function (err, $, res, body) {
         assert(err.message === 'element is not form');
@@ -27,7 +27,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('要素数0のsubmitはエラーとなる', function (done) {
+  it('要素数0 => エラー', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('header').submit({ hoge: 'fuga' }, function (err, $, res, body) {
         assert(err.message === 'no elements');
@@ -69,7 +69,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('form要素のmethod属性がない場合はGETでフォームが送信される', function (done) {
+  it('form要素のmethod属性がない => GETでフォームが送信される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name="no-method"]').submit(function (err, $, res, body) {
         assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga');
@@ -84,12 +84,11 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('form要素のaction属性もmethod属性もない場合はGETかつ現ページに対してフォームが送信される', function (done) {
+  it('form要素のaction属性もmethod属性もない => GETかつ現ページに対してフォームが送信される', function (done) {
     var url = helper.url('form', 'utf-8');
     cli.fetch(url, function (err, $, res, body) {
       $('form[name="no-action-no-method"]').submit(function (err, $, res, body) {
         assert($.documentInfo().url === url + '?hoge=fuga');
-        var h = res.headers;
         assert(typeOf($) === 'function');
         assert(typeOf(body) === 'string');
         done();
@@ -158,7 +157,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('input要素のvalueがない場合空文字となる', function (done) {
+  it('input要素のvalueがない => 空文字となる', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=no-input-value]').submit(function (err, $, res, body) {
         assert($.documentInfo().url === helper.url('~info'));
@@ -173,7 +172,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('submit時に指定するパラメータのvalueがnull/undefined/emptyの場合は"name="という形でURLに追加される', function (done) {
+  it('パラメータのvalueがnull/undefined/empty => "name="という形でURLに追加される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=post]').submit({
         foo: null, bar: undefined, baz: ''
@@ -190,7 +189,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('submit時に指定するパラメータが数字の0の場合は"name=0"という形でURLに追加される', function (done) {
+  it('パラメータのvalueが数字の0 => "name=0"という形でURLに追加される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       $('form[name=post]').submit({ hoge: 0 }, function (err, $, res, body) {
         assert($.documentInfo().url === helper.url('~info'));
@@ -206,7 +205,7 @@ describe('cheerio:submit', function () {
   });
 
   each([ 0, 1, 2 ], function (idx) {
-    it('生のform要素をsubmitしてもフォーム送信される(' + idx + '番目)', function (done) {
+    it('生のform要素 => フォーム送信される(' + idx + '番目)', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $($('.form-group form')[idx]).submit(function (err, $, res, body) {
           assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga');
@@ -222,7 +221,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('無から作成したform要素をsubmitしてもフォーム送信される(jQuery形式)', function (done) {
+  it('無から作成したform要素(jQuery形式) => フォーム送信される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       var $form = $('<form/>').attr({
         method: 'GET',
@@ -253,7 +252,7 @@ describe('cheerio:submit', function () {
     });
   });
 
-  it('無から作成したform要素をsubmitしてもフォーム送信される(HTML形式)', function (done) {
+  it('無から作成したform要素(HTML形式) => フォーム送信される', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       var $form = $([
         '<form method="POST" action="/~info">',
@@ -337,7 +336,7 @@ describe('cheerio:submit', function () {
 
   each(helper.files('form'), function (enc) {
     describe('cheerio:submit(' + enc + ')', function () {
-      it('デフォルトパラメータが日本語の場合はページのエンコーディングに合わせたURLエンコードで送信される', function (done) {
+      it('デフォルトパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', function (done) {
         cli.fetch(helper.url('form', enc), function (err, $, res, body) {
           $('form[name=default-jp]').submit(function (err, $, res, body) {
             var qp = helper.qsparse(res.headers['post-data']);
@@ -354,7 +353,7 @@ describe('cheerio:submit', function () {
         });
       });
 
-      it('上書きパラメータが日本語の場合はページのエンコーディングに合わせたURLエンコードで送信される', function (done) {
+      it('上書きパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', function (done) {
         var set = {
           text: 'かきくけこ',
           checkbox: null,

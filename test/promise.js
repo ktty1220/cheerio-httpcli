@@ -13,13 +13,13 @@ describe('promise:fetch', function () {
     this.server.close();
   });
 
-  it('fetch時にコールバックを指定した場合はundefinedが返る', function (done) {
+  it('fetch時にコールバックを指定 => undefinedを返す', function (done) {
     assert(! cli.fetch(helper.url('~info'), function () {
       done();
     }));
   });
 
-  it('fetch時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+  it('fetch時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
     var promise = cli.fetch(helper.url('~info'));
     assert(typeOf(promise) === 'object');
     assert(typeOf(promise.then) === 'function');
@@ -28,7 +28,7 @@ describe('promise:fetch', function () {
     promise.finally(done);
   });
 
-  it('promiseによるfetchが正常に完了するとthen->finallyが呼ばれる', function (done) {
+  it('promiseによるfetchが正常に完了 => then->finallyが呼ばれる', function (done) {
     var called = 0;
     return cli.fetch(helper.url('auto', 'shift_jis'))
     .then(function (result) {
@@ -46,7 +46,7 @@ describe('promise:fetch', function () {
     });
   });
 
-  it('promiseによるfetchでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
+  it('promiseによるfetchでエラーが発生 => catch->finallyが呼ばれる', function (done) {
     var called = { then: 0, catch: 0 };
     var url = helper.url('error', 'not-found');
     var param = { hoge: 'fuga' };
@@ -80,7 +80,7 @@ describe('promise:click', function () {
   });
 
   describe('a要素', function () {
-    it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
+    it('click時にコールバックを指定 => undefinedを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         assert(! $('a').click(function () {
           done();
@@ -88,7 +88,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var promise = $('a').click();
         assert(typeOf(promise) === 'object');
@@ -99,7 +99,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -120,7 +120,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -144,7 +144,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promise作成前にclickエラーが発生してもcatch->finallyが呼ばれる', function (done) {
+    it('promise作成前にclickエラーが発生 => catch->finallyが呼ばれる', function (done) {
       var called = { then: 0, catch: 0 };
       var url = helper.url('form', 'utf-8');
       return cli.fetch(url)
@@ -169,7 +169,7 @@ describe('promise:click', function () {
   });
 
   describe('input[type=submit]要素', function () {
-    it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
+    it('click時にコールバックを指定 => undefinedを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         assert(! $form.find('[name=edit]').click(function () {
@@ -178,7 +178,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         var promise = $form.find('[name=edit]').click();
@@ -190,7 +190,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -215,7 +215,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -242,7 +242,7 @@ describe('promise:click', function () {
   });
 
   describe('button[type=submit]要素', function () {
-    it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
+    it('click時にコールバックを指定 => undefinedを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         assert(! $form.find('[name=delete]').click(function () {
@@ -251,7 +251,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         var promise = $form.find('[name=delete]').click();
@@ -263,7 +263,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -288,7 +288,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -315,7 +315,7 @@ describe('promise:click', function () {
   });
 
   describe('input[type=image]要素', function () {
-    it('click時にコールバックを指定した場合はundefinedが返る', function (done) {
+    it('click時にコールバックを指定 => undefinedを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         assert(! $form.find('[name=tweet]').click(function () {
@@ -324,7 +324,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('click時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         var $form = $('form[name=multi-submit]');
         var promise = $form.find('[name=tweet]').click();
@@ -336,7 +336,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了するとthen->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -361,7 +361,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickでエラーが発生するとcatch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -396,7 +396,7 @@ describe('promise:submit', function () {
     this.server.close();
   });
 
-  it('submit時にコールバックを指定した場合はundefinedが返る', function (done) {
+  it('submit時にコールバックを指定 => undefinedを返す', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       assert(! $('form').submit(function () {
         done();
@@ -404,7 +404,7 @@ describe('promise:submit', function () {
     });
   });
 
-  it('submit時にコールバックを指定しない場合はpromiseオブジェクトが返る', function (done) {
+  it('submit時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
     cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
       var promise = $('form').submit();
       assert(typeOf(promise) === 'object');
@@ -415,7 +415,7 @@ describe('promise:submit', function () {
     });
   });
 
-  it('promiseによるsubmitが正常に完了するとthen->finallyが呼ばれる', function () {
+  it('promiseによるsubmitが正常に完了 => then->finallyが呼ばれる', function () {
     var called = 0;
     return cli.fetch(helper.url('form', 'utf-8'))
     .then(function (result) {
@@ -439,7 +439,7 @@ describe('promise:submit', function () {
     });
   });
 
-  it('promiseによるsubmitでエラーが発生するとcatch->finallyが呼ばれる(GET)', function () {
+  it('promiseによるsubmitでエラーが発生 => catch->finallyが呼ばれる(GET)', function () {
     var called = { then: 0, catch: 0 };
     return cli.fetch(helper.url('form', 'utf-8'))
     .then(function (result) {
@@ -462,7 +462,7 @@ describe('promise:submit', function () {
     });
   });
 
-  it('promiseによるsubmitでエラーが発生するとcatch->finallyが呼ばれる(POST)', function () {
+  it('promiseによるsubmitでエラーが発生 => catch->finallyが呼ばれる(POST)', function () {
     var called = { then: 0, catch: 0 };
     return cli.fetch(helper.url('form', 'utf-8'))
     .then(function (result) {
@@ -485,7 +485,7 @@ describe('promise:submit', function () {
     });
   });
 
-  it('promise作成前にsubmitエラーが発生してもcatch->finallyが呼ばれる', function () {
+  it('promise作成前にsubmitエラーが発生 => catch->finallyが呼ばれる', function () {
     var called = { then: 0, catch: 0 };
     var url = helper.url('form', 'utf-8');
     return cli.fetch(url)

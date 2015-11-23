@@ -20,7 +20,7 @@ describe('maxdatasize', function () {
     });
   });
 
-  it('maxDataSizeを指定すると受信制限がかかる', function (done) {
+  it('maxDataSizeを指定 => 指定したバイト数で受信制限がかかる', function (done) {
     cli.maxDataSize = 1024 * 64;
     cli.fetch(helper.url('~mega'), function (err, $, res, body) {
       assert(err.message === 'data size limit over');

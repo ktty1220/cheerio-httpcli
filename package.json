@@ -23,10 +23,10 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
-    "eslint": "^1.10.1",
+    "eslint": "^1.10.2",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
-    "istanbul": "^0.4.0",
+    "istanbul": "^0.4.1",
     "jscs": "^2.6.0",
     "leasot": "^3.0.1",
     "mocha": "^2.3.4",
@@ -39,6 +39,7 @@
     "cov": "istanbul cover -x index.js ./node_modules/mocha/bin/_mocha -- -R nyan && true || true",
     "lint": "eslint lib test example --ext .js && true || true",
     "cs": "jscs lib test example && true || true",
+    "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=*espower*,mocha*,iconv-lite && true || true",
     "todo": "leasot -S lib/**/**/* test/** example/** && true || true"
   },
   "eslintConfig": {
@@ -138,7 +139,13 @@
       "no-unneeded-ternary": 2,
       "no-unreachable": 1,
       "no-unused-expressions": 1,
-      "no-unused-vars": 0,
+      "no-unused-vars": [
+        2,
+        {
+          "vars": "all",
+          "args": "none"
+        }
+      ],
       "no-use-before-define": 2,
       "no-useless-call": 2,
       "no-useless-concat": 1,
