@@ -240,7 +240,7 @@ describe('cheerio:click', function () {
   describe('input[type=image]要素', function () {
     it('所属しているformのsubmitを実行する(パラメータとしてx,y座標がセットされる)', function (done) {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        $('form[name="multi-submit"]').find('input[name=tweet]').click(function (err, $, res, body) {
+        $('form[name="multi-submit"] input[name=tweet]').click(function (err, $, res, body) {
           assert(! err);
           assert($.documentInfo().url === helper.url('~info'));
           var h = res.headers;

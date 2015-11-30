@@ -174,7 +174,9 @@ describe('cheerio:field', function () {
       array: [ 1, 2, 3 ],
       object: { x: 1, y: 2, z: 3 },
       number: 12,
-      functino: function () { return 'hello'; },
+      functino: function () {
+        return 'hello';
+      },
       date: new Date('2015/12/31 23:59:59'),
       regexp: /asdf/,
       null: null,
@@ -283,7 +285,9 @@ describe('cheerio:field', function () {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var $form = $('form[name=checkbox]');
           var expected = $form.field();
-          $form.field('check3', function () { return '33'; });
+          $form.field('check3', function () {
+            return '33';
+          });
           assert.deepEqual($form.field(), expected);
           done();
         });
@@ -371,7 +375,9 @@ describe('cheerio:field', function () {
         var name = '__user';
         var value = [ 'foo', 'bar', 'baz', 1, 2, 3 ];
         var expected = $form.field();
-        expected[name] = value.map(function (v) { return String(v); });
+        expected[name] = value.map(function (v) {
+          return String(v);
+        });
         $form.field(name, value, 'append');
         assert.deepEqual($form.field()[name], expected[name]);
         assert.deepEqual($form.field(), expected);
@@ -438,7 +444,7 @@ describe('cheerio:field', function () {
       });
     });
 
-    describe('#連想配列のnameが存在しない(onNotFoundによって分岐)', function () {
+    describe('連想配列のnameが存在しない(onNotFoundによって分岐)', function () {
       before(function () {
         this.set = {
           password: 'bar',

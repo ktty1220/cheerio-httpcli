@@ -11,16 +11,177 @@ describe('fetchSync', function () {
     assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
     assert(typeOf(result) === 'object');
     assert(typeOf(result.response) === 'object');
+    assert.deepEqual(
+      Object.keys(result.response).sort(),
+      [ 'body', 'cookies', 'headers', 'request', 'statusCode' ]
+    );
     assert(typeOf(result.$) === 'function');
     assert(typeOf(result.body) === 'string');
     assert(result.$('title').text() === '夏目漱石「私の個人主義」');
   });
 
-  // TODO param
-  // TODO POST
-  // TODO cookie
-  // TODO fail
-  // TODO error
-  // TODO clickSync
-  // TODO submitSync
+  it('パラメータの指定がURLに反映されている', function () {
+    var param = { hoge: 'fuga', piyo: 999, doya: true };
+    var result = cli.fetchSync(helper.url('~info'), param);
+    assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
+    assert(result.response.headers['request-url'] === '/~info?hoge=fuga&piyo=999&doya=true');
+  });
+
+  it('クッキーがセットされている & 変更不可', function () {
+    var result = cli.fetchSync(helper.url('~info'));
+    var res = result.response;
+    assert(typeOf(res.cookies) === 'object');
+    assert(res.cookies.session_id === 'hahahaha');
+    assert(res.cookies.login === '1');
+    res.cookies.session_id = 'fooooooo';
+    assert(res.cookies.session_id === 'hahahaha');
+  });
+
+  it('エラー => エラー内容を取得できる', function () {
+    var url = helper.url('~404');
+    var result = cli.fetchSync(url, { hoge: 'fuga' });
+    var err = result.error;
+    assert(err.message === 'server status');
+    assert(err.statusCode === 404);
+    assert(err.url === url);
+    assert.deepEqual(err.param, { hoge: 'fuga' });
+    assert(result.$('title').text(), 'ページが見つかりません');
+    assert(result.body.length > 0);
+  });
+
+  it('タイムアウトの値を超えるとエラーになる', function () {
+    cli.timeout = 300;
+    var url = helper.url('~slow');
+    var result = cli.fetchSync(url);
+    var err = result.error;
+    assert(err.message === 'ETIMEDOUT');
+    assert(! err.statusCode);
+    assert(err.url === url);
+    assert(! result.body);
+  });
+});
+
+describe('clickSync(a要素)', function () {
+  it('fetchSyncからのclickSync => 順番に同期処理でリンク先を取得する', function () {
+    var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+    var result2 = result1.$('.rel').clickSync();
+    assert.deepEqual(result2.$.documentInfo(), {
+      url: helper.url('auto', 'euc-jp'),
+      encoding: 'euc-jp'
+    });
+    assert(typeOf(result2.response) === 'object');
+    assert(typeOf(result2.$) === 'function');
+    assert(typeOf(result2.body) === 'string');
+  });
+
+  it('fetch(callback)からのclickSync => 非同期 -> 同期の流れでリンク先を取得する', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      var result = $('.rel').clickSync();
+      assert.deepEqual(result.$.documentInfo(), {
+        url: helper.url('auto', 'euc-jp'),
+        encoding: 'euc-jp'
+      });
+      assert(typeOf(result.response) === 'object');
+      assert(typeOf(result.$) === 'function');
+      assert(typeOf(result.body) === 'string');
+      done();
+    });
+  });
+
+  it('fetch(promise)からのclickSync => 非同期 -> 同期の流れでリンク先を取得する', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'))
+    .then(function (result1) {
+      var result2 = result1.$('.root').clickSync();
+      assert(result2.$.documentInfo().url === helper.url('~info') + '?hoge=fuga&piyo=');
+      assert(typeOf(result2.response) === 'object');
+      assert(typeOf(result2.$) === 'function');
+      assert(typeOf(result2.body) === 'string');
+      done();
+    });
+  });
+
+  it('実行前エラーが同期で実行される', function () {
+    var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+    var result2 = result1.$('div').clickSync();
+    assert(Object.keys(result2), [ 'error' ]);
+    assert(result2.error.message === 'element is not clickable');
+  });
+
+  it('実行後エラーが同期で実行される', function () {
+    var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+    var result2 = result1.$('.js').clickSync();
+    assert(Object.keys(result2), [ 'error' ]);
+    assert(result2.error.message === 'Invalid URI "javascript:history.back();"');
+  });
+});
+
+// TODO submitSync
+
+describe('clickSync(submit)', function () {
+  describe('input[type=submit]要素', function () {
+    it('所属しているformのsubmitを同期処理で実行する(編集ボタンのパラメータがセットされる)', function () {
+      var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+      var result2 = result1.$('form[name="multi-submit"] input[name=edit]').clickSync();
+      assert(! result2.error);
+      assert(result2.$.documentInfo().url === helper.url('~info'));
+      var h = result2.response.headers;
+      assert(h['request-url'] === '/~info');
+      assert(h['request-method'] === 'POST');
+      var data = [
+        [ 'text', 'あいうえお' ],
+        [ 'checkbox', 'bbb' ],
+        [ 'edit', '編集' ]
+      ].map(function (v, i, a) {
+        return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
+      }).join('&');
+      assert(h['post-data'] === data);
+      assert(typeOf(result2.$) === 'function');
+      assert(typeOf(result2.body) === 'string');
+    });
+  });
+
+  describe('button[type=submit]要素', function () {
+    it('所属しているformのsubmitを同期処理で実行する(削除ボタンのパラメータがセットされる)', function () {
+      var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+      var result2 = result1.$('form[name="multi-submit"] button[name=delete]').clickSync();
+      assert(! result2.error);
+      assert(result2.$.documentInfo().url === helper.url('~info'));
+      var h = result2.response.headers;
+      assert(h['request-url'] === '/~info');
+      assert(h['request-method'] === 'POST');
+      var data = [
+        [ 'text', 'あいうえお' ],
+        [ 'checkbox', 'bbb' ],
+        [ 'delete', '削除' ]
+      ].map(function (v, i, a) {
+        return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
+      }).join('&');
+      assert(h['post-data'] === data);
+      assert(typeOf(result2.$) === 'function');
+      assert(typeOf(result2.body) === 'string');
+    });
+  });
+
+  describe('input[type=image]要素', function () {
+    it('所属しているformのsubmitを同期処理で実行する(パラメータとしてx,y座標がセットされる)', function () {
+      var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+      var result2 = result1.$('form[name="multi-submit"] input[name=tweet]').clickSync();
+      assert(! result2.error);
+      assert(result2.$.documentInfo().url === helper.url('~info'));
+      var h = result2.response.headers;
+      assert(h['request-url'] === '/~info');
+      assert(h['request-method'] === 'POST');
+      var data = [
+        [ 'text', 'あいうえお' ],
+        [ 'checkbox', 'bbb' ],
+        [ 'tweet.x', 0 ],
+        [ 'tweet.y', 0 ]
+      ].map(function (v, i, a) {
+        return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
+      }).join('&');
+      assert(h['post-data'] === data);
+      assert(typeOf(result2.$) === 'function');
+      assert(typeOf(result2.body) === 'string');
+    });
+  });
 });

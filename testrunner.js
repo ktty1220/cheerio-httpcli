@@ -5,7 +5,7 @@ var path  = require('path');
 var fs    = require('fs');
 var spawn = require('child_process').spawn;
 var which = require('which');
-var argv  = require('optimist').argv;
+var argv  = require('yargs').argv;
 require('mocha-clean');
 require('intelli-espower-loader');
 
