@@ -2,9 +2,14 @@
 /*eslint no-invalid-this:0*/
 var assert = require('power-assert');
 var typeOf = require('type-of');
+var each   = require('foreach');
 var helper = require('./_helper');
 var cli    = require('../index');
 
+/**
+ * 処理内容は非同期版の処理を使いまわしているので詳細なテストは省略
+ * 同期処理の実行確認がメイン
+ */
 describe('fetchSync', function () {
   it('同期リクエストが実行される', function () {
     var result = cli.fetchSync(helper.url('auto', 'utf-8'));
@@ -56,6 +61,18 @@ describe('fetchSync', function () {
     var err = result.error;
     assert(err.message === 'ETIMEDOUT');
     assert(! err.statusCode);
+    assert(err.url === url);
+    assert(! result.body);
+  });
+
+  it('node本体がPATH上に見つからない => エラー', function () {
+    var bkPath = process.env.PATH;
+    process.env.PATH = '';
+    var url = helper.url('~info');
+    var result = cli.fetchSync(url);
+    process.env.PATH = bkPath;
+    var err = result.error;
+    assert(err.message === 'Could not found node or iojs in PATH');
     assert(err.url === url);
     assert(! result.body);
   });
@@ -114,8 +131,6 @@ describe('clickSync(a要素)', function () {
     assert(result2.error.message === 'Invalid URI "javascript:history.back();"');
   });
 });
-
-// TODO submitSync
 
 describe('clickSync(submit)', function () {
   describe('input[type=submit]要素', function () {
@@ -183,5 +198,102 @@ describe('clickSync(submit)', function () {
       assert(typeOf(result2.$) === 'function');
       assert(typeOf(result2.body) === 'string');
     });
+  });
+});
+
+describe('submitSync', function () {
+  it('フォームが同期処理で送信される', function () {
+    var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+    var result2 = result1.$('form[name=post]').submitSync();
+    assert(result2.$.documentInfo().url === helper.url('~info'));
+    var h = result2.response.headers;
+    assert(h['request-url'] === '/~info');
+    assert(h['request-method'] === 'POST');
+    assert(h['post-data'] === 'hoge=fuga');
+    assert(typeOf(result2.$) === 'function');
+    assert(typeOf(result2.body) === 'string');
+  });
+
+  var escapes = helper.escapedParam();
+  each(helper.files('form'), function (enc) {
+    describe('URLエンコード(' + enc + ')', function () {
+      it('デフォルトパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', function () {
+        var result1 = cli.fetchSync(helper.url('form', enc));
+        var result2 = result1.$('form[name=default-jp]').submitSync();
+        var qp = helper.qsparse(result2.response.headers['post-data']);
+        assert.deepEqual(Object.keys(qp).sort(), [
+          'checkbox', 'radio', 'select', 'text', 'textarea'
+        ]);
+        assert(qp.text === escapes['あいうえお'][enc]);
+        assert(qp.checkbox === escapes['かきくけこ'][enc]);
+        assert(qp.radio === escapes['なにぬねの'][enc]);
+        assert.deepEqual(qp.select, [ escapes['ふふふふふ'][enc], escapes['ほほほほほ'][enc] ]);
+        assert(qp.textarea === escapes['まみむめも'][enc]);
+      });
+
+      it('上書きパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', function () {
+        var set = {
+          text: 'かきくけこ',
+          checkbox: null,
+          radio: 'たちつてと',
+          select: [ 'ははははは', 'へへへへへ' ],
+          textarea: ''
+        };
+        var result1 = cli.fetchSync(helper.url('form', enc));
+        var result2 = result1.$('form[name=default-jp]').submitSync(set);
+        var qp = helper.qsparse(result2.response.headers['post-data']);
+        assert.deepEqual(Object.keys(qp).sort(), [
+          'checkbox', 'radio', 'select', 'text', 'textarea'
+        ]);
+        assert(qp.text === escapes['かきくけこ'][enc]);
+        assert(qp.checkbox === '');
+        assert(qp.radio === escapes['たちつてと'][enc]);
+        assert.deepEqual(qp.select, [ escapes['ははははは'][enc], escapes['へへへへへ'][enc] ]);
+        assert(qp.textarea === '');
+      });
+    });
+  });
+
+  it('fetch(callback)からのsubmitSync => 非同期 -> 同期の流れでフォーム送信される', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+      var result = $('form[name=post]').submitSync();
+      assert(result.$.documentInfo().url === helper.url('~info'));
+      var h = result.response.headers;
+      assert(h['request-url'] === '/~info');
+      assert(h['request-method'] === 'POST');
+      assert(h['post-data'] === 'hoge=fuga');
+      assert(typeOf(result.$) === 'function');
+      assert(typeOf(result.body) === 'string');
+      done();
+    });
+  });
+
+  it('fetch(promise)からのclickSync => 非同期 -> 同期の流れでリンク先を取得する', function (done) {
+    cli.fetch(helper.url('form', 'utf-8'))
+    .then(function (result1) {
+      var result2 = result1.$('form[name=post]').submitSync();
+      assert(result2.$.documentInfo().url === helper.url('~info'));
+      var h = result2.response.headers;
+      assert(h['request-url'] === '/~info');
+      assert(h['request-method'] === 'POST');
+      assert(h['post-data'] === 'hoge=fuga');
+      assert(typeOf(result2.$) === 'function');
+      assert(typeOf(result2.body) === 'string');
+      done();
+    });
+  });
+
+  it('実行前エラーが同期で実行される', function () {
+    var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+    var result2 = result1.$('a').submitSync();
+    assert(Object.keys(result2), [ 'error' ]);
+    assert(result2.error.message === 'element is not form');
+  });
+
+  it('実行後エラーが同期で実行される', function () {
+    var result1 = cli.fetchSync(helper.url('form', 'utf-8'));
+    var result2 = result1.$('form[name=error]').submitSync();
+    assert(Object.keys(result2), [ 'error' ]);
+    assert(result2.error.message === 'no content');
   });
 });
