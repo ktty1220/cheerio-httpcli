@@ -2,6 +2,7 @@
 var nstatic = require('node-static');
 var http    = require('http');
 var path    = require('path');
+var strip   = require('strip-ansi');
 var each    = require('foreach');
 var fs      = require('fs');
 var qs      = require('querystring');
@@ -134,8 +135,11 @@ module.exports = {
         }
 
         // 通常HTMLファイル
-        res.setHeader('trace-route', JSON.stringify(_traceRoute));
-        file.serve(req, res);
+        var wait = (req.url.match(/[\?&]wait=(\d+)/i) || [])[1] || 5;
+        setTimeout(function () {
+          res.setHeader('trace-route', JSON.stringify(_traceRoute));
+          file.serve(req, res);
+        }, parseInt(wait, 10));
       }).resume();
     }).listen(this.port, '0.0.0.0');
   },
@@ -154,6 +158,13 @@ module.exports = {
    */
   toBase64: function (file) {
     return fs.readFileSync(path.join(__dirname, file)).toString('base64');
+  },
+
+  /**
+   * 指定したファイルの内容をBufferで返す
+   */
+  readBuffer: function (file) {
+    return new Buffer(fs.readFileSync(path.join(__dirname, file)));
   },
 
   /**
@@ -219,5 +230,22 @@ module.exports = {
       }
     };
     /*jscs:enable disallowQuotedKeysInObjects*/
+  },
+
+  /**
+   * stderr出力をキャプチャ
+   */
+  hookStderr: function (callback) {
+    var capturedText = '';
+    var origStderrWrite = process.stderr.write;
+    process.stderr.write = function (text) {
+      capturedText = strip(text).trim();
+    };
+    callback(function () {
+      return (function () {
+        process.stderr.write = origStderrWrite;
+        return capturedText;
+      })();
+    });
   }
 };

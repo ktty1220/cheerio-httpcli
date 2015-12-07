@@ -11,7 +11,7 @@
     "cov": "istanbul cover -x index.js -x testrunner.js testrunner.js -- -R nyan && true || true",
     "lint": "eslint lib test example --ext .js && true || true",
     "cs": "jscs lib test example && true || true",
-    "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=*espower*,mocha*,iconv-lite && true || true",
+    "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=iconv-lite,os-locale && true || true",
     "todo": "leasot -S lib/**/**/* test/** example/** && true || true"
   },
   "dependencies": {
@@ -39,13 +39,14 @@
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "istanbul": "^0.4.1",
-    "jscs": "^2.6.0",
+    "jscs": "^2.7.0",
     "leasot": "^3.1.0",
     "mocha": "^2.3.4",
     "mocha-clean": "^1.0.0",
     "node-static": "^0.7.7",
     "power-assert": "^1.2.0",
-    "yargs": "^3.30.0"
+    "strip-ansi": "^3.0.0",
+    "yargs": "^3.31.0"
   },
   "repository": {
     "type": "git",

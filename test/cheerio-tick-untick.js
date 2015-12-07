@@ -11,7 +11,7 @@ describe('cheerio:tick', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[type=text]').eq(0).tick();
-          assert.fail('not thrown');
+          throw new Error('not thrown');
         } catch (e) {
           assert(e.message === 'element is not checkbox or radio');
         }
@@ -23,7 +23,7 @@ describe('cheerio:tick', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[name=not_found]').tick();
-          assert.fail('not thrown');
+          throw new Error('not thrown');
         } catch (e) {
           assert(e.message === 'no elements');
         }
@@ -245,7 +245,7 @@ describe('cheerio:untick', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[type=text]').eq(0).untick();
-          assert.fail('not thrown');
+          throw new Error('not thrown');
         } catch (e) {
           assert(e.message === 'element is not checkbox or radio');
         }
@@ -257,7 +257,7 @@ describe('cheerio:untick', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         try {
           $('input[name=not_found]').untick();
-          assert.fail('not thrown');
+          throw new Error('not thrown');
         } catch (e) {
           assert(e.message === 'no elements');
         }

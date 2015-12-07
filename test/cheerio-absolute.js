@@ -23,7 +23,7 @@ describe('cheerio:absoluteUrl', function () {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           try {
             $(elem).eq(0).absoluteUrl();
-            assert.fail('not thrown');
+            throw new Error('not thrown');
           } catch (e) {
             assert(e.message === 'element is not link or img');
           }
@@ -320,9 +320,12 @@ describe('cheerio:absoluteUrl', function () {
     it('複数要素 => 各要素のsrcのURLを絶対URLにした配列を返す', function (done) {
       var _this = this;
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-        var base = helper.url('img', '').replace(/\.html/, '');
+        var base = helper.url('img', '');
         var expected = [
           base + '/img/cat.png',
+          base + '/img/1x1.gif',
+          base + '/img/1x1.gif',
+          base + '/img/1x1.gif',
           undefined,
           '',
           base + '/img/food.jpg?hoge=fuga&piyo=',
@@ -331,7 +334,7 @@ describe('cheerio:absoluteUrl', function () {
           base + '/not-found.gif',
           'data:image/jpg;base64,' + _this.base64img
         ];
-        var actual = $('img').absoluteUrl();
+        var actual = $('img').absoluteUrl([]);
         assert.deepEqual(actual, expected);
         done();
       });
@@ -344,6 +347,67 @@ describe('cheerio:absoluteUrl', function () {
         done();
       });
     });
+
+    describe('srcAttrs', function () {
+      it('無指定 => デフォルトの優先順で属性を検索する', function (done) {
+        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+          var base = helper.url('img', '');
+          assert($('.lazy1').absoluteUrl() === base + '/img/cat.png');
+          assert($('.lazy2').absoluteUrl() === base + '/img/food.jpg');
+          assert($('.lazy3').absoluteUrl() === base + '/img/1x1.gif');
+          done();
+        });
+      });
+
+      it('文字列 => 指定した文字列属性をsrcよりも優先して検索する', function (done) {
+        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+          var base = helper.url('img', '');
+          var attr = 'data-original-src';
+          assert($('.lazy1').absoluteUrl(attr) === base + '/img/1x1.gif');
+          assert($('.lazy2').absoluteUrl(attr) === base + '/img/1x1.gif');
+          assert($('.lazy3').absoluteUrl(attr) === base + '/img/sports.jpg');
+          done();
+        });
+      });
+
+      it('配列 => 指定した配列順で検索する', function (done) {
+        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+          var base = helper.url('img', '');
+          var attr = [
+            'data-original-src',
+            'data-original',
+            'data-lazy-src'
+          ];
+          assert($('.lazy1').absoluteUrl(attr) === base + '/img/cat.png');
+          assert($('.lazy2').absoluteUrl(attr) === base + '/img/food.jpg');
+          assert($('.lazy3').absoluteUrl(attr) === base + '/img/sports.jpg');
+          done();
+        });
+      });
+
+      it('存在しない属性 => srcのURLを絶対URLにして返す', function (done) {
+        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+          var base = helper.url('img', '');
+          var attr = [
+            'data-foo-bar'
+          ];
+          assert($('.lazy1').absoluteUrl(attr) === base + '/img/1x1.gif');
+          assert($('.lazy2').absoluteUrl(attr) === base + '/img/1x1.gif');
+          assert($('.lazy3').absoluteUrl(attr) === base + '/img/1x1.gif');
+          done();
+        });
+      });
+
+      it('空配列 => srcのURLを絶対URLにして返す', function (done) {
+        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+          var base = helper.url('img', '');
+          assert($('.lazy1').absoluteUrl([]) === base + '/img/1x1.gif');
+          assert($('.lazy2').absoluteUrl([]) === base + '/img/1x1.gif');
+          assert($('.lazy3').absoluteUrl([]) === base + '/img/1x1.gif');
+          done();
+        });
+      });
+    });
   });
 
   describe('a要素とimg要素の複合', function () {
@@ -354,9 +418,12 @@ describe('cheerio:absoluteUrl', function () {
     it('各要素のhref/srcのURLを絶対URLにした配列を返す', function (done) {
       var _this = this;
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-        var base = helper.url('img', '').replace(/\.html/, '');
+        var base = helper.url('img', '');
         var expected = [
           base + '/img/cat.png',
+          base + '/img/1x1.gif',
+          base + '/img/1x1.gif',
+          base + '/img/1x1.gif',
           undefined,
           '',
           base + '/img/food.jpg?hoge=fuga&piyo=',
@@ -367,7 +434,7 @@ describe('cheerio:absoluteUrl', function () {
           'http://www.google.co.jp/',
           helper.url('~info?foo=1&bar=2&baz=3')
         ];
-        var actual = $('img, a').absoluteUrl();
+        var actual = $('img, a').absoluteUrl([]);
         assert.deepEqual(actual, expected);
         done();
       });
