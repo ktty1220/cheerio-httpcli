@@ -65,18 +65,6 @@ describe('fetchSync', function () {
     assert(err.url === url);
     assert(! result.body);
   });
-
-  it('node本体がPATH上に見つからない => エラー', function () {
-    var bkPath = process.env.PATH;
-    process.env.PATH = '';
-    var url = helper.url('~info');
-    var result = cli.fetchSync(url);
-    process.env.PATH = bkPath;
-    var err = result.error;
-    assert(err.message === 'Could not found node or iojs in PATH');
-    assert(err.url === url);
-    assert(! result.body);
-  });
 });
 
 describe('clickSync(a要素)', function () {

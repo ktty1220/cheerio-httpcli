@@ -29,12 +29,12 @@ describe('cheerio:download', function () {
     it('1未満', function (done) {
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
         try {
-          cli.download.concurrency = 0;
+          cli.download.parallel = 0;
           $('.rel').download();
         } catch (e) {
-          assert(e.message === 'valid download concurrency range is 1 and 5');
+          assert(e.message === 'valid download parallel range is 1 and 5');
         } finally {
-          cli.download.concurrency = 5;
+          cli.download.parallel = 5;
         }
         done();
       });
@@ -43,12 +43,12 @@ describe('cheerio:download', function () {
     it('6以上', function (done) {
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
         try {
-          cli.download.concurrency = 6;
+          cli.download.parallel = 6;
           $('.rel').download();
         } catch (e) {
-          assert(e.message === 'valid download concurrency range is 1 and 5');
+          assert(e.message === 'valid download parallel range is 1 and 5');
         } finally {
-          cli.download.concurrency = 5;
+          cli.download.parallel = 5;
         }
         done();
       });

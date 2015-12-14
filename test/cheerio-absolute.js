@@ -252,7 +252,7 @@ describe('cheerio:absoluteUrl', function () {
     });
 
     describe('複合 => それぞれのfilterが組み合わせる', function () {
-      it('absolute:false & relative: false => URLでないもののみ返す', function (done) {
+      it('absolute: false & relative: false => URLでないもののみ返す', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var expcted = [
             undefined,
@@ -268,7 +268,7 @@ describe('cheerio:absoluteUrl', function () {
         });
       });
 
-      it('absolute:false & invalid: false => 相対URLのみ返す', function (done) {
+      it('absolute: false & invalid: false => 相対URLのみ返す', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var expcted = [
             helper.url('auto', 'euc-jp'),
@@ -287,7 +287,7 @@ describe('cheerio:absoluteUrl', function () {
         });
       });
 
-      it('relative:false & invalid: false => 絶対URLのみ返す', function (done) {
+      it('relative: false & invalid: false => 絶対URLのみ返す', function (done) {
         cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
           var expcted = [
             'http://www.yahoo.co.jp/'

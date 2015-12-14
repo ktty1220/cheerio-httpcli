@@ -61,7 +61,8 @@ module.exports = {
     var _this = this;
     var _traceRoute = [];
     var file = new nstatic.Server(this.root, {
-      gzip: true
+      gzip: true,
+      cache: 0
     });
     return http.createServer(function (req, res) {
       var pdata = '';
@@ -141,7 +142,9 @@ module.exports = {
           file.serve(req, res);
         }, parseInt(wait, 10));
       }).resume();
-    }).listen(this.port, '0.0.0.0');
+    }).listen(this.port, '0.0.0.0', function () {
+      process.stderr.write('%%% server start %%%');
+    });
   },
 
   /**

@@ -27,6 +27,35 @@ Node.jsでWEBページのスクレイピングを行う際に必要となる文�
 npm install cheerio-httpcli
 ```
 
+## API目次
+
+* [メソッド](#%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89)
+  * [fetch()](#fetchurl-get-param-callback)
+  * [fetchSync()](#fetchsyncurl-get-param)
+  * [setBrowser()](#setbrowserbrowser-type)
+  * [setIconvEngine()](#seticonvengineiconv-module-name)
+* [プロパティ](#%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3)
+  * [version](#version)
+  * [headers](#headers)
+  * [timeout](#timeout)
+  * [gzip](#gzip)
+  * [referer](#referer)
+  * [maxDataSize](#maxdatasize)
+  * [debug](#debug)
+  * [download](#download)
+* [cheerioオブジェクトの独自拡張](#cheerio%E3%82%AA%E3%83%96%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E7%8B%AC%E8%87%AA%E6%8B%A1%E5%BC%B5)
+  * [$.documentInfo()](#documentinfo)
+  * [$(_link-element_ or _submit-element_).__click__()](#link-elementclick-callback-)
+  * [$(_link-element_ or _submit-element_).__clickSync__()](#link-elementclicksync)
+  * [$(_form-element_).__submit__()](#form-elementsubmit-param-callback-)
+  * [$(_form-element_).__submitSync__()](#form-elementsubmitsync-param-)
+  * [$(_form-element_).__field__()](#form-elementfield-name-value-onnotfound-)
+  * [$(_checkbox-element_ or _radio-element_).__tick__()](#checkbox-element-or-radio-elementtick)
+  * [$(_checkbox-element_ or _radio-element_).__untick__()](#checkbox-element-or-radio-elementuntick)
+  * [$(_link-element_ or _image-element_).__absoluteUrl__()](#link-element-or-image-elementabsoluteurl-filter-src-attr-)
+  * [$(_image-element_).__download__()](#image-elementdownload-src-attr-)
+  * [$(_element_).__entityHtml__()](#elemententityhtml)
+
 ## メソッド
 
 ### fetch(url[, get-param, callback])
@@ -111,12 +140,13 @@ p.finally(function () {
 
 ```js
 .then(function (result) {
-  console.log(result); => {
-                            error: ...,
-                            $: ...,
-                            response: ...,
-                            body: ...
-                          };
+  console.log(result);
+  // => {
+  //      error: ...,
+  //      $: ...,
+  //      response: ...,
+  //      body: ...
+  //    };
 });
 ```
 
@@ -155,6 +185,31 @@ client.fetch(<TOPページのURL>)
 
 > `fetch()`の第3引数の`callback`関数を指定した場合はPromiseオブジェクトは返しません。したがってコールバック形式で呼び出しつつPromiseオブジェクトで何かをするということはできません。
 
+### fetchSync(url[, get-param])
+
+非同期で実行される`fetch()`の同期版(リクエストが完了するまで次の行に進まない)となります。`fs.readFile()`に対する`fs.readFileSync()`の関係と同じような意味合いになります。
+
+* 呼び出し時のパラメータは`fetch()`のプロミス形式と同様です。
+* 戻り値はプロミス形式の`then`に渡されるオブジェクトと同様の形式です。
+
+```js
+var client = require('cheerio-httpcli');
+
+var result1 = client.fetchSync('http://foo.bar.baz/');
+console.log(result1);
+// => {
+// 	 error: ...,
+// 	 $: ...,
+// 	 response: ...,
+// 	 body: ...
+// }
+
+console.log(result1.$('title')); // => http://foo.bar.baz/のタイトルが表示される
+
+var result2 = client.fetchSync('http://hoge.fuga.piyo/');
+console.log(result2.$('title')); // => http://hoge.fuga.piyo/のタイトルが表示される
+```
+
 ### setBrowser(browser-type)
 
 ブラウザごとのUser-Agentをワンタッチで設定するメソッドです。
@@ -173,7 +228,7 @@ User-Agentを指定したブラウザのものに変更した場合は`true`、�
 
 * ie
 * edge
-* chrome `default`
+* __chrome__ `default`
 * firefox
 * opera
 * vivaldi
@@ -228,7 +283,7 @@ requestモジュールで使用するリクエストヘッダ情報の連想配�
 
 ### timeout
 
-requestモジュールで指定するタイムアウト情報です。デフォルトでは30秒となっています(効いているかどうか不明)。
+requestモジュールで指定するタイムアウト情報です。デフォルトでは30秒となっています。
 
 ### gzip
 
@@ -252,7 +307,7 @@ client.maxDataSize = 1024 * 1024;
 
 // 1MB以上ののHTMLを指定
 client.fetch('http://big.large.huge/data.html', function (err, $, res, body) {
-  console.log(err.message);  // => 'data size limit over'
+  console.log(err.message); // => 'data size limit over'
 });
 ```
 
@@ -269,6 +324,10 @@ var client = require('cheerio-httpcli');
 client.debug = true;
 client.fetch( ...
 ```
+
+### download
+
+ファイルダウンロードマネージャーオブジェクトです。このオブジェクトを通してファイルダウンロードに関する設定を行います(詳細は[$(_image-element_).download()](#image-elementdownload-src-attr-)を参照)。
 
 ## cheerioオブジェクトの独自拡張
 
@@ -288,11 +347,13 @@ client.fetch('http://hogehoge/', function (err, $, res, body) {
 
 `fetch()`で指定したURLがリダイレクトされた場合はリダイレクト先のURLが`url`に入ります。`encoding`に関しても同様で、最終的に到達したページのエンコーディングが入ります。
 
-### $(link-element).click([ callback ])
+### $(_link-element_).click([ callback ])
 
-`a`タグでのみ使用できます。
+`a`要素もしくは送信ボタン系要素で使用可能ですが、それぞれ挙動が異なります。
 
-`href`属性に指定されているURLと取得したページのURLを組み合わせて移動先のURLを作成し、`fetch()`を実行します。`fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。
+#### `a`要素
+
+`href`属性に指定されているURLと取得したページのURLを組み合わせて移動先のURLを作成し、`fetch()`を実行します。
 
 ```js
 client.fetch('http://hogehoge/')
@@ -307,11 +368,90 @@ client.fetch('http://hogehoge/')
 
 注意点として、この`click()`メソッドはjavascriptリンクや`onclick="..."`などの動的処理には対応していません。あくまでも`href`のURLに簡単にアクセスできるための機能です。
 
-なお、`$(...)`で取得した`a`タグオブジェクトが複数ある場合は先頭のオブジェクトに対してのみ実行されます。
+#### 送信ボタン系要素
 
-### $(form-element).submit([ param, callback ])
+`input[type=submit]`、`button[type=submit]`、`input[type=image]`要素が対象となります。
 
-`form`タグでのみ使用できます。
+押された送信ボタンが所属するフォーム内に配置されている`input`や`checkbox`などのフォーム部品から送信パラメータを自動作成し、`action`属性のURLに`method`属性でフォーム送信を実行します。
+
+```js
+client.fetch('http://hogehoge/')
+.then(function (result) {
+  var form = $('form[name=login]');
+
+  // ユーザー名とパスワードをセット(field()については後述)
+  form.field({
+    user: 'guest',
+    pass: '12345678'
+  });
+
+  // 送信ボタンを押してフォームを送信(コールバック形式)
+  // ※上で指定したuserとpass以外はデフォルトのパラメータとなる
+  form.find('input[type=submit]').click(function (err, $, res, body) {
+    // フォーム送信後に移動したページ取得後の処理
+  });
+})
+```
+
+cheerio-httpcliは内部でクッキーも保持するので、ログインが必要なページの取得などもこのフォーム送信でログインした後に巡回できるようになります。
+
+なお、こちらも動的処理であるonsubmit="xxx"や送信ボタンのonclick="..."には対応していません。
+
+#### 共通の仕様
+
+* `$(...).click()`時の対象要素が複数ある場合は先頭の要素に対してのみ処理が行われます。
+* `fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。
+
+### $(_link-element_).clickSync()
+
+非同期で実行される`click()`の同期版となります。
+
+* 戻り値はプロミス形式の`then`に渡されるオブジェクトと同様の形式です。
+
+#### `a`要素
+
+```js
+var client = require('cheerio-httpcli');
+
+// fetch()は非同期で行ってその中で同期リクエストする場合
+client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
+	var result = $('a#login').clickSync();
+	console.log(result);
+  // => {
+	//  		error: ...,
+	//  		$: ...,
+	//  		response: ...,
+	//  		body: ...
+	//  	}
+});
+```
+
+#### 送信ボタン系要素
+
+```js
+var client = require('cheerio-httpcli');
+
+// フォームのあるページに同期リクエスト
+var result1 = client.fetch('http://foo.bar.baz/');
+var form = result1.$('form[name=login]');
+
+form.field({
+  user: 'guest',
+  pass: '12345678'
+});
+
+// フォーム送信も同期リクエスト
+var result2 = form.find('input[type=submit]').clickSync();
+
+// フォーム送信後に移動したページ取得後の処理
+  .
+  .
+  .
+```
+
+### $(_form-element_).submit([ param, callback ])
+
+`form`要素でのみ使用できます。
 
 指定したフォーム内に配置されている`input`や`checkbox`などのフォーム部品から送信パラメータを自動作成し、`action`属性のURLに`method`属性でフォームを送信します。`fetch()`と同様に引数の`callback`関数の有無でコールバック形式とプロミス形式の指定を切り替えられます。
 
@@ -333,12 +473,408 @@ client.fetch('http://hogehoge/')
 })
 ```
 
-cheerio-httpcliは内部でクッキーも保持するので、ログインが必要なページの取得なども`submit()`でログイン後に巡回できるようになります。
+その他の仕様は`$(submit-element).click()`と同様です。
 
-その他の仕様は`click()`と同様です。
+* `onsubmit="xxx"`には対応していません。
+* `$(...)`で取得した`form`要素が複数ある場合は先頭の要素に対してのみ実行されます。
 
-* `onsubmit="xxx"`や送信ボタンの`onclick="..."`で実行される動的処理には対応していません。
-* `$(...)`で取得した`form`タグオブジェクトが複数ある場合は先頭のオブジェクトに対してのみ実行されます。
+#### $(_submit-element_).click()との違い
+
+`$(submit-element).click()`は押したボタンのパラメータがサーバーに送信されますが、`$(form-element).submit()`は送信系ボタンのパラメータをすべて除外した上でサーバーに送信します。
+
+##### 例
+
+```html
+<form>
+	<input type="text" name="user" value="guest">
+	<input type="submit" name="edit" value="edit">
+	<input type="submit" name="delete" value="delete">
+</form>
+```
+
+上記フォームは1フォーム内に複数の`submit`ボタンがあります。それぞれのメソッドによるこのフォームの送信時のパラメータは以下のようになります。
+
+```js
+// $(submit-element).click()の場合
+$('[name=edit]').click(); // => ?user=guest&edit=edit
+
+// $(form-element).submit()の場合
+$('form').submit(); // => ?user=guest
+```
+
+このように1フォーム内に複数の`submit`ボタンがある場合、サーバー側では押されたボタンのパラメータで処理を分岐させている可能性があるので、`$('form').submit()`だと正常な結果が得られないかもしれません。
+
+実際にブラウザから手動でフォームを送信した挙動に近いのは`$(submit-element).click()`になります。
+
+### $(_form-element_).submitSync([ param ])
+
+非同期で実行される`submit()`の同期版となります。戻り値はプロミス形式の`then`に渡されるオブジェクトと同様の形式です。
+
+* 呼び出し時のパラメータは`submit()`のプロミス形式と同様です。
+* 戻り値はプロミス形式の`then`に渡されるオブジェクトと同様の形式です。
+
+```js:submitSync()例
+var client = require('cheerio-httpcli');
+
+// トップページにアクセス(ここも同期リクエストにすることも可能)
+client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
+	// 同期リクエストでログインページに移動
+	var result1 = $('a#login').clickSync();
+	// 同期リクエストでログインフォーム送信
+	var result2 = result1.$('form[name=login]').submitSync({
+		account: 'guest',
+		password: 'guest'
+	});
+	// ログイン結果確認
+	console.log(result2.response.statusCode);
+});
+```
+
+### $(_form-element_).field([ name, value, onNotFound ])
+
+`$(...).css()`や`$(...).attr()`と同じ感覚でフォーム部品の値を取得/指定できるメソッドです。呼び出し時の引数によって動作が変わります。`form`要素で使用可能です。
+
+#### `name`:文字列、`value`:なし
+
+`form-element`内の部品`name`の現在の値を取得します。
+
+```js
+// userのvalueを取得
+$('form[name=login]').field('user'); // => guest
+```
+
+#### `name`:文字列、`value`:文字列 or 配列
+
+`form-element`内の部品`name`の値を`value`に変更します。
+
+```js
+// passのvalueを設定
+$('form[name=login]').field('pass', 'admin');
+```
+
+#### `name`:連想配列、`value`:なし
+
+指定された連想配列内の`name`:`value`を一括で`form-element`内の部品に反映します。
+
+```js
+// 一括で設定
+$('form[name=login]').field({
+	user: 'foo',
+	pass: 'bar'
+});
+```
+
+#### 引数なし
+
+`form-element`内の全部品の`name`と`value`を連想配列で取得します。
+
+```js
+// 一括で取得
+$('form[name=login]').field();
+// => {
+// 		 user: 'foo',
+// 		 pass: 'bar',
+// 		 remember: 1
+// 	 }
+```
+
+#### onNotFound
+
+部品に値を設定する際に参照されるオプションです。指定した`name`の部品がフォーム内に存在しなかった時の動作を以下のいずれかの文字列で指定します。
+
+* `throw` ...  例外が発生します。
+* `append` ... 新規にその`name`部品を作成してフォームに追加します(文字列の場合は`hidden`、配列の場合は`checkbox`)。
+
+`onNotFound`を指定しなかった場合は例外は発生せず、新規に`name`部品の追加もしません(何もしない)。
+
+```js
+// loginフォーム内にabcというnameの部品がない時の動作
+
+$('form[name=login]').field('abc', 'hello', 'throw');
+// => 例外: Element named 'abc' could not be found in this form
+
+$('form[name=login]').field('abc', 'hello', 'append');
+// => <input type="hidden" name="abc" value="hello"> を追加
+
+$('form[name=login]').field('abc', [ 'hello', 'world' ], 'append');
+// => <input type="checkbox" name="abc" value="hello" checked>
+//    <input type="checkbox" name="abc" value="world" checked> を追加
+
+$('form[name=login]').field('abc', 'hello');
+// => 何もしない
+```
+
+### $(_checkbox-element_ or _radio-element_).tick()
+
+指定したチェックボックス、ラジオボタンの要素を選択状態にします。対象の要素が元から選択状態の場合は何も変化しません。
+
+対象要素が複数ある場合は対象すべてを選択状態にしますが、ラジオボタンに関しては同グループ内で複数を選択状態にすることはできないので、最初に該当した要素を選択状態にします。
+
+```js
+$('input[name=check_foo]').tick();          // => check_fooを選択状態に
+$('input[type=checkbox]').tick();           // => 全チェックボックスを選択状態に
+$('input[name=radio_bar][value=2]').tick(); // => radio_barのvalueが2のラジオボタンを選択状態に
+$('input[type=radio]').tick();              // => 各ラジオボタングループの先頭を選択状態に
+```
+
+### $(_checkbox-element_ or _radio-element_).untick()
+
+指定したチェックボックス、ラジオボタンの要素を非選択状態にします。対象の要素が元から非選択状態の場合は何も変化しません。
+
+対象要素が複数ある場合は対象すべてを非選択状態にします。
+
+```js
+$('input[name=check_foo]').untick();          // => check_fooを非選択状態に
+$('input[type=checkbox]').untick();           // => 全チェックボックスを非選択状態に
+$('input[name=radio_bar][value=2]').untick(); // => radio_barのvalueが2のラジオボタンを非選択状態に
+$('input[type=radio]').untick();              // => 各ラジオボタンを非選択状態に
+```
+
+### $(_link-element_ or _image-element_).absoluteUrl([ filter, src-attr ])
+
+`a`要素の`href`、もしくは`img`要素の`src`のURLを完全な形(絶対パス)にしたものを取得します。元から完全なURLになっている場合(外部リンクなど)はその内容をそのまま返します。また、`javascript:void(0)`といったURLでないリンクの場合は`undefined`を返します。
+
+```html
+<a id="top" href="../index.html">トップページ</a>
+```
+
+`http://foo.bar.baz/hoge/`というページ内に上記のようなリンクがある場合、`$(...).attr('href')`と`$(...).absoluteUrl()`の戻り値はそれぞれ以下のようになります。
+
+```js
+console.log($('a#top').attr('href'));  // => ../index.html
+console.log($('a#top').absoluteUrl()); // => http://foo.bar.baz/index.html
+```
+
+また、対象の要素が複数ある場合は各要素の絶対URLを配列に格納して返します。
+
+```js
+console.log($('a').absoluteUrl());
+// => [
+//      'http://foo.bar.baz/index.html',
+//      'http://foo.bar.baz/xxx.html',
+//      'https://www.google.com/'
+//    ]
+```
+
+#### filter
+
+対象要素の元のURLを3種類に分類して、取得対象から除外するかどうかフィルタリングするオプションです。
+
+1. `relative` ... 相対URL(サイト内リンク)
+2. `absolute` ... 絶対URL(http(s)から始まるリンク(主にサイト外リンク))
+3. `invalid` ... URL以外(JavaScriptなど)
+
+> サイト内リンクを絶対URLで指定しているページもあるので、絶対URL = サイト外リンクとは限りません。
+
+各フィルタを`true`にすると取得、`false`にすると除外という意味になります。デフォルトはすべて`true`になっています。
+
+##### 例
+
+```html
+<a href="./page2.html">
+<a href="./#foo">
+<a href="javascript:hogehoge();">
+<a href="http://www.yahoo.com/">
+```
+
+このようなHTMLに対して`$('a').absoluteUrl()`を各種`filter`オプション指定で実行した時の戻り値は以下のようになります。
+
+```js
+// 指定無し
+console.log($('a').absoluteUrl();
+// => [
+//      'http://foo.bar.baz/page2.html',
+//      'http://foo.bar.baz/#foo',
+//      undefined,
+//      'https://www.yahoo.com/'
+//    ]
+
+// 相対リンクのみ取得
+console.log($('a').absoluteUrl({
+  relative: true,
+  absolute: false,
+  invalid: false
+}));
+// => [
+//      'http://foo.bar.baz/page2.html',
+//      'http://foo.bar.baz/#foo'
+//    ]
+
+// URLとして有効なもののみ取得(除外するものだけfalseの指定でもOK)
+console.log($('a').absoluteUrl({ invalid: false }));
+// => [
+//      'http://foo.bar.baz/page2.html',
+//      'http://foo.bar.baz/#foo',
+//      'https://www.yahoo.com/'
+//    ]
+
+```
+
+なお、対象となる要素が1つのみの時の戻り値は配列ではなく絶対URLの文字列になりますが、その際の`filter`オプションの指定とその結果は以下のようになります。
+
+```html
+<a id="ajax" href="javascript:exec_ajax();">Ajax</a>
+```
+
+上記リンクはJavaScriptリンクなので分類としては`invalid`に入ります。
+
+```js
+console.log($('a#ajax').absoluteUrl({ invalid: false })); // => undefined
+```
+
+そのリンクに対して`invalid`を除外するオプションで`absoluteUrl()`を呼び出すと戻り値は`undefined`となります。
+
+#### src-attr
+
+`img`要素から画像URLとして取得する属性名を指定するオプションです(文字列 or 配列)。
+
+取得対象のWEBページでLazyLoad系のjQueryプラグインなどを使っている場合は`src`属性にダミーの画像URLが入っていたりしますが、そのような`img`要素で`src`属性以外からURLを取得する際に指定します。
+
+```html
+<img src="blank.gif" data-original-src="http://this.is/real-image.png">
+```
+
+このようなHTMLで、`src`の`blank.gif`ではなく`data-original-src`の`http://this.is/real-image.png`をダウンロードしたい場合は以下のように指定します。
+
+```js
+// filterオプションは省略可能
+$('img').absoluteUrl('data-original-src');
+```
+
+`data-original-src`がその要素に存在しない場合は`src`属性のURLをダウンロードします。
+
+なお、デフォルトでは`data-original`>`data-lazy-src`>`src`の優先順になっています。デフォルトの優先順位を破棄して`src`属性の画像を最優先でダウンロードしたい場合は、
+
+```js
+$('img').absoluteUrl({ invalid: false }, []);
+```
+
+のように空配列を指定します。
+
+### $(_image-element_).download([ src-attr ])
+
+拡張cheerioオブジェクトからダウンロードマネージャーへの登録を行います。`<img src="data:image/png;base64,/9j/4AAQSkZJRgABA ...">`といった埋め込み画像もバイナリ化してダウンロードできます。
+
+現在対応しているのは`img`要素だけなので、`img`要素以外で`download()`を実行すると例外が発生します。
+
+また、`download()`を実行する際にはダウンロードマネージャーの設定が必要になります。
+
+##### 例
+
+```js
+var fs = require('fs');
+var client = require('cheerio-httpcli');
+
+// ①ダウンロードマネージャーの設定(全ダウンロードイベントがここで処理される)
+client.download
+.on('success', function (url, buffer) {
+	fs.writeFileSync('/path/to/image.png', buffer, 'binary');
+	console.log(url + 'をダウンロードしました');
+})
+.on('error', function (err) {
+	console.error(err.url + 'をダウンロードできませんでした: ' + err.message);
+});
+
+// ④並列ダウンロード制限の設定
+client.download.parallel = 3;
+
+// ②スクレイピング開始
+client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
+	// ③class="thumbnail"の画像を全部ダウンロード
+	$('img.thumbnail').download();
+	console.log('OK!');
+});
+```
+
+①の`client.download`というのがcheerio-httpcliに内蔵されているダウンロードマネージャーになります。
+
+スクレイピング中に`$(...).download()`メソッドで実行された画像のダウンロードが完了すると`client.download`に`success`イベントが送られます(エラーが発生した場合は`error`イベント)。
+
+①では色々な場所から送られてくる画像ダウンロード完了イベント時の処理を設定しています。この例では第2引数に入っている画像のBufferを`/path/to/image.png`に保存しています。
+
+`client.download`のイベント処理設定が完了したら②スクレイピングに入ります。
+
+②でWEBページを取得し、その中の③で`$(...).download()`メソッドを実行しています。
+
+この時、`$('img.thumbnail')`に該当する画像要素が10個あったとすると、その10個の画像要素がまとめてダウンロードマネージャーに登録されます。
+
+少し戻って④を見ると並列ダウンロード数制限が設定されています。今回の例では`3`なので、登録された10個の画像要素の内、即座に3つがダウンロード処理に入ります。
+
+残りの7要素はダウンロード待ちキューに入り、最初の3つの内のどこかのダウンロードが完了して空きができるとそこに登録されてダウンロードが実行される ... という流れです。
+
+> 画像ダウンロードは本線である②③のスクレイピングとは非同期で行われます。
+>
+> 上記の例では③を実行して「OK!」が表示された段階で本線のスクレイピングは終わりますが、画像のダウンロードはまだ途中であり、また、ダウンロードマネージャーに登録した全画像のダウンロードが完了するまではこのスクリプト自体は終了しません。
+>
+> 「OK!」が表示されてもなかなかコンソールに制御が戻ってこないからといって`Ctrl+C`とかはせずに、ダウンロード完了までお待ちください。
+
+#### src-attr
+
+`absoluteUrl()`と同様に、`img`要素から画像URLとして取得する属性名を指定可能です(文字列 or 配列)。
+
+```html
+<img src="blank.gif" data-original-src="http://this.is/real-image.png">
+```
+
+上記のようなHTMLで、`src`の`blank.gif`ではなく`data-original-src`の`http://this.is/real-image.png`をダウンロードしたい場合は以下のように指定します。
+
+```js
+$('img').download('data-original-src');
+```
+
+※その他仕様は`absoluteUrl()`の`src-attr`項を参照
+
+#### ダウンロードマネージャー
+
+##### プロパティ
+
+###### parallel
+
+ダウンロードの同時並列実行数を指定します。`1`～`10`の間で指定します。デフォルトは`5`です。すでにダウンロードが始まっている段階で値を変更した場合は、現在実行中のダウンロードがすべて完了してから反映されます。
+
+###### state
+
+ダウンロードマネージャーの現在の処理状況を確認できます。読み取り専用なので数値を変更してもダウンロードの状況は変化しません。
+
+`state`には以下の2項目が登録されています。
+
+* `queue` ... ダウンロード待ち件数
+* `complete` ... ダウンロード完了件数
+
+```js
+console.log(client.download.state); // => { queue: 10, complete: 3 }
+```
+
+また、ダウンロードイベント内で`this.state`でも確認できます。
+
+```js
+client.download
+.on('success', function (url, buffer) {
+  console.log('[ダウンロード状況]', this.state); // => { queue: 2, complete: 5 }
+  ...
+```
+
+##### イベント
+
+`download.on`で設定可能はイベントは以下の通りです。
+
+###### on('success', funciton (url, buffer) { ... })
+
+ダウンロード完了時に呼び出されるイベント時の処理です。第1引数の`url`にはダウンロード元の画像URLが、第2引数の`buffer`には画像のバイナリが`Buffer`化されて入っています。
+
+###### on('error', funciton (err) { ... })
+
+ダウンロード中にエラーが発生した時に呼び出されるイベント時の処理です。`err`オブジェクトには`url`プロパティ(ダウンロード元の画像URL)が入っています。
+
+### $(_element_).entityHtml()
+
+対象要素のHTML部分をすべてHTMLエンティティ化した文字列を返します。基本的には使い道はないと思います。
+
+```js
+// <h1>こんにちは</h1>
+console.log($('h1').html()) // => こんにちは
+console.log($('h1').entityHtml()); // => &#x3053;&#x3093;&#x306B;&#x3061;&#x306F;
+```
 
 ### $(element).text([ string ]) / $(element).html([ string ])
 
@@ -348,30 +884,28 @@ cheerioデフォルトの`text()`および`html()`は、元からHTMLエンテ�
 <span id="hello">&lt;hello&gt;</span>
 ```
 
-上記のようなHTMLの場合、以下のようになります。
+このようなHTMLの場合、以下のようになります。
 
 ```js
-console.log($('#hello').text());
-// => &lt;hello&gt;
+console.log($('#hello').text()); // => &lt;hello&gt;
 ```
 
 cheerio-httpcliではこの挙動を変更し、元からHTMLエンティティで表記されている文字列も可読文字にデコードします。数値参照、16進数参照、文字参照すべて変換します。
 
 ```js
-console.log($('#hello').text());
-// => <hello>
+console.log($('#hello').text()); // => <hello>
 ```
 
 もし、HTMLエンティティを変換しない元の表記のままのテキストやHTMLを取得したい場合は`_text()`および`_html()`メソッドを使用してください。こちらはcheerioデフォルトの挙動となります。
 
 ```js
-console.log($('#hello').text());
-// => <hello>
-console.log($('#hello')._text());
-// => &lt;hello&gt;
+console.log($('#hello').text());  // => <hello>
+console.log($('#hello')._text()); // => &lt;hello&gt;
 ```
 
-## responseオブジェクトの独自拡張
+## Tips
+
+### responseオブジェクトの独自拡張
 
 `fetch()`、`cheerio.click()`、`cheerio.submit()`などで取得できる`response`オブジェクトはrequestモジュールで取得したものですが、独自拡張として`cookies`プロパティを付け足しています。
 
@@ -390,8 +924,6 @@ client.fetch('http://hogehoge/')
 この`cookies`プロパティには現在取得したページのサーバーから送られてきたクッキーのキーと値が連想配列で入っています。セッションIDやログイン状態の確認などに使えるかもしれません。
 
 なお、この`cookies`の値を変更してもリクエスト処理には反映されません。クッキー確認専用のプロパティです。
-
-## Tips
 
 ### Basic認証
 
@@ -426,9 +958,9 @@ client.fetch('http://' + user + ':' + password + '@securet.example.com', functio
 
 詳細は[こちら](http://qiita.com/ktty1220/items/e9e42247ede476d04ce2#comment-02b5b12c8be4f193834b)
 
-## その他
+### 文字コード判別の仕様
 
-* 文字コードの判別はjschardetで高精度で判別できた場合はその情報を使用しますが、そうでない場合は`<head>`タグのcharset情報を参照します。後者での判別時においてcharsetで指定された文字コードとWEBページの実際の文字コードが異なる場合は変換エラーや文字化けが発生します。
+文字コードの判別はjschardetで高精度で判別できた場合はその情報を使用しますが、そうでない場合は`<head>`タグのcharset情報を参照します。後者での判別時においてcharsetで指定された文字コードとWEBページの実際の文字コードが異なる場合は変換エラーや文字化けが発生します。
 
 ## ライセンス
 

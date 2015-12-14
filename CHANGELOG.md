@@ -1,14 +1,16 @@
 # 0.4.0 (201x-xx-xx)
 
 ### NEW(beta)
+
 * 同期リクエスト実装(`fetchSync()`/`clickSync()`/`submitSync()`)
-* [TODO] `img`要素に`download()`メソッド実装
+* `img`要素に`download()`メソッド実装
 * `a`要素、`img`要素に`absoluteUrl()`メソッド実装
 * submit系ボタンに`click()`メソッドを実装(押されたボタンの情報がフォーム送信時にパラメータとしてセットされる)
 * `checkbox`要素、`radio`要素に`tick()`/`untick()`メソッド実装
 * `form`要素に`field()`メソッド実装
 
 ### IMPROVEMENTS
+
 * 依存ライブラリを最新バージョンに更新
 * `setBrowser()`メソッドで指定する一部のブラウザのバージョンを一部更新
 * Accept-Languageヘッダを指定していない場合は実行環境のロケールから言語を取得してセットするように変更(WindowsかつNode.js v0.10以下の環境では未対応)
@@ -18,9 +20,11 @@
 * example追加
 
 ### FIXES(breaking)
+
 * `$('form').submit()`時にsubmit系ボタンの情報を送信パラメータにセットしないように変更(1つのフォームに複数submit系ボタンがある場合の挙動がおかしくなっていたのを修正)
 
 ### DEPRICATED
+
 * `_text()`/`_html()`メソッドを0.5.0で廃止予定に
 
 # 0.3.8 (2015-11-21)

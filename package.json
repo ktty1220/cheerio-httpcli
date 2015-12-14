@@ -31,13 +31,12 @@
     "spawn-sync": "^1.0.14",
     "tough-cookie": "^2.2.1",
     "type-of": "^2.0.1",
-    "valid-url": "^1.0.9",
-    "which": "^1.2.0"
+    "valid-url": "^1.0.9"
   },
   "devDependencies": {
     "eslint": "^1.10.3",
     "espower-loader": "^1.0.0",
-    "intelli-espower-loader": "^1.0.0",
+    "intelli-espower-loader": "^1.0.1",
     "istanbul": "^0.4.1",
     "jscs": "^2.7.0",
     "leasot": "^3.1.0",

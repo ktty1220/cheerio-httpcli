@@ -102,7 +102,7 @@
     "accessor-pairs": 2,
     "block-scoped-var": 2,
     "consistent-return": 2,
-    "linebreak-style": [ 0, "unix" ],
+    "linebreak-style": [ 2, "unix" ],
     "new-cap": 2,
     "new-parens": 2,
     "newline-after-var": [ 0, "always" ],
