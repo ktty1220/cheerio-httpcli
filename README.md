@@ -12,12 +12,15 @@ Node.jsでWEBページのスクレイピングを行う際に必要となる文�
 
 ## 特徴
 
-1. 取得先WEBページの文字コードを自動で判定してHTMLをUTF-8に変換してくれる
-2. UTF-8に変換したHTMLをjQueryのように操作することが可能
-3. Node.jsお馴染みのコールバック形式と最近の流行であるプロミス形式どちらにも対応
-4. フォームの送信やリンクのクリックをエミュレート
-5. ブラウザ指定による簡単User-Agent切り替え機能
-6. 現在のクッキーの内容を簡単に取得できる(読み取り専用)
+1. 取得先WEBページの文字コードを自動で判定してHTMLをUTF-8に変換
+2. UTF-8に変換したHTMLをjQueryのように操作可能
+3. フォームの送信やリンクのクリックをエミュレート
+4. Node.jsお馴染みのコールバック形式と最近の流行であるプロミス形式どちらにも対応
+5. 同期リクエスト対応
+6. `$('img')`要素画像のダウンロード(LazyLoad対応)
+7. `$('a,img')`要素のURLを絶対パスで取得可能
+8. ブラウザ指定による簡単User-Agent切り替え機能
+9. 現在のクッキーの内容を簡単に取得(読み取り専用)
 
 > 静的なHTMLをベースに処理するモジュールなのでSPAなどクライアントサイドのJavaScriptによってコンテンツを取得/変更するタイプのWEBページには対応していません。
 
@@ -52,7 +55,7 @@ npm install cheerio-httpcli
   * [$(_form-element_).__field__()](#form-elementfield-name-value-onnotfound-)
   * [$(_checkbox-element_ or _radio-element_).__tick__()](#checkbox-element-or-radio-elementtick)
   * [$(_checkbox-element_ or _radio-element_).__untick__()](#checkbox-element-or-radio-elementuntick)
-  * [$(_link-element_ or _image-element_).__absoluteUrl__()](#link-element-or-image-elementabsoluteurl-filter-src-attr-)
+  * [$(_link-element_ or _image-element_).__url__()](#link-element-or-image-elementurl-filter-src-attr-)
   * [$(_image-element_).__download__()](#image-elementdownload-src-attr-)
   * [$(_element_).__entityHtml__()](#elemententityhtml)
 
@@ -233,7 +236,9 @@ User-Agentを指定したブラウザのものに変更した場合は`true`、�
 * opera
 * vivaldi
 * safari
-* ios
+* ipad
+* iphone
+* ipod
 * android
 * googlebot
 
@@ -279,11 +284,11 @@ cheerio-httpcliのバージョン情報です。
 
 ### headers
 
-requestモジュールで使用するリクエストヘッダ情報の連想配列です。デフォルトでは何も指定されていませんが、`fetch()`実行時にUser-Agentが空の場合は自動的にUser-AgentにIE11の情報が入ります。
+requestモジュールで使用するリクエストヘッダ情報の連想配列です。デフォルトでは何も指定されていませんが、`fetch()`実行時にUser-Agentが空の場合は自動的にUser-AgentにGoogleChromeの情報が入ります。
 
 ### timeout
 
-requestモジュールで指定するタイムアウト情報です。デフォルトでは30秒となっています。
+requestモジュールで指定するタイムアウト情報をミリ秒で指定します。デフォルトは`30000`(30秒)となっています。
 
 ### gzip
 
@@ -291,11 +296,13 @@ requestモジュールで指定するタイムアウト情報です。デフォ�
 
 ### referer
 
-リファラーを自動でセットするかどうかの指定です。`true`にすると1つ前に`fetch()`したページのURLが自動でリクエストヘッダのRefererにセットされます。デフォルトは`true`です。
+リファラを自動でセットするかどうかの指定です。`true`にすると1つ前に`fetch()`したページのURLが自動でリクエストヘッダのRefererにセットされます。デフォルトは`true`です。
 
 ### maxDataSize
 
 `fetch()`などで受信するデータの限界量を数値(バイト数)で指定します。この値を超えるサイズを受信した段階でエラーが発生します。ユーザーから入力されたURLを解析する用途などにおいて、不用意に大きいデータを読み込んでしまい回線を占有する可能性がある場合に指定しておいた方が良いでしょう。
+
+> 画像のダウンロード時には適用されません。
 
 デフォルトは`null`(制限なし)です。
 
@@ -311,7 +318,7 @@ client.fetch('http://big.large.huge/data.html', function (err, $, res, body) {
 });
 ```
 
-なお、maxDataSizeを超えた場合は途中まで受信したデータは破棄されます。
+なお、`maxDataSize`を超えた場合は途中まで受信したデータは破棄されます。
 
 ### debug
 
@@ -335,7 +342,7 @@ cheerio-httpcliではcheerioオブジェクトのprototypeを拡張していく�
 
 ### $.documentInfo()
 
-取得したWEBページに関する情報(URLとエンコーディング)を取得できます。
+取得したWEBページに関する情報(`url`と`encoding`)を取得できます。
 
 ```js
 client.fetch('http://hogehoge/', function (err, $, res, body) {
@@ -395,7 +402,7 @@ client.fetch('http://hogehoge/')
 
 cheerio-httpcliは内部でクッキーも保持するので、ログインが必要なページの取得などもこのフォーム送信でログインした後に巡回できるようになります。
 
-なお、こちらも動的処理であるonsubmit="xxx"や送信ボタンのonclick="..."には対応していません。
+なお、こちらも動的処理である`onsubmit="xxx"`や送信ボタンの`onclick="..."`には対応していません。
 
 #### 共通の仕様
 
@@ -496,10 +503,10 @@ client.fetch('http://hogehoge/')
 
 ```js
 // $(submit-element).click()の場合
-$('[name=edit]').click(); // => ?user=guest&edit=edit
+$('[name=edit]').click(); // => '?user=guest&edit=edit'
 
 // $(form-element).submit()の場合
-$('form').submit(); // => ?user=guest
+$('form').submit(); // => '?user=guest'
 ```
 
 このように1フォーム内に複数の`submit`ボタンがある場合、サーバー側では押されたボタンのパラメータで処理を分岐させている可能性があるので、`$('form').submit()`だと正常な結果が得られないかもしれません。
@@ -540,16 +547,19 @@ client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
 
 ```js
 // userのvalueを取得
-$('form[name=login]').field('user'); // => guest
+$('form[name=login]').field('user'); // => 'guest'
 ```
 
 #### `name`:文字列、`value`:文字列 or 配列
 
-`form-element`内の部品`name`の値を`value`に変更します。
+`form-element`内の部品`name`の値を`value`に変更します。同一`name`の複数チェックボックスや複数選択`select`の場合は配列でまとめて選択値を指定できます。
 
 ```js
 // passのvalueを設定
 $('form[name=login]').field('pass', 'admin');
+
+// 複数選択可能部品の場合
+$('form[name=login]').field('multi-select', [ 'hoge', 'fuga', 'piyo' ]);
 ```
 
 #### `name`:連想配列、`value`:なし
@@ -580,7 +590,7 @@ $('form[name=login]').field();
 
 #### onNotFound
 
-部品に値を設定する際に参照されるオプションです。指定した`name`の部品がフォーム内に存在しなかった時の動作を以下のいずれかの文字列で指定します。
+第3引数の`onNotFound`は、部品に値を設定する際に参照されるオプションです。指定した`name`の部品がフォーム内に存在しなかった時の動作を以下のいずれかの文字列で指定します。
 
 * `throw` ...  例外が発生します。
 * `append` ... 新規にその`name`部品を作成してフォームに追加します(文字列の場合は`hidden`、配列の場合は`checkbox`)。
@@ -627,10 +637,10 @@ $('input[type=radio]').tick();              // => 各ラジオボタングルー
 $('input[name=check_foo]').untick();          // => check_fooを非選択状態に
 $('input[type=checkbox]').untick();           // => 全チェックボックスを非選択状態に
 $('input[name=radio_bar][value=2]').untick(); // => radio_barのvalueが2のラジオボタンを非選択状態に
-$('input[type=radio]').untick();              // => 各ラジオボタンを非選択状態に
+$('input[type=radio]').untick();              // => 全ラジオボタンを非選択状態に
 ```
 
-### $(_link-element_ or _image-element_).absoluteUrl([ filter, src-attr ])
+### $(_link-element_ or _image-element_).url([ filter, src-attr ])
 
 `a`要素の`href`、もしくは`img`要素の`src`のURLを完全な形(絶対パス)にしたものを取得します。元から完全なURLになっている場合(外部リンクなど)はその内容をそのまま返します。また、`javascript:void(0)`といったURLでないリンクの場合は`undefined`を返します。
 
@@ -638,17 +648,17 @@ $('input[type=radio]').untick();              // => 各ラジオボタンを非�
 <a id="top" href="../index.html">トップページ</a>
 ```
 
-`http://foo.bar.baz/hoge/`というページ内に上記のようなリンクがある場合、`$(...).attr('href')`と`$(...).absoluteUrl()`の戻り値はそれぞれ以下のようになります。
+`http://foo.bar.baz/hoge/`というページ内に上記のようなリンクがある場合、`$(...).attr('href')`と`$(...).url()`の戻り値はそれぞれ以下のようになります。
 
 ```js
-console.log($('a#top').attr('href'));  // => ../index.html
-console.log($('a#top').absoluteUrl()); // => http://foo.bar.baz/index.html
+console.log($('a#top').attr('href')); // => '../index.html'
+console.log($('a#top').url());        // => 'http://foo.bar.baz/index.html'
 ```
 
 また、対象の要素が複数ある場合は各要素の絶対URLを配列に格納して返します。
 
 ```js
-console.log($('a').absoluteUrl());
+console.log($('a').url());
 // => [
 //      'http://foo.bar.baz/index.html',
 //      'http://foo.bar.baz/xxx.html',
@@ -658,7 +668,7 @@ console.log($('a').absoluteUrl());
 
 #### filter
 
-対象要素の元のURLを3種類に分類して、取得対象から除外するかどうかフィルタリングするオプションです。
+第1引数の`filter`は、対象要素の`href`や`src`のURLを3種類に分類して、取得対象から除外するかどうかフィルタリングするオプションです。
 
 1. `relative` ... 相対URL(サイト内リンク)
 2. `absolute` ... 絶対URL(http(s)から始まるリンク(主にサイト外リンク))
@@ -677,11 +687,11 @@ console.log($('a').absoluteUrl());
 <a href="http://www.yahoo.com/">
 ```
 
-このようなHTMLに対して`$('a').absoluteUrl()`を各種`filter`オプション指定で実行した時の戻り値は以下のようになります。
+このようなHTMLに対して`$('a').url()`を各種`filter`オプション指定で実行した時の戻り値は以下のようになります。
 
 ```js
 // 指定無し
-console.log($('a').absoluteUrl();
+console.log($('a').url();
 // => [
 //      'http://foo.bar.baz/page2.html',
 //      'http://foo.bar.baz/#foo',
@@ -690,7 +700,7 @@ console.log($('a').absoluteUrl();
 //    ]
 
 // 相対リンクのみ取得
-console.log($('a').absoluteUrl({
+console.log($('a').url({
   relative: true,
   absolute: false,
   invalid: false
@@ -701,7 +711,7 @@ console.log($('a').absoluteUrl({
 //    ]
 
 // URLとして有効なもののみ取得(除外するものだけfalseの指定でもOK)
-console.log($('a').absoluteUrl({ invalid: false }));
+console.log($('a').url({ invalid: false }));
 // => [
 //      'http://foo.bar.baz/page2.html',
 //      'http://foo.bar.baz/#foo',
@@ -713,20 +723,18 @@ console.log($('a').absoluteUrl({ invalid: false }));
 なお、対象となる要素が1つのみの時の戻り値は配列ではなく絶対URLの文字列になりますが、その際の`filter`オプションの指定とその結果は以下のようになります。
 
 ```html
-<a id="ajax" href="javascript:exec_ajax();">Ajax</a>
+<a id="top" href="index.html">Ajax</a>
 ```
 
-上記リンクはJavaScriptリンクなので分類としては`invalid`に入ります。
+上記リンクは相対リンクなので分類としては`relative`に入ります。この時`relative`を除外するオプションで`url()`を呼び出すと戻り値は`undefined`となります。
 
 ```js
-console.log($('a#ajax').absoluteUrl({ invalid: false })); // => undefined
+console.log($('#top').url({ relative: false })); // => undefined
 ```
-
-そのリンクに対して`invalid`を除外するオプションで`absoluteUrl()`を呼び出すと戻り値は`undefined`となります。
 
 #### src-attr
 
-`img`要素から画像URLとして取得する属性名を指定するオプションです(文字列 or 配列)。
+第2引数の`src-attr`は、`img`要素から画像URLとして取得する属性名を指定するオプションです(文字列 or 配列)。
 
 取得対象のWEBページでLazyLoad系のjQueryプラグインなどを使っている場合は`src`属性にダミーの画像URLが入っていたりしますが、そのような`img`要素で`src`属性以外からURLを取得する際に指定します。
 
@@ -738,15 +746,15 @@ console.log($('a#ajax').absoluteUrl({ invalid: false })); // => undefined
 
 ```js
 // filterオプションは省略可能
-$('img').absoluteUrl('data-original-src');
+$('img').url('data-original-src');
 ```
 
 `data-original-src`がその要素に存在しない場合は`src`属性のURLをダウンロードします。
 
-なお、デフォルトでは`data-original`>`data-lazy-src`>`src`の優先順になっています。デフォルトの優先順位を破棄して`src`属性の画像を最優先でダウンロードしたい場合は、
+なお、デフォルトでは`data-original`>`data-lazy-src`>`data-src`>`src`の優先順になっています。デフォルトの優先順位を破棄して`src`属性の画像を最優先でダウンロードしたい場合は、
 
 ```js
-$('img').absoluteUrl({ invalid: false }, []);
+$('img').url({ invalid: false }, []);
 ```
 
 のように空配列を指定します。
@@ -767,9 +775,9 @@ var client = require('cheerio-httpcli');
 
 // ①ダウンロードマネージャーの設定(全ダウンロードイベントがここで処理される)
 client.download
-.on('success', function (url, buffer) {
-	fs.writeFileSync('/path/to/image.png', buffer, 'binary');
-	console.log(url + 'をダウンロードしました');
+.on('ready', function (stream) {
+	stream.pipe(fs.createWriteStream('/path/to/image.png'));
+	console.log(stream.url.href + 'をダウンロードしました');
 })
 .on('error', function (err) {
 	console.error(err.url + 'をダウンロードできませんでした: ' + err.message);
@@ -788,19 +796,19 @@ client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
 
 ①の`client.download`というのがcheerio-httpcliに内蔵されているダウンロードマネージャーになります。
 
-スクレイピング中に`$(...).download()`メソッドで実行された画像のダウンロードが完了すると`client.download`に`success`イベントが送られます(エラーが発生した場合は`error`イベント)。
+スクレイピング中に`$(...).download()`メソッドで実行された画像のダウンロードが始まると`client.download`の`ready`イベントが発生します(エラーが発生した場合は`error`イベント)。
 
-①では色々な場所から送られてくる画像ダウンロード完了イベント時の処理を設定しています。この例では第2引数に入っている画像のBufferを`/path/to/image.png`に保存しています。
+①では色々な場所から実行される画像ダウンロード時の共通処理を設定しています。この例では引に渡されたダウンロード元画像ファイルのStreamを`/path/to/image.png`に保存しています。
 
 `client.download`のイベント処理設定が完了したら②スクレイピングに入ります。
 
 ②でWEBページを取得し、その中の③で`$(...).download()`メソッドを実行しています。
 
-この時、`$('img.thumbnail')`に該当する画像要素が10個あったとすると、その10個の画像要素がまとめてダウンロードマネージャーに登録されます。
+この時、`$('img.thumbnail')`に該当する画像要素が10個あったとすると、その10個の画像要素がまとめてダウンロードマネージャーに登録されます(すでに登録済みのURLは除外されます)。
 
 少し戻って④を見ると並列ダウンロード数制限が設定されています。今回の例では`3`なので、登録された10個の画像要素の内、即座に3つがダウンロード処理に入ります。
 
-残りの7要素はダウンロード待ちキューに入り、最初の3つの内のどこかのダウンロードが完了して空きができるとそこに登録されてダウンロードが実行される ... という流れです。
+残りの7要素はダウンロード待ちキューに入り、最初の3つの内のどこかのダウンロードが完了して空きができると、次の画像URLがその空き部分にに登録されてダウンロードが実行される ... という流れです。
 
 > 画像ダウンロードは本線である②③のスクレイピングとは非同期で行われます。
 >
@@ -810,7 +818,7 @@ client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
 
 #### src-attr
 
-`absoluteUrl()`と同様に、`img`要素から画像URLとして取得する属性名を指定可能です(文字列 or 配列)。
+第1引数の`src-attr`オプションは、`url()`と同様に`img`要素から画像URLとして取得する属性名を指定可能です(文字列 or 配列)。
 
 ```html
 <img src="blank.gif" data-original-src="http://this.is/real-image.png">
@@ -822,15 +830,17 @@ client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
 $('img').download('data-original-src');
 ```
 
-※その他仕様は`absoluteUrl()`の`src-attr`項を参照
+> その他仕様は`url()`の`src-attr`項を参照
 
 #### ダウンロードマネージャー
+
+`$(...).download()`で登録されたURLのダウンロード時共通設定になります。
 
 ##### プロパティ
 
 ###### parallel
 
-ダウンロードの同時並列実行数を指定します。`1`～`10`の間で指定します。デフォルトは`5`です。すでにダウンロードが始まっている段階で値を変更した場合は、現在実行中のダウンロードがすべて完了してから反映されます。
+ダウンロードの同時並列実行数を指定します。`1`～`10`の間で指定します(デフォルトは`5`)。すでにダウンロードが始まっている段階で値を変更した場合は、現在実行中のダウンロードがすべて完了してから反映されます。
 
 ###### state
 
@@ -840,31 +850,71 @@ $('img').download('data-original-src');
 
 * `queue` ... ダウンロード待ち件数
 * `complete` ... ダウンロード完了件数
+* `error` ... エラー件数
 
 ```js
-console.log(client.download.state); // => { queue: 10, complete: 3 }
+console.log(client.download.state); // => { queue: 10, complete: 3, error: 0 }
 ```
 
 また、ダウンロードイベント内で`this.state`でも確認できます。
 
 ```js
 client.download
-.on('success', function (url, buffer) {
-  console.log('[ダウンロード状況]', this.state); // => { queue: 2, complete: 5 }
+.on('ready', function (stream) {
+  console.log(this.state); // => { queue: 2, complete: 5, error: 1 }
   ...
 ```
+
+##### メソッド
+
+###### clearCache()
+
+ダウンロードマネージャーは重複したURLを除外するためにURLキャッシュを内部で持っています。何らかの理由でそのキャッシュをクリアする場合に使用します。
 
 ##### イベント
 
 `download.on`で設定可能はイベントは以下の通りです。
 
-###### on('success', funciton (url, buffer) { ... })
+###### on('ready', funciton (stream) { ... })
 
-ダウンロード完了時に呼び出されるイベント時の処理です。第1引数の`url`にはダウンロード元の画像URLが、第2引数の`buffer`には画像のバイナリが`Buffer`化されて入っています。
+ダウンロード開始時に呼び出されるイベント時の処理です。引数にはダウンロード元画像ファイルのストリームが入ります。ストリームに実装されているプロパティ/メソッドは以下のとおりです。
+
+* `url` ... 画像ファイルのURLオブジェクトです。URLの文字列は`stream.url.href`で取得できます。Base64埋め込み画像の場合はURLオブジェクトではなく`base64`という文字列が入ります。
+* `type` ... Content-Typeが入ります。サーバーから返されたレスポンスヘッダにContent-Typeがない場合は`undefined`になります。
+* `length` ... Content-Lengthが入ります。サーバーから返されたレスポンスヘッダにContent-Lengthがない場合は`-1`になります。
+* `toBuffer(callback)` ... ストリームをBufferに変換してコールバック関数(err, buffer)に返します。画像ファイルの内容をすべてメモリ上に読み込むので巨大な画像の場合はそれだけメモリを消費します。
+* `end()` ... ストリームの読み込みを終了します。`ready`イベント内で__ストリームを読み込まずに処理を抜ける場合などは必ず呼び出してください__(そのままにしておくとキューが詰まって次のダウンロードができなくなります。また、ストリームが読み込まれずに放置されたまま`timeout`時間が経過すると`error`イベントが発生して強制的にエラー扱いとなります)。
 
 ###### on('error', funciton (err) { ... })
 
 ダウンロード中にエラーが発生した時に呼び出されるイベント時の処理です。`err`オブジェクトには`url`プロパティ(ダウンロード元の画像URL)が入っています。
+
+###### 例
+
+```js
+client.download
+.on('ready', function (stream) {
+  // gif画像以外はいらない
+  if (! /\.gif$/i.test(stream.url.pathname)) {
+    return stream.end();
+  }
+
+  // 各種情報表示
+  console.log(stream.url.href); // => 'http://hogehoge.com/foobar.png'
+  console.log(stream.type);     // => 'image/png'
+  console.log(stream.length);   // => 10240
+
+  // Buffer化してファイルに保存
+  stream.toBuffer(function (err, buffer) {
+    fs.writeFileSync('foobar.png', buffer, 'binary');
+  });
+})
+.on('error', function (err) {
+  console.error(err.url + ':' + err.message);
+});
+
+```
+
 
 ### $(_element_).entityHtml()
 
@@ -872,35 +922,8 @@ client.download
 
 ```js
 // <h1>こんにちは</h1>
-console.log($('h1').html()) // => こんにちは
-console.log($('h1').entityHtml()); // => &#x3053;&#x3093;&#x306B;&#x3061;&#x306F;
-```
-
-### $(element).text([ string ]) / $(element).html([ string ])
-
-cheerioデフォルトの`text()`および`html()`は、元からHTMLエンティティで表記している文字列をそのまま返します。
-
-```html
-<span id="hello">&lt;hello&gt;</span>
-```
-
-このようなHTMLの場合、以下のようになります。
-
-```js
-console.log($('#hello').text()); // => &lt;hello&gt;
-```
-
-cheerio-httpcliではこの挙動を変更し、元からHTMLエンティティで表記されている文字列も可読文字にデコードします。数値参照、16進数参照、文字参照すべて変換します。
-
-```js
-console.log($('#hello').text()); // => <hello>
-```
-
-もし、HTMLエンティティを変換しない元の表記のままのテキストやHTMLを取得したい場合は`_text()`および`_html()`メソッドを使用してください。こちらはcheerioデフォルトの挙動となります。
-
-```js
-console.log($('#hello').text());  // => <hello>
-console.log($('#hello')._text()); // => &lt;hello&gt;
+console.log($('h1').html())        // => 'こんにちは'
+console.log($('h1').entityHtml()); // => '&#x3053;&#x3093;&#x306B;&#x3061;&#x306F;'
 ```
 
 ## Tips

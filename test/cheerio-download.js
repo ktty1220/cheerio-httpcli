@@ -1,13 +1,16 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0*/
-var assert = require('power-assert');
-var helper = require('./_helper');
-var cli    = require('../index');
+var assert   = require('power-assert');
+var helper   = require('./_helper');
+var cli      = require('../index');
+var isSteram = require('isstream');
 
+// TODO ダウンロードマネージャー未設定
 describe('cheerio:download', function () {
   beforeEach(function () {
-    cli.download.state = { queue: 0, complete: 0 };
+    cli.download.state = { queue: 0, complete: 0, error: 0 };
     cli.download.removeAllListeners();
+    cli.download.clearCache();
   });
   afterEach(function () {
     cli.timeout = 30000;
@@ -55,18 +58,41 @@ describe('cheerio:download', function () {
     });
   });
 
-  it('画像のBufferがsuccessイベントに送られる', function (done) {
+  it('画像のStreamがreadyイベントに送られる', function (done) {
     cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
       cli.download
-      .on('success', function (url, buffer) {
-        var img = helper.url('img', '') + '/img/cat.png';
-        var expected = helper.readBuffer('fixtures/img/img/cat.png');
-        assert(url === img);
-        assert.deepEqual(buffer, expected);
-        assert.deepEqual(this.state, { queue: 0, complete: 1 });
+      .on('ready', function (stream) {
+        var img = helper.url('img') + '/img/cat.png';
+        assert(stream.url.href === img);
+        assert(stream.type === 'image/png');
+        assert(stream.length === 15572);
+        assert(isSteram(stream));
+        stream.end();
         done();
       })
-      .on('fail', function (e) {
+      .on('error', function (e) {
+        throw e;
+      });
+      assert($('.rel').download() === 1);
+    });
+  });
+
+  it('stream.toBuffer()でBuffer化される', function (done) {
+    cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+      cli.download
+      .on('ready', function (stream) {
+        var img = helper.url('img') + '/img/cat.png';
+        assert(stream.url.href === img);
+        assert(stream.type === 'image/png');
+        assert(stream.length === 15572);
+        stream.toBuffer((function (err, buffer) {
+          var expected = helper.readBuffer('fixtures/img/img/cat.png');
+          assert.deepEqual(buffer, expected);
+          assert.deepEqual(this.state, { queue: 0, complete: 1, error: 0 });
+          done();
+        }).bind(this));
+      })
+      .on('error', function (e) {
         throw e;
       });
       assert($('.rel').download() === 1);
@@ -76,14 +102,19 @@ describe('cheerio:download', function () {
   it('Base64エンコードされた画像 => Buffer化される', function (done) {
     cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
       cli.download
-      .on('success', function (url, buffer) {
-        var expected = helper.readBuffer('fixtures/img/img/sports.jpg');
-        assert(url === 'base64');
-        assert.deepEqual(buffer, expected);
-        assert.deepEqual(this.state, { queue: 0, complete: 1 });
-        done();
+      .on('ready', function (stream) {
+        assert(isSteram(stream));
+        stream.toBuffer((function (err, buffer) {
+          var expected = helper.readBuffer('fixtures/img/img/sports.jpg');
+          assert(stream.url === 'base64');
+          assert(stream.type === 'image/jpg');
+          assert(stream.length === 2268);
+          assert.deepEqual(buffer, expected);
+          assert.deepEqual(this.state, { queue: 0, complete: 1, error: 0 });
+          done();
+        }).bind(this));
       })
-      .on('fail', function (e) {
+      .on('error', function (e) {
         throw e;
       });
       assert($('.base64').download() === 1);
@@ -104,34 +135,36 @@ describe('cheerio:download', function () {
     });
   });
 
-  it('404 => failイベントに送られる', function (done) {
+  it('404 => errorイベントに送られる', function (done) {
     cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
       cli.download
-      .on('success', function (url, buffer) {
+      .on('ready', function (stream) {
+        stream.end();
         throw new Error('not thrown');
       })
-      .on('fail', function (e) {
-        var img = helper.url('img', '') + '/not-found.gif';
+      .on('error', function (e) {
+        var img = helper.url('img') + '/not-found.gif';
         assert(e.url === img);
         assert(e.message === 'server status');
-        assert.deepEqual(this.state, { queue: 0, complete: 1 });
+        assert.deepEqual(this.state, { queue: 0, complete: 0, error: 1 });
         done();
       });
       assert($('.err404').download() === 1);
     });
   });
 
-  it('タイムアウト => failイベントに送られる', function (done) {
+  it('リクエストタイムアウト => errorイベントに送られる', function (done) {
     cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
       cli.download
-      .on('success', function (url, buffer) {
+      .on('ready', function (stream) {
+        stream.end();
         throw new Error('not thrown');
       })
-      .on('fail', function (e) {
-        var img = helper.url('img', '') + '/img/cat.png';
+      .on('error', function (e) {
+        var img = helper.url('img') + '/img/cat.png';
         assert(e.url === img);
         assert(e.message === 'ETIMEDOUT');
-        assert.deepEqual(this.state, { queue: 0, complete: 1 });
+        assert.deepEqual(this.state, { queue: 0, complete: 0, error: 1 });
         done();
       });
       cli.timeout = 1;
@@ -139,22 +172,41 @@ describe('cheerio:download', function () {
     });
   });
 
+  it('streamを使用しないままタイムアウト時間が過ぎるとエラー', function (done) {
+    cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+      cli.download
+      .on('ready', function (stream) {
+      })
+      .on('error', function (e) {
+        var img = helper.url('img') + '/~mega';
+        assert(e.url === img);
+        assert(e.message === 'stream timeout (maybe stream is not used)');
+        assert.deepEqual(this.state, { queue: 0, complete: 0, error: 1 });
+        done();
+      });
+      cli.timeout = 500;
+      assert($('.mega').download() === 1);
+    });
+  });
+
   it('ダウンロードが完了するまではqueueにカウントされている', function (done) {
     cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
       var expected = [
-        { queue: 1, complete: 1 },
-        { queue: 0, complete: 2 }
+        { queue: 1, complete: 1, error: 0 },
+        { queue: 0, complete: 2, error: 0 }
       ];
       var eIdx = 0;
       cli.download
-      .on('success', function (url, buffer) {
-        var st = expected[eIdx++];
-        assert.deepEqual(this.state, { queue: st.queue, complete: st.complete });
-        if (eIdx === expected.length) {
-          return done();
-        }
+      .on('ready', function (stream) {
+        stream.toBuffer((function (err, buffer) {
+          var st = expected[eIdx++];
+          assert.deepEqual(this.state, st);
+          if (eIdx === expected.length) {
+            return done();
+          }
+        }).bind(this));
       })
-      .on('fail', function (e) {
+      .on('error', function (e) {
         throw e;
       });
       $('.root').attr('src', $('.root').attr('src') + '&wait=1000');
@@ -167,16 +219,18 @@ describe('cheerio:download', function () {
     it('無指定 => デフォルトの優先順で属性を検索してダウンロード', function (done) {
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
         var expected = {
-          url: helper.url('img', '') + '/img/cat.png',
+          url: helper.url('img') + '/img/cat.png',
           buffer: helper.readBuffer('fixtures/img/img/cat.png')
         };
         cli.download
-        .on('success', function (url, buffer) {
-          var actual = { url: url, buffer: buffer };
-          assert.deepEqual(actual, expected);
-          done();
+        .on('ready', function (stream) {
+          stream.toBuffer(function (err, buffer) {
+            var actual = { url: stream.url.href, buffer: buffer };
+            assert.deepEqual(actual, expected);
+            done();
+          });
         })
-        .on('fail', function (e) {
+        .on('error', function (e) {
           throw e;
         });
         assert($('.lazy1').download() === 1);
@@ -186,16 +240,20 @@ describe('cheerio:download', function () {
     it('文字列 => 指定した文字列属性をsrcよりも優先してダウンロード', function (done) {
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
         var expected = {
-          url: helper.url('img', '') + '/img/sports.jpg',
+          url: helper.url('img') + '/img/sports.jpg',
           buffer: helper.readBuffer('fixtures/img/img/sports.jpg')
         };
         cli.download
-        .on('success', function (url, buffer) {
-          var actual = { url: url, buffer: buffer };
-          assert.deepEqual(actual, expected);
-          done();
+        .on('ready', function (stream) {
+          assert(stream.type === 'image/jpeg');
+          assert(stream.length === 2268);
+          stream.toBuffer(function (err, buffer) {
+            var actual = { url: stream.url.href, buffer: buffer };
+            assert.deepEqual(actual, expected);
+            done();
+          });
         })
-        .on('fail', function (e) {
+        .on('error', function (e) {
           throw e;
         });
         assert($('.lazy3').download('data-original-src') === 1);
@@ -205,16 +263,20 @@ describe('cheerio:download', function () {
     it('空配列 => srcのURLをダウンロード', function (done) {
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
         var expected = {
-          url: helper.url('img', '') + '/img/1x1.gif',
+          url: helper.url('img') + '/img/1x1.gif',
           buffer: helper.readBuffer('fixtures/img/img/1x1.gif')
         };
         cli.download
-        .on('success', function (url, buffer) {
-          var actual = { url: url, buffer: buffer };
-          assert.deepEqual(actual, expected);
-          done();
+        .on('ready', function (stream) {
+          assert(stream.type === 'image/gif');
+          assert(stream.length === 37);
+          stream.toBuffer(function (err, buffer) {
+            var actual = { url: stream.url.href, buffer: buffer };
+            assert.deepEqual(actual, expected);
+            done();
+          });
         })
-        .on('fail', function (e) {
+        .on('error', function (e) {
           throw e;
         });
         assert($('.lazy2').download([]) === 1);

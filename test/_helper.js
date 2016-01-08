@@ -135,7 +135,7 @@ module.exports = {
           return res.end(buf);
         }
 
-        // 通常HTMLファイル
+        // 通常ファイル
         var wait = (req.url.match(/[\?&]wait=(\d+)/i) || [])[1] || 5;
         setTimeout(function () {
           res.setHeader('trace-route', JSON.stringify(_traceRoute));

@@ -4,7 +4,7 @@
 
 * 同期リクエスト実装(`fetchSync()`/`clickSync()`/`submitSync()`)
 * `img`要素に`download()`メソッド実装
-* `a`要素、`img`要素に`absoluteUrl()`メソッド実装
+* `a`要素、`img`要素に`url()`メソッド実装
 * submit系ボタンに`click()`メソッドを実装(押されたボタンの情報がフォーム送信時にパラメータとしてセットされる)
 * `checkbox`要素、`radio`要素に`tick()`/`untick()`メソッド実装
 * `form`要素に`field()`メソッド実装
@@ -22,6 +22,7 @@
 ### FIXES(breaking)
 
 * `$('form').submit()`時にsubmit系ボタンの情報を送信パラメータにセットしないように変更(1つのフォームに複数submit系ボタンがある場合の挙動がおかしくなっていたのを修正)
+* `setBrowser()`メソッドで指定するブラウザ種類の`ios`を`ipad`/`iphone`/`ipod`に分離
 
 ### DEPRICATED
 

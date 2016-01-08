@@ -12,15 +12,18 @@ var client = require('../index');
 
 // 画像保存フォルダ作成
 var imgdir = path.join(__dirname, 'img');
-fs.mkdirSync(imgdir);
+if (! fs.existsSync(imgdir)) {
+  fs.mkdirSync(imgdir);
+}
 
+// ダウンロードマネージャー設定
 client.download
-.on('success', function (url, buffer) {
+.on('ready', function (stream) {
   // ダウンロード完了時の処理(各ファイルごとに呼ばれる)
-  var file = url.match(/([^\/]+)$/)[1];
+  var file = stream.url.pathname.match(/([^\/]+)$/)[1];
   var savepath = path.join(imgdir, file);
-  fs.writeFileSync(savepath, buffer, 'binary');
-  console.log(url + 'を' + savepath + 'にダウンロードしました');
+  stream.pipe(fs.createWriteStream(savepath));
+  console.log(stream.url.href + 'を' + savepath + 'にダウンロードしました');
   console.log('[ダウンロード状況]', this.state);
 })
 .on('error', function (err) {
@@ -29,6 +32,8 @@ client.download
   console.log('[ダウンロード状況]', this.state);
 });
 
+
+// fetch start
 console.log('tiqavにアクセスします');
 client.fetch('http://tiqav.com/')
 .then(function (result) {
@@ -40,5 +45,5 @@ client.fetch('http://tiqav.com/')
   console.log(err);
 })
 .finally(function () {
-  console.log('終了します');
+  console.log('スクレイピングを終了します');
 });
