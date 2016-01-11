@@ -1,4 +1,5 @@
 /*eslint quote-props:0, max-statements:[1, 50]*/
+/*jshint -W100*/
 var nstatic = require('node-static');
 var http    = require('http');
 var path    = require('path');

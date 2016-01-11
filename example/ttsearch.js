@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /*eslint no-console:0, no-invalid-this:0*/
+/*jshint -W100*/
 'use strict';
 
 /**
@@ -21,7 +22,7 @@ client.fetch('http://ttsearch.net/')
 .then(function (result) {
   var $ = result.$;
   var results = [];
-  $('a.title').each(function (idx) {
+  $('a.title').each(function () {
     results.push({
       title: $(this).text().trim(),
       url: $(this).attr('href')
@@ -36,4 +37,3 @@ client.fetch('http://ttsearch.net/')
 .finally(function () {
   console.log('終了します');
 });
-

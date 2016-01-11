@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /*eslint no-console:0, no-invalid-this:0*/
+/*jshint -W100*/
 'use strict';
 
 /**
@@ -21,7 +22,7 @@ client.fetch('http://www.2ch.net/')
 .then(function (result) {
   var $ = result.$;
   var results = [];
-  $('.box').each(function (idx) {
+  $('.box').each(function () {
     var $a = $(this).find('a').eq(0);
     results.push({
       title: $a.text().trim(),

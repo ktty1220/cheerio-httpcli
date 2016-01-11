@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /*eslint no-console:0, no-invalid-this:0*/
+/*jshint -W100*/
 'use strict';
 
 /**
@@ -20,7 +21,7 @@ if (result1.error) {
   var results1 = [];
   // 検索結果が個別に格納されている要素をループ
   var $ = result1.$;
-  $('.b_algo').each(function (idx) {
+  $('.b_algo').each(function () {
     // 各検索結果のタイトル部分とURL、概要を取得
     var $h2 = $(this).find('h2');
     var url = $h2.find('a').attr('href');
@@ -43,7 +44,7 @@ if (result2.error) {
   var results2 = [];
   // 検索結果が個別に格納されている要素をループ
   var _$ = result2.$;
-  _$('#rso .g').each(function (idx) {
+  _$('#rso .g').each(function () {
     // 各検索結果のタイトル部分とURL、概要を取得
     var $h3 = _$(this).find('h3');
     var url = $h3.find('a').attr('href');

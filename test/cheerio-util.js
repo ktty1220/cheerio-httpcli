@@ -1,5 +1,6 @@
 /*eslint-env mocha*/
 /*eslint no-undefined:0*/
+/*jshint -W100*/
 var assert = require('power-assert');
 var cutil  = require('../lib/cheerio/util');
 

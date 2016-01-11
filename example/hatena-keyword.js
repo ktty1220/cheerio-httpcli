@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /*eslint no-console:0, no-invalid-this:0*/
+/*jshint -W100*/
 'use strict';
 
 /**
@@ -17,7 +18,7 @@ client.fetch('http://d.hatena.ne.jp/keyword/')
 .then(function (result) {
   console.log('最近更新されたキーワード一覧');
   var $ = result.$;
-  $('#updatekeywords ul li .name').each(function (idx) {
+  $('#updatekeywords ul li .name').each(function () {
     // NEW!は邪魔なので削除
     $('.new', $(this)).remove();
     console.log('* ' + $(this).text());

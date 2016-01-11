@@ -1,5 +1,6 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0, no-undefined:0, max-len:[1, 150, 2]*/
+/*jshint -W100*/
 var assert = require('power-assert');
 var typeOf = require('type-of');
 var assign = require('object-assign');

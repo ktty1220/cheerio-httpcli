@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /*eslint no-console:0, no-invalid-this:0*/
+/*jshint -W100*/
 'use strict';
 
 /**
@@ -19,7 +20,7 @@ client.fetch('http://www.google.co.jp/search', { q: word }, function (err, $, re
 
   var results = [];
   // 検索結果が個別に格納されている要素をループ
-  $('#rso .g').each(function (idx) {
+  $('#rso .g').each(function () {
     // 各検索結果のタイトル部分とURL、概要を取得
     var $h3 = $(this).find('h3');
     var url = $h3.find('a').attr('href');

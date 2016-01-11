@@ -1,6 +1,7 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0*/
 /*jscs:disable requireDotNotation*/
+/*jshint -W100*/
 var assert = require('power-assert');
 var typeOf = require('type-of');
 var each   = require('foreach');

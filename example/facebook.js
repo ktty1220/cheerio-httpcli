@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /*eslint no-console:0*/
+/*jshint -W100*/
 'use strict';
 
 /**
@@ -37,4 +38,3 @@ client.fetch('http://www.facebook.com/')
 .finally(function () {
   console.log('終了します');
 });
-
