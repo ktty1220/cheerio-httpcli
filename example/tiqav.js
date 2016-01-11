@@ -2,6 +2,8 @@
 /*eslint no-console:0,no-invalid-this:0*/
 'use strict';
 
+var C = require('colors/safe');
+
 /**
  * tiqav画像取得サンプル
  */
@@ -23,27 +25,32 @@ client.download
   var file = stream.url.pathname.match(/([^\/]+)$/)[1];
   var savepath = path.join(imgdir, file);
   stream.pipe(fs.createWriteStream(savepath));
-  console.log(stream.url.href + 'を' + savepath + 'にダウンロードしました');
-  console.log('[ダウンロード状況]', this.state);
+  console.log(C.green('SUCCESS'), C.blue(stream.url.href) + ' => ' + C.yellow(savepath));
+  console.log(C.magenta('STATE'), this.state);
 })
 .on('error', function (err) {
   // ダウンロード失敗時の処理(各ファイルごとに呼ばれる)
-  console.log('画像取得エラー', err);
-  console.log('[ダウンロード状況]', this.state);
+  console.log(C.red('ERROR'), err);
+  console.log(C.magenta('STATE'), this.state);
+})
+.on('end', function (err) {
+  // ダウンロードキューが空になった時の処理
+  console.log(C.green.bold('COMPLETE'), this.state);
 });
 
 
 // fetch start
-console.log('tiqavにアクセスします');
+console.log(C.cyan('INFO'), 'tiqavにアクセスします');
 client.fetch('http://tiqav.com/')
 .then(function (result) {
   // 画像を根こそぎダウンロード
-  result.$('.box img').download();
+  var $imgs = result.$('.box img');
+  console.log(C.cyan('INFO'), $imgs.length + '個の画像があります');
+  $imgs.download();
 })
 .catch(function (err) {
-  console.log('エラーが発生しました');
-  console.log(err);
+  console.log(C.red('ERROR'), err);
 })
 .finally(function () {
-  console.log('スクレイピングを終了します');
+  console.log(C.cyan('INFO'), 'スクレイピングが終了しました');
 });

@@ -4,13 +4,14 @@ var assert   = require('power-assert');
 var helper   = require('./_helper');
 var cli      = require('../index');
 var isSteram = require('isstream');
+var devNull  = require('dev-null');
 
-// TODO ダウンロードマネージャー未設定
 describe('cheerio:download', function () {
   beforeEach(function () {
     cli.download.state = { queue: 0, complete: 0, error: 0 };
     cli.download.removeAllListeners();
     cli.download.clearCache();
+    cli.download.on('ready', function () {});
   });
   afterEach(function () {
     cli.timeout = 30000;
@@ -29,15 +30,18 @@ describe('cheerio:download', function () {
   });
 
   describe('同時実行数指定', function () {
+    after(function () {
+      cli.download.parallel = 3;
+    });
+
     it('1未満', function (done) {
       cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
         try {
           cli.download.parallel = 0;
           $('.rel').download();
+          throw new Error('not thrown');
         } catch (e) {
           assert(e.message === 'valid download parallel range is 1 and 5');
-        } finally {
-          cli.download.parallel = 5;
         }
         done();
       });
@@ -48,12 +52,40 @@ describe('cheerio:download', function () {
         try {
           cli.download.parallel = 6;
           $('.rel').download();
+          throw new Error('not thrown');
         } catch (e) {
           assert(e.message === 'valid download parallel range is 1 and 5');
-        } finally {
-          cli.download.parallel = 5;
         }
         done();
+      });
+    });
+  });
+
+  describe('URL登録', function () {
+    it('二重登録不可', function (done) {
+      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+        $('.rel').download();
+        setTimeout(function () {
+          $('.rel').download();
+          setTimeout(function () {
+            assert.deepEqual(cli.download.state, { queue: 0, complete: 1, error: 0 });
+            done();
+          }, 100);
+        }, 100);
+      });
+    });
+
+    it('clearCahce()後は再度登録可能', function (done) {
+      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+        $('.rel').download();
+        setTimeout(function () {
+          cli.download.clearCache();
+          $('.rel').download();
+          setTimeout(function () {
+            assert.deepEqual(cli.download.state, { queue: 0, complete: 2, error: 0 });
+            done();
+          }, 100);
+        }, 100);
       });
     });
   });
@@ -77,25 +109,67 @@ describe('cheerio:download', function () {
     });
   });
 
-  it('stream.toBuffer()でBuffer化される', function (done) {
-    cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-      cli.download
-      .on('ready', function (stream) {
-        var img = helper.url('img') + '/img/cat.png';
-        assert(stream.url.href === img);
-        assert(stream.type === 'image/png');
-        assert(stream.length === 15572);
-        stream.toBuffer((function (err, buffer) {
-          var expected = helper.readBuffer('fixtures/img/img/cat.png');
-          assert.deepEqual(buffer, expected);
-          assert.deepEqual(this.state, { queue: 0, complete: 1, error: 0 });
-          done();
-        }).bind(this));
-      })
-      .on('error', function (e) {
-        throw e;
+  describe('stream.toBuffer()', function () {
+    it('streamがBuffer化される', function (done) {
+      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+        cli.download
+        .on('ready', function (stream) {
+          var img = helper.url('img') + '/img/cat.png';
+          assert(stream.url.href === img);
+          assert(stream.type === 'image/png');
+          assert(stream.length === 15572);
+          stream.toBuffer((function (err, buffer) {
+            var expected = helper.readBuffer('fixtures/img/img/cat.png');
+            assert.deepEqual(buffer, expected);
+            assert.deepEqual(this.state, { queue: 0, complete: 1, error: 0 });
+            done();
+          }).bind(this));
+        })
+        .on('error', function (e) {
+          throw e;
+        });
+        assert($('.rel').download() === 1);
       });
-      assert($('.rel').download() === 1);
+    });
+
+    it('stream使用後に実行 => 例外', function (done) {
+      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+        cli.download
+        .on('ready', function (stream) {
+          stream.pipe(devNull());
+          try {
+            stream.toBuffer(function (err, buffer) {
+              throw new Error('not thrown');
+            });
+          } catch (e) {
+            assert(e.message === 'stream has already been read');
+          }
+          done();
+        })
+        .on('error', function (e) {
+          throw e;
+        });
+        assert($('.rel').download() === 1);
+      });
+    });
+
+    it('コールバック未設定 => 例外', function (done) {
+      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+        cli.download
+        .on('ready', function (stream) {
+          stream.pipe(devNull());
+          try {
+            stream.toBuffer();
+          } catch (e) {
+            assert(e.message === 'callback is not function');
+            return done();
+          }
+        })
+        .on('error', function (e) {
+          throw e;
+        });
+        assert($('.rel').download() === 1);
+      });
     });
   });
 
@@ -281,6 +355,19 @@ describe('cheerio:download', function () {
         });
         assert($('.lazy2').download([]) === 1);
       });
+    });
+  });
+
+  it('#ダウンロードマネージャー未設定', function (done) {
+    cli.download.removeAllListeners('ready');
+    cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
+      try {
+        $('.rel').download();
+        throw new Error('not thrown');
+      } catch (e) {
+        assert(e.message === 'download manager configured no event');
+      }
+      done();
     });
   });
 });

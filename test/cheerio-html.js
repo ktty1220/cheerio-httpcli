@@ -9,7 +9,7 @@ describe('cheerio:html', function () {
     cli.fetch(helper.url('entities', 'hex'), function (err, $, res, body) {
       helper.hookStderr(function (unhook) {
         $('h1')._html();
-        var expected = '[DEPRICATED] _html() will be removed on v0.5.0.)';
+        var expected = '[DEPRICATED] _html() will be removed in the future)';
         var actual = unhook();
         assert(actual === expected);
         done();
@@ -21,7 +21,7 @@ describe('cheerio:html', function () {
     cli.fetch(helper.url('entities', 'hex'), function (err, $, res, body) {
       helper.hookStderr(function (unhook) {
         $('h1')._text();
-        var expected = '[DEPRICATED] _text() will be removed on v0.5.0.)';
+        var expected = '[DEPRICATED] _text() will be removed in the future)';
         var actual = unhook();
         assert(actual === expected);
         done();
