@@ -201,10 +201,10 @@ var client = require('cheerio-httpcli');
 var result1 = client.fetchSync('http://foo.bar.baz/');
 console.log(result1);
 // => {
-// 	 error: ...,
-// 	 $: ...,
-// 	 response: ...,
-// 	 body: ...
+//    error: ...,
+//    $: ...,
+//    response: ...,
+//    body: ...
 // }
 
 console.log(result1.$('title')); // => http://foo.bar.baz/のタイトルが表示される
@@ -425,14 +425,14 @@ var client = require('cheerio-httpcli');
 
 // fetch()は非同期で行ってその中で同期リクエストする場合
 client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
-	var result = $('a#login').clickSync();
-	console.log(result);
+  var result = $('a#login').clickSync();
+  console.log(result);
   // => {
-	//  		error: ...,
-	//  		$: ...,
-	//  		response: ...,
-	//  		body: ...
-	//  	}
+  //      error: ...,
+  //      $: ...,
+  //      response: ...,
+  //      body: ...
+  //    }
 });
 ```
 
@@ -496,9 +496,9 @@ client.fetch('http://hogehoge/')
 
 ```html
 <form>
-	<input type="text" name="user" value="guest">
-	<input type="submit" name="edit" value="edit">
-	<input type="submit" name="delete" value="delete">
+  <input type="text" name="user" value="guest">
+  <input type="submit" name="edit" value="edit">
+  <input type="submit" name="delete" value="delete">
 </form>
 ```
 
@@ -528,15 +528,15 @@ var client = require('cheerio-httpcli');
 
 // トップページにアクセス(ここも同期リクエストにすることも可能)
 client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
-	// 同期リクエストでログインページに移動
-	var result1 = $('a#login').clickSync();
-	// 同期リクエストでログインフォーム送信
-	var result2 = result1.$('form[name=login]').submitSync({
-		account: 'guest',
-		password: 'guest'
-	});
-	// ログイン結果確認
-	console.log(result2.response.statusCode);
+  // 同期リクエストでログインページに移動
+  var result1 = $('a#login').clickSync();
+  // 同期リクエストでログインフォーム送信
+  var result2 = result1.$('form[name=login]').submitSync({
+    account: 'guest',
+    password: 'guest'
+  });
+  // ログイン結果確認
+  console.log(result2.response.statusCode);
 });
 ```
 
@@ -572,8 +572,8 @@ $('form[name=login]').field('multi-select', [ 'hoge', 'fuga', 'piyo' ]);
 ```js
 // 一括で設定
 $('form[name=login]').field({
-	user: 'foo',
-	pass: 'bar'
+  user: 'foo',
+  pass: 'bar'
 });
 ```
 
@@ -585,10 +585,10 @@ $('form[name=login]').field({
 // 一括で取得
 $('form[name=login]').field();
 // => {
-// 		 user: 'foo',
-// 		 pass: 'bar',
-// 		 remember: 1
-// 	 }
+//      user: 'foo',
+//      pass: 'bar',
+//      remember: 1
+//    }
 ```
 
 #### onNotFound
@@ -779,14 +779,14 @@ var client = require('cheerio-httpcli');
 // ①ダウンロードマネージャーの設定(全ダウンロードイベントがここで処理される)
 client.download
 .on('ready', function (stream) {
-	stream.pipe(fs.createWriteStream('/path/to/image.png'));
-	console.log(stream.url.href + 'をダウンロードしました');
+  stream.pipe(fs.createWriteStream('/path/to/image.png'));
+  console.log(stream.url.href + 'をダウンロードしました');
 })
 .on('error', function (err) {
-	console.error(err.url + 'をダウンロードできませんでした: ' + err.message);
+  console.error(err.url + 'をダウンロードできませんでした: ' + err.message);
 })
 .on('end', function (err) {
-	console.log('ダウンロードが完了しました');
+  console.log('ダウンロードが完了しました');
 });
 
 // ④並列ダウンロード制限の設定
@@ -794,9 +794,9 @@ client.download.parallel = 4;
 
 // ②スクレイピング開始
 client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
-	// ③class="thumbnail"の画像を全部ダウンロード
-	$('img.thumbnail').download();
-	console.log('OK!');
+  // ③class="thumbnail"の画像を全部ダウンロード
+  $('img.thumbnail').download();
+  console.log('OK!');
 });
 ```
 
