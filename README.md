@@ -523,7 +523,7 @@ $('form').submit(); // => '?user=guest'
 * 呼び出し時のパラメータは`submit()`のプロミス形式と同様です。
 * 戻り値はプロミス形式の`then`に渡されるオブジェクトと同様の形式です。
 
-```js:submitSync()例
+```js
 var client = require('cheerio-httpcli');
 
 // トップページにアクセス(ここも同期リクエストにすることも可能)
