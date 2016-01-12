@@ -645,7 +645,7 @@ $('input[type=radio]').untick();              // => 全ラジオボタンを非�
 
 ### $(_link-element_ or _image-element_).url([ filter, src-attr ])
 
-`a`要素の`href`、もしくは`img`要素の`src`のURLを完全な形(絶対パス)にしたものを取得します。元から完全なURLになっている場合(外部リンクなど)はその内容をそのまま返します。また、`javascript:void(0)`といったURLでないリンクの場合は`undefined`を返します。
+`a`要素の`href`、もしくは`img`要素の`src`のURLを完全な形(絶対パス)にしたものを取得します。元から完全なURLになっている場合(外部リンクなど)や`javascript:void(0)`といったURLでないリンクはその内容をそのまま返します。
 
 ```html
 <a id="top" href="../index.html">トップページ</a>
@@ -698,7 +698,7 @@ console.log($('a').url();
 // => [
 //      'http://foo.bar.baz/page2.html',
 //      'http://foo.bar.baz/#foo',
-//      undefined,
+//      'javascript:hogehoge();',
 //      'https://www.yahoo.com/'
 //    ]
 
