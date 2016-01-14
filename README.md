@@ -43,6 +43,7 @@ npm install cheerio-httpcli
   * [timeout](#timeout)
   * [gzip](#gzip)
   * [referer](#referer)
+  * [followMetaRefresh](#followmetarefresh)
   * [maxDataSize](#maxdatasize)
   * [debug](#debug)
   * [download](#download)
@@ -300,6 +301,10 @@ requestモジュールで指定するタイムアウト情報をミリ秒で指�
 ### referer
 
 リファラを自動でセットするかどうかの指定です。`true`にすると1つ前に`fetch()`したページのURLが自動でリクエストヘッダのRefererにセットされます。デフォルトは`true`です。
+
+### followMetaRefresh
+
+`<meta http-equiv="refresh" content="0;URL=...">`といったMETAタグをHTML内に発見した場合に自動でそのURLにリダイレクトします。ただし、`<!--[if IE]>〜<![endif]-->`のようなIE条件付きコメント内にある場合はリダイレクトしません。デフォルトは`true`です。
 
 ### maxDataSize
 

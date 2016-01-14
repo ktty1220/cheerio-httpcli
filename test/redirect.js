@@ -35,9 +35,22 @@ describe('redirect', function () {
   });
 
   describe('meta refresh', function () {
+    beforeEach(function () {
+      cli.followMetaRefresh = true;
+    });
+
     it('meta[refresh]タグを検知してリダイレクト先に飛ぶ', function (done) {
       var url = helper.url('form', 'utf-8');
       cli.fetch(helper.url('refresh', 'all'), function (err, $, res, body) {
+        assert($.documentInfo().url === url);
+        done();
+      });
+    });
+
+    it('followMetaRefreshがfalse => meta[refresh]タグがあってもリダイレクトしない', function (done) {
+      cli.followMetaRefresh = false;
+      var url = helper.url('refresh', 'all');
+      cli.fetch(url, function (err, $, res, body) {
         assert($.documentInfo().url === url);
         done();
       });
