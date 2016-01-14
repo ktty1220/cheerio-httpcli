@@ -1,6 +1,6 @@
 {
   "name": "cheerio-httpcli",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "http client module with cheerio & iconv(-lite) & promise",
   "main": "index.js",
   "engines": {
@@ -15,6 +15,7 @@
     "todo": "leasot -S lib/**/**/* test/** example/** && true || true"
   },
   "dependencies": {
+    "async": "^1.5.2",
     "cheerio": "^0.19.0",
     "colors": "^1.1.2",
     "constants": "0.0.2",
@@ -39,9 +40,9 @@
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.1",
     "isstream": "^0.1.2",
-    "istanbul": "^0.4.1",
+    "istanbul": "^0.4.2",
     "jscs": "^2.8.0",
-    "leasot": "^3.1.1",
+    "leasot": "^3.1.2",
     "mocha": "^2.3.4",
     "mocha-clean": "^1.0.0",
     "node-static": "^0.7.7",
