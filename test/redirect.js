@@ -7,29 +7,49 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('redirect', function () {
-  it('documentInfoにリダイレクト先のURLが登録される', function (done) {
-    var url = helper.url('manual', 'euc-jp');
-    cli.fetch(helper.url('~redirect'), function (err, $, res, body) {
-      assert($.documentInfo().url === url);
-      done();
-    });
-  });
-
-  it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ', function (done) {
-    var url = helper.url('manual', 'euc-jp');
-    cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
-      $('form[name=login]').submit(function (err, $, res, body) {
-        assert(typeOf(res.cookies) === 'object');
-        assert(res.cookies.user === 'guest');
+  describe('30x', function () {
+    it('documentInfoにリダイレクト先のURLが登録される', function (done) {
+      var url = helper.url('manual', 'euc-jp');
+      cli.fetch(helper.url('~redirect'), function (err, $, res, body) {
         assert($.documentInfo().url === url);
-        assert.deepEqual(JSON.parse(res.headers['trace-route']), [
-          '/form/utf-8.html?reset_trace_route',
-          '/~redirect',
-          '/manual/euc-jp.html'
-        ]);
         done();
+      });
+    });
+
+    it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ', function (done) {
+      var url = helper.url('manual', 'euc-jp');
+      cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
+        $('form[name=login]').submit(function (err, $, res, body) {
+          assert(typeOf(res.cookies) === 'object');
+          assert(res.cookies.user === 'guest');
+          assert($.documentInfo().url === url);
+          assert.deepEqual(JSON.parse(res.headers['trace-route']), [
+            '/form/utf-8.html?reset_trace_route',
+            '/~redirect',
+            '/manual/euc-jp.html'
+          ]);
+          done();
+        });
       });
     });
   });
 
+  describe('meta refresh', function () {
+    it('meta[refresh]タグを検知してリダイレクト先に飛ぶ', function (done) {
+      var url = helper.url('form', 'utf-8');
+      cli.fetch(helper.url('refresh', 'all'), function (err, $, res, body) {
+        assert($.documentInfo().url === url);
+        done();
+      });
+    });
+
+    it('IE条件コメント内のmeta[refresh]タグはリダイレクト対象外', function (done) {
+      var url = helper.url('refresh', 'ie-only');
+      cli.fetch(url, function (err, $, res, body) {
+        assert($.documentInfo().url === url);
+        assert($('title').text() === 'Refresh IE only');
+        done();
+      });
+    });
+  });
 });
