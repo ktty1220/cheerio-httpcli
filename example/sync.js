@@ -13,6 +13,9 @@ var word = 'チュパカブラ';
 
 var client = require('../index');
 
+// [重要] google検索の場合はfollowMetaRefreshをfalseにする(README.md参照)
+client.followMetaRefresh = false;
+
 console.log('--- Bingで検索 ---');
 var result1 = client.fetchSync('http://www.bing.com/search', { q: word });
 if (result1.error) {

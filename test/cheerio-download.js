@@ -359,7 +359,7 @@ describe('cheerio:download', function () {
     });
   });
 
-  it('#ダウンロードマネージャー未設定', function (done) {
+  it('ダウンロードマネージャー未設定', function (done) {
     cli.download.removeAllListeners('ready');
     cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
       try {
