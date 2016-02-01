@@ -304,7 +304,11 @@ requestモジュールで指定するタイムアウト情報をミリ秒で指�
 
 ### followMetaRefresh
 
-`<meta http-equiv="refresh" content="0;URL=...">`といったMETAタグをHTML内に発見した場合に自動でそのURLにリダイレクトします。ただし、`<!--[if IE]>〜<![endif]-->`のようなIE条件付きコメント内にある場合はリダイレクトしません。デフォルトは`true`です。
+`<meta http-equiv="refresh" content="0;URL=...">`といったMETAタグをHTML内に発見した場合に自動でそのURLにリダイレクトします。ただし、`<!--[if IE]>〜<![endif]-->`のようなIE条件付きコメント内にある場合はリダイレクトしません。デフォルトは`false`です。
+
+> Google検索をする場合は`followMetaRefresh`は`false`にしてください。
+>
+> Googleの検索結果HTMLには常にMETAタグのRefresh指定が入っているので(しかも毎回微妙に異なるURL)、リダイレクトがループして最終的にエラーになります。
 
 ### maxDataSize
 

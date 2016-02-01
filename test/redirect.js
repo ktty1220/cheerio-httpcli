@@ -39,8 +39,17 @@ describe('redirect', function () {
       cli.followMetaRefresh = true;
     });
 
-    it('meta[refresh]タグを検知してリダイレクト先に飛ぶ', function (done) {
-      var url = helper.url('refresh', 'all');
+    it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(絶対URL)', function (done) {
+      var url = helper.url('refresh', 'absolute');
+      cli.fetch(url, function (err, $, res, body) {
+        assert($.documentInfo().url === helper.url('~info'));
+        assert(res.headers.referer === url);
+        done();
+      });
+    });
+
+    it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(相対URL)', function (done) {
+      var url = helper.url('refresh', 'relative');
       cli.fetch(url, function (err, $, res, body) {
         assert($.documentInfo().url === helper.url('~info'));
         assert(res.headers.referer === url);
@@ -50,7 +59,7 @@ describe('redirect', function () {
 
     it('followMetaRefresh:false => meta[refresh]タグがあってもリダイレクトしない', function (done) {
       cli.followMetaRefresh = false;
-      var url = helper.url('refresh', 'all');
+      var url = helper.url('refresh', 'absolute');
       cli.fetch(url, function (err, $, res, body) {
         assert($.documentInfo().url === url);
         done();

@@ -1,3 +1,9 @@
+# 0.6.3 (2016-02-01)
+
+* 依存ライブラリを最新バージョンに更新
+* followMetaRefreshが有効でMETAタグのRefresh先のURLが相対パスの時にリダイレクトできない不具合を修正
+* followMetaRefreshのデフォルトを`false`に変更
+
 # 0.6.2 (2016-01-14)
 
 * followMetaRefreshオプション追加(METAタグRefreshでリダイレクトするかどうかの指定)

@@ -13,6 +13,9 @@ var word = 'ドラえもん';
 
 var client = require('../index');
 
+// [重要] google検索の場合はfollowMetaRefreshをfalseにする(README.md参照)
+client.followMetaRefresh = false;
+
 client.fetch('http://www.google.co.jp/search', { q: word }, function (err, $, res, body) {
   if (err) {
     return console.error(err);
