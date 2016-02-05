@@ -57,8 +57,8 @@ npm install cheerio-httpcli
 ## API目次
 
 * [メソッド](#%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89)
-  * [fetch()](#fetchurl-get-param-callback)
-  * [fetchSync()](#fetchsyncurl-get-param)
+  * [fetch()](#fetchurl-get-param-encode-callback)
+  * [fetchSync()](#fetchsyncurl-get-param-encode)
   * [setBrowser()](#setbrowserbrowser-type)
   * [setIconvEngine()](#seticonvengineiconv-module-name)
 * [プロパティ](#%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3)
@@ -216,7 +216,7 @@ client.fetch(<TOPページのURL>)
 
 > `fetch()`の第3引数の`callback`関数を指定した場合はPromiseオブジェクトは返しません。したがってコールバック形式で呼び出しつつPromiseオブジェクトで何かをするということはできません。
 
-### fetchSync(url[, get-param])
+### fetchSync(url[, get-param, encode])
 
 非同期で実行される`fetch()`の同期版(リクエストが完了するまで次の行に進まない)となります。`fs.readFile()`に対する`fs.readFileSync()`の関係と同じような意味合いになります。
 

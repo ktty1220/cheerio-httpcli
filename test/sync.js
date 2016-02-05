@@ -44,6 +44,26 @@ describe('fetchSync', function () {
     assert(res.cookies.session_id === 'hahahaha');
   });
 
+  it('encodeの指定が反映される', function () {
+    var url = helper.url('unknown', 'shift_jis');
+    var result = cli.fetchSync(url, {}, 'sjis');
+    assert.deepEqual(result.$.documentInfo(), {
+      url: url,
+      encoding: 'sjis'
+    });
+    assert(result.$('title').text() === '１');
+  });
+
+  it('encodeの指定が反映される(param省略)', function () {
+    var url = helper.url('unknown', 'shift_jis');
+    var result = cli.fetchSync(url, 'sjis');
+    assert.deepEqual(result.$.documentInfo(), {
+      url: url,
+      encoding: 'sjis'
+    });
+    assert(result.$('title').text() === '１');
+  });
+
   it('エラー => エラー内容を取得できる', function () {
     var url = helper.url('~404');
     var result = cli.fetchSync(url, { hoge: 'fuga' });

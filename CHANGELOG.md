@@ -1,3 +1,9 @@
+# 0.6.5 (2016-02-05)
+
+* `fetch()`時に`get-param`を省略して`encode`を指定した時の引数調整がまだおかしかったのを修正
+* `fetchSync()`のエンコーディング指定オプションの説明を修正
+* README.mdのアンカー設定の修正
+
 # 0.6.4 (2016-02-05)
 
 * `fetch()`時に`get-param`を省略して`encode`を指定した時の引数調整がおかしかったのを修正
@@ -6,12 +12,12 @@
 # 0.6.3 (2016-02-01)
 
 * 依存ライブラリを最新バージョンに更新
-* followMetaRefreshが有効でMETAタグのRefresh先のURLが相対パスの時にリダイレクトできない不具合を修正
-* followMetaRefreshのデフォルトを`false`に変更
+* `followMetaRefresh`が有効でMETAタグのRefresh先のURLが相対パスの時にリダイレクトできない不具合を修正
+* `followMetaRefresh`のデフォルトを`false`に変更
 
 # 0.6.2 (2016-01-14)
 
-* followMetaRefreshオプション追加(METAタグRefreshでリダイレクトするかどうかの指定)
+* `followMetaRefresh`オプション追加(METAタグRefreshでリダイレクトするかどうかの指定)
 
 # 0.6.1 (2016-01-14)
 
@@ -55,7 +61,7 @@
 
 # 0.3.7 (2015-11-15)
 
-* 受信サイズ制限オプション(maxDataSize)追加(#8)
+* 受信サイズ制限オプション(`maxDataSize`)追加(#8)
 * フォーム送信時のパラメータ名がURLエンコードされていなかったのを修正
 * 不必要な空GETパラメータが入ってフォーム送信が上手く行かないケースを修正
 
