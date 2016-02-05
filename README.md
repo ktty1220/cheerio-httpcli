@@ -24,6 +24,30 @@ Node.jsでWEBページのスクレイピングを行う際に必要となる文�
 
 > 静的なHTMLをベースに処理するモジュールなのでSPAなどクライアントサイドのJavaScriptによってコンテンツを取得/変更するタイプのWEBページには対応していません。
 
+## サンプル
+
+```js
+var client = require('cheerio-httpcli');
+
+// Googleで「node.js」について検索する。
+var word = 'node.js';
+
+client.fetch('http://www.google.com/search', { q: word }, function (err, $, res, body) {
+  // レスポンスヘッダを参照
+  console.log(res.headers);
+
+  // HTMLタイトルを表示
+  console.log($('title').text());
+
+  // リンク一覧を表示
+  $('a').each(function (idx) {
+    console.log($(this).attr('href'));
+  });
+});
+```
+
+同梱の「example/google.js」はGoogle検索結果の一覧を取得するサンプルです。参考にしてください。
+
 ## インストール
 
 ```sh
@@ -62,7 +86,7 @@ npm install cheerio-httpcli
 
 ## メソッド
 
-### fetch(url[, get-param, callback])
+### fetch(url[, get-param, encode, callback])
 
 `url`で指定したWEBページをGETメソッドで取得し、文字コードの変換とHTMLパースを行い`callback`関数に返します。
 
@@ -73,31 +97,34 @@ npm install cheerio-httpcli
 3. requestモジュールの`response`オブジェクト(独自拡張版)
 4. UTF-8に変換したHTMLコンテンツ
 
-GET時にパラメータを付加する場合は第2引数の`get-param`に連想配列で指定します。
+#### 各種引数の指定
 
-##### サンプル
+* GET時にパラメータ(`?foo=bar&hoge=fuga`)を付加する場合は第2引数の`get-param`に連想配列で指定します。
+* 予め取得対象のWEBページのエンコーディングが分かっている場合は`encode`に`sjis`や`euc-jp`などの文字列をセットすることで自動判定による誤判定(滅多に発生しませんが)を防止することができます。
+* `get-param`、`encode`、場合によっては`callback`も省略可能です。
 
-```js
-var client = require('cheerio-httpcli');
+    ```js
+    // get-paramとencodeを省略 => GETパラメータ指定なし & エンコーディング自動判定
+    client.fetch('http://hogehoge.com/fuga.html', function (err, $, res, body) {
+      ...
+    });
 
-// Googleで「node.js」について検索する。
-var word = 'node.js';
+    // get-paramを省略 => GETパラメータ指定なし & エンコーディング指定(sjis)
+    client.fetch('http://hogehoge.com/fuga.html', 'sjis', function (err, $, res, body) {
+      ...
+    });
 
-client.fetch('http://www.google.com/search', { q: word }, function (err, $, res, body) {
-  // レスポンスヘッダを参照
-  console.log(res.headers);
+    // encodeを省略 => GETパラメータ指定(?foo=bar) & エンコーディング自動判定
+    client.fetch('http://hogehoge.com/fuga.html', { foo: 'bar' }, function (err, $, res, body) {
+      ...
+    });
 
-  // HTMLタイトルを表示
-  console.log($('title').text());
-
-  // リンク一覧を表示
-  $('a').each(function (idx) {
-    console.log($(this).attr('href'));
-  });
-});
-```
-
-同梱の「example/google.js」はGoogle検索結果の一覧を取得するサンプルです。参考にしてください。
+    // url以外全部省略 => GETパラメータ指定なし & エンコーディング自動判定 & プロミス形式(後述)
+    client.fetch('http://hogehoge.com/fuga.html')
+    .then(function (result) {
+      ...
+    });
+    ```
 
 #### プロミス形式での呼び出し
 
