@@ -96,4 +96,28 @@ describe('encoding:unknown', function () {
       done();
     });
   });
+
+  it('fetch時にエンコーディング指定 => shift_jisとして処理される', function (done) {
+    var url = helper.url('unknown', 'shift_jis');
+    cli.fetch(url, {}, 'sjis', function (err, $, res, body) {
+      assert.deepEqual($.documentInfo(), {
+        url: url,
+        encoding: 'sjis'
+      });
+      assert($('title').text() === '１');
+      done();
+    });
+  });
+
+  it('fetch時にエンコーディング指定(param省略) => shift_jisとして処理される', function (done) {
+    var url = helper.url('unknown', 'shift_jis');
+    cli.fetch(url, 'sjis', function (err, $, res, body) {
+      assert.deepEqual($.documentInfo(), {
+        url: url,
+        encoding: 'sjis'
+      });
+      assert($('title').text() === '１');
+      done();
+    });
+  });
 });
