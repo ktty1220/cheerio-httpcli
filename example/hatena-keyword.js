@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*eslint no-console:0, no-invalid-this:0*/
+/*eslint no-invalid-this:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -13,28 +13,27 @@ var word = 'ネッシー';
 
 var client = require('../index');
 
-console.log('はてなキーワードTOPページにアクセスします');
+console.info('はてなキーワードTOPページにアクセスします');
 client.fetch('http://d.hatena.ne.jp/keyword/')
 .then(function (result) {
-  console.log('最近更新されたキーワード一覧');
+  console.info('最近更新されたキーワード一覧');
   var $ = result.$;
   $('#updatekeywords ul li .name').each(function () {
     // NEW!は邪魔なので削除
     $('.new', $(this)).remove();
-    console.log('* ' + $(this).text());
+    console.info('* ' + $(this).text());
   });
-  console.log('「' + word + '」を検索します');
+  console.info('「' + word + '」を検索します');
   return $('#index-search').submit({
     word: word
   });
 })
 .then(function (result) {
-  console.log(result.$('.keyword-body').text().trim().replace(/[\u0009\u3000]/g, ''));
+  console.info(result.$('.keyword-body').text().trim().replace(/[\u0009\u3000]/g, ''));
 })
 .catch(function (err) {
-  console.log('エラーが発生しました');
-  console.log(err);
+  console.error('エラーが発生しました', err);
 })
 .finally(function () {
-  console.log('終了します');
+  console.info('終了します');
 });

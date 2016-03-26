@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*eslint no-console:0, no-invalid-this:0*/
+/*eslint no-invalid-this:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -18,7 +18,8 @@ client.followMetaRefresh = false;
 
 client.fetch('http://www.google.co.jp/search', { q: word }, function (err, $, res, body) {
   if (err) {
-    return console.error(err);
+    console.error(err);
+    return;
   }
 
   var results = [];
@@ -36,5 +37,5 @@ client.fetch('http://www.google.co.jp/search', { q: word }, function (err, $, re
     }
   });
 
-  console.log(results);
+  console.info(results);
 });

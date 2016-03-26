@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*eslint no-console:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -13,10 +12,10 @@ var str = 'お前はもう死んでいる';
 
 var client = require('../index');
 
-console.log('デバッグオプションを有効にします');
+console.info('デバッグオプションを有効にします');
 client.debug = true;
 
-console.log('excite翻訳ページにアクセスします');
+console.info('excite翻訳ページにアクセスします');
 client.fetch('http://www.excite.co.jp/world/')
 .then(function (result) {
   return result.$('#formTrans').submit({
@@ -25,12 +24,11 @@ client.fetch('http://www.excite.co.jp/world/')
   });
 })
 .then(function (result) {
-  console.log('「' + str + '」=>「' + result.$('#after').val() + '」');
+  console.info('「' + str + '」=>「' + result.$('#after').val() + '」');
 })
 .catch(function (err) {
-  console.log('エラーが発生しました');
-  console.log(err);
+  console.error('エラーが発生しました', err);
 })
 .finally(function () {
-  console.log('終了します');
+  console.info('終了します');
 });

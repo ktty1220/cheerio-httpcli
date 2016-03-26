@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*eslint no-console:0,no-invalid-this:0*/
+/*eslint no-invalid-this:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -26,32 +26,32 @@ client.download
   var file = stream.url.pathname.match(/([^\/]+)$/)[1];
   var savepath = path.join(imgdir, file);
   stream.pipe(fs.createWriteStream(savepath));
-  console.log(C.green('SUCCESS'), C.blue(stream.url.href) + ' => ' + C.yellow(savepath));
-  console.log(C.magenta('STATE'), this.state);
+  console.info(C.green('SUCCESS'), C.blue(stream.url.href) + ' => ' + C.yellow(savepath));
+  console.info(C.magenta('STATE'), this.state);
 })
 .on('error', function (err) {
   // ダウンロード失敗時の処理(各ファイルごとに呼ばれる)
-  console.log(C.red('ERROR'), err);
-  console.log(C.magenta('STATE'), this.state);
+  console.error(C.red('ERROR'), err);
+  console.info(C.magenta('STATE'), this.state);
 })
 .on('end', function (err) {
   // ダウンロードキューが空になった時の処理
-  console.log(C.green.bold('COMPLETE'), this.state);
+  console.info(C.green.bold('COMPLETE'), this.state);
 });
 
 
 // fetch start
-console.log(C.cyan('INFO'), 'tiqavにアクセスします');
+console.info(C.cyan('INFO'), 'tiqavにアクセスします');
 client.fetch('http://tiqav.com/')
 .then(function (result) {
   // 画像を根こそぎダウンロード
   var $imgs = result.$('.box img');
-  console.log(C.cyan('INFO'), $imgs.length + '個の画像があります');
+  console.info(C.cyan('INFO'), $imgs.length + '個の画像があります');
   $imgs.download();
 })
 .catch(function (err) {
-  console.log(C.red('ERROR'), err);
+  console.error(C.red('ERROR'), err);
 })
 .finally(function () {
-  console.log(C.cyan('INFO'), 'スクレイピングが終了しました');
+  console.info(C.cyan('INFO'), 'スクレイピングが終了しました');
 });

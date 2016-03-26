@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*eslint no-console:0, no-invalid-this:0*/
+/*eslint no-invalid-this:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -16,7 +16,7 @@ var client = require('../index');
 // [重要] google検索の場合はfollowMetaRefreshをfalseにする(README.md参照)
 client.followMetaRefresh = false;
 
-console.log('--- Bingで検索 ---');
+console.info('--- Bingで検索 ---');
 var result1 = client.fetchSync('http://www.bing.com/search', { q: word });
 if (result1.error) {
   console.error(result1.error);
@@ -36,10 +36,10 @@ if (result1.error) {
       });
     }
   });
-  console.log(results1);
+  console.info(results1);
 }
 
-console.log('\n--- Googleで検索 ---');
+console.info('\n--- Googleで検索 ---');
 var result2 = client.fetchSync('http://www.google.co.jp/search', { q: word });
 if (result2.error) {
   console.error(result2.error);
@@ -59,5 +59,5 @@ if (result2.error) {
       });
     }
   });
-  console.log(results2);
+  console.info(results2);
 }

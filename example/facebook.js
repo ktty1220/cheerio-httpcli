@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*eslint no-console:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -17,24 +16,23 @@ var password = 'fugafuga';
 
 var client = require('../index');
 
-console.log('facebookTOPページにアクセスします');
+console.info('facebookTOPページにアクセスします');
 client.fetch('http://www.facebook.com/')
 .then(function (result) {
-  console.log('ログインフォームを送信します');
+  console.info('ログインフォームを送信します');
   return result.$('#login_form').submit({
     email: username,
     pass: password
   });
 })
 .then(function (result) {
-  console.log('クッキー', result.response.cookies);
-  console.log('ユーザー名を取得します');
-  console.log(result.$('._2dpb').text());
+  console.info('クッキー', result.response.cookies);
+  console.info('ユーザー名を取得します');
+  console.info(result.$('._2dpb').text());
 })
 .catch(function (err) {
-  console.log('エラーが発生しました');
-  console.log(err);
+  console.error('エラーが発生しました', err);
 })
 .finally(function () {
-  console.log('終了します');
+  console.info('終了します');
 });

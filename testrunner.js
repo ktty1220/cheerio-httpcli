@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*eslint no-console:0*/
 
 var Mocha = require('mocha');
 var path  = require('path');

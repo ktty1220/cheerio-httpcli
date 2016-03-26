@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*eslint no-console:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -14,36 +13,35 @@ var password = 'fugafuga';
 
 var client = require('../index');
 
-console.log('ニコニコTOPページにアクセスします');
+console.info('ニコニコTOPページにアクセスします');
 client.fetch('http://nicovideo.jp/')
 .then(function (result) {
-  console.log('ログインリンクをクリックします');
+  console.info('ログインリンクをクリックします');
   return result.$('#sideNav .loginBtn').click();
 })
 .then(function (result) {
-  console.log('ログインフォームを送信します');
+  console.info('ログインフォームを送信します');
   return result.$('#login_form').submit({
     mail_tel: username,
     password: password
   });
 })
 .then(function (result) {
-  console.log('ログイン可否をチェックします');
+  console.info('ログイン可否をチェックします');
   if (! result.response.headers['x-niconico-id']) {
     throw new Error('login failed');
   }
-  console.log('クッキー', result.response.cookies);
-  console.log('マイページに移動します');
+  console.info('クッキー', result.response.cookies);
+  console.info('マイページに移動します');
   return client.fetch('http://www.nicovideo.jp/my/top');
 })
 .then(function (result) {
-  console.log('マイページに表示されるアカウント名を取得します');
-  console.log(result.$('#siteHeaderUserNickNameContainer').text());
+  console.info('マイページに表示されるアカウント名を取得します');
+  console.info(result.$('#siteHeaderUserNickNameContainer').text());
 })
 .catch(function (err) {
-  console.log('エラーが発生しました');
-  console.log(err);
+  console.error('エラーが発生しました', err);
 })
 .finally(function () {
-  console.log('終了します');
+  console.info('終了します');
 });

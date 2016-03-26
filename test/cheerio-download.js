@@ -160,7 +160,7 @@ describe('cheerio:download', function () {
         .on('ready', function (stream) {
           stream.pipe(devNull());
           try {
-            stream.toBuffer();
+            return stream.toBuffer();
           } catch (e) {
             assert(e.message === 'callback is not function');
             return done();
@@ -279,6 +279,7 @@ describe('cheerio:download', function () {
           if (eIdx === expected.length) {
             return done();
           }
+          /*eslint-disable consistent-return*/ return; /*eslint-enable consistent-return*/
         }).bind(this));
       })
       .on('error', function (e) {

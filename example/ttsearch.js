@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*eslint no-console:0, no-invalid-this:0*/
+/*eslint no-invalid-this:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -28,12 +28,11 @@ client.fetch('http://ttsearch.net/')
       url: $(this).attr('href')
     });
   });
-  console.log(results);
+  console.info(results);
 })
 .catch(function (err) {
-  console.log('エラーが発生しました');
-  console.log(err);
+  console.error('エラーが発生しました', err);
 })
 .finally(function () {
-  console.log('終了します');
+  console.info('終了します');
 });

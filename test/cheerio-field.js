@@ -518,4 +518,38 @@ describe('cheerio:field', function () {
       });
     });
   });
+
+  describe('値セット系はメソッドチェーン可能', function () {
+    it('単一値', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var $form = $('form[name=login]');
+        var expected = assign($form.field(), {
+          user: 'foobar',
+          password: 'hogefuga'
+        });
+        $form.field('user', expected.user).field('password', expected.password);
+        assert.deepEqual($form.field(), expected);
+        done();
+      });
+    });
+
+    it('連想配列', function (done) {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        var set1 = {
+          password: 'bar',
+          custom_string: 'foo'
+        };
+        var set2 = {
+          message: 'hello world!',
+          custom_array: [ 'aaa', 'bbb', 'ccc' ]
+        };
+        var $form = $('form[name=login]');
+        var expected = assign($form.field(), set1, set2);
+        delete expected.custom_string;
+        $form.field(set1).field(set2, 'append');
+        assert.deepEqual($form.field(), expected);
+        done();
+      });
+    });
+  });
 });

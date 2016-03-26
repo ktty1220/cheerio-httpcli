@@ -1,4 +1,4 @@
-/*eslint quote-props:0, max-statements:[1, 50]*/
+/*eslint max-statements:[1, 50]*/
 /*jshint -W100*/
 var nstatic = require('node-static');
 var http    = require('http');
@@ -142,6 +142,7 @@ module.exports = {
           res.setHeader('trace-route', JSON.stringify(_traceRoute));
           file.serve(req, res);
         }, parseInt(wait, 10));
+        /*eslint-disable consistent-return*/ return; /*eslint-enable consistent-return*/
       }).resume();
     }).listen(this.port, '0.0.0.0', function () {
       process.stderr.write('%%% server start %%%');
@@ -176,6 +177,7 @@ module.exports = {
    */
   escapedParam: function () {
     /*jscs:disable disallowQuotedKeysInObjects*/
+    /*eslint-disable quote-props*/
     return {
       'あいうえお': {
         'utf-8': '%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A',
@@ -234,6 +236,7 @@ module.exports = {
       }
     };
     /*jscs:enable disallowQuotedKeysInObjects*/
+    /*eslint-enable quote-props*/
   },
 
   /**

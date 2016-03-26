@@ -34,7 +34,7 @@ describe('referer:enable', function () {
 describe('referer:disable', function () {
   it('Referer自動設定を無効 => Refererはセットされない', function (done) {
     cli.referer = false;
-    delete(cli.headers.Referer);
+    delete cli.headers.Referer;
     var url = helper.url('auto', 'euc-jp');
     cli.fetch(url, function (err, $, res, body) {
       cli.fetch(helper.url('~info'), function (err, $, res, body) {

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*eslint no-console:0*/
 /*jshint -W100*/
 'use strict';
 
@@ -16,17 +15,17 @@ client.setBrowser('googlebot');
 // Yahooのトップページを取得
 client.fetch('http://www.yahoo.co.jp/')
 .then(function (result) {
-  console.log('<then>', result.$('title').text());
+  console.info('<then>', result.$('title').text());
   // Googleのトップページを取得
   return client.fetch('http://www.google.co.jp/');
 }).then(function (result) {
-  console.log('<then>', result.$('title').text());
+  console.info('<then>', result.$('title').text());
   // 例外を発生させる
   throw new Error('<error>');
 }).catch(function (err) {
   // 例外発生時の処理
-  console.log('<catch>', err);
+  console.error('<catch>', err);
 }).finally(function () {
   // 最終的に必ず実行される処理
-  console.log('<finally>');
+  console.info('<finally>');
 });
