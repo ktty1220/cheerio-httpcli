@@ -22,7 +22,7 @@ describe('promise:fetch', function () {
     promise.finally(done);
   });
 
-  it('promiseによるfetchが正常に完了 => then->finallyが呼ばれる', function (done) {
+  it('promiseによるfetchが正常に完了 => then->finallyが呼ばれる', function () {
     var called = 0;
     return cli.fetch(helper.url('auto', 'shift_jis'))
     .then(function (result) {
@@ -36,11 +36,10 @@ describe('promise:fetch', function () {
     })
     .finally(function () {
       assert(called === 1);
-      done();
     });
   });
 
-  it('promiseによるfetchでエラーが発生 => catch->finallyが呼ばれる', function (done) {
+  it('promiseによるfetchでエラーが発生 => catch->finallyが呼ばれる', function () {
     var called = { then: 0, catch: 0 };
     var url = helper.url('error', 'not-found');
     var param = { hoge: 'fuga' };
@@ -60,7 +59,6 @@ describe('promise:fetch', function () {
     })
     .finally(function () {
       assert.deepEqual(called, { then: 0, catch: 1 });
-      done();
     });
   });
 });
@@ -86,7 +84,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -103,11 +101,10 @@ describe('promise:click', function () {
       })
       .finally(function () {
         assert(called === 1);
-        done();
       });
     });
 
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -127,11 +124,10 @@ describe('promise:click', function () {
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
-        done();
       });
     });
 
-    it('promise作成前にclickエラーが発生 => catch->finallyが呼ばれる', function (done) {
+    it('promise作成前にclickエラーが発生 => catch->finallyが呼ばれる', function () {
       var called = { then: 0, catch: 0 };
       var url = helper.url('form', 'utf-8');
       return cli.fetch(url)
@@ -150,7 +146,6 @@ describe('promise:click', function () {
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
-        done();
       });
     });
   });
@@ -177,7 +172,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -194,15 +189,19 @@ describe('promise:click', function () {
         var h = result.response.headers;
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'checkbox=bbb&edit=' + encodeURIComponent('編集'));
+
+        var ep = 'text='
+        + encodeURIComponent('あいうえお')
+        + '&checkbox=bbb&edit='
+        + encodeURIComponent('編集');
+        assert(h['post-data'] === ep);
       })
       .finally(function () {
         assert(called === 1);
-        done();
       });
     });
 
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -223,7 +222,6 @@ describe('promise:click', function () {
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
-        done();
       });
     });
   });
@@ -250,7 +248,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -267,15 +265,19 @@ describe('promise:click', function () {
         var h = result.response.headers;
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'checkbox=bbb&delete=' + encodeURIComponent('削除'));
+
+        var ep = 'text='
+        + encodeURIComponent('あいうえお')
+        + '&checkbox=bbb&delete='
+        + encodeURIComponent('削除');
+        assert(h['post-data'] === ep);
       })
       .finally(function () {
         assert(called === 1);
-        done();
       });
     });
 
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -296,7 +298,6 @@ describe('promise:click', function () {
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
-        done();
       });
     });
   });
@@ -323,7 +324,7 @@ describe('promise:click', function () {
       });
     });
 
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function (done) {
+    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
       var called = 0;
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -340,15 +341,18 @@ describe('promise:click', function () {
         var h = result.response.headers;
         assert(h['request-url'] === '/~info');
         assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'checkbox=bbb&tweet=' + encodeURIComponent('ツイート'));
+
+        var ep = 'text='
+        + encodeURIComponent('あいうえお')
+        + '&checkbox=bbb&tweet.x=0&tweet.y=0';
+        assert(h['post-data'] === ep);
       })
       .finally(function () {
         assert(called === 1);
-        done();
       });
     });
 
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function (done) {
+    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
       var called = { then: 0, catch: 0 };
       return cli.fetch(helper.url('form', 'utf-8'))
       .then(function (result) {
@@ -369,7 +373,6 @@ describe('promise:click', function () {
       })
       .finally(function () {
         assert.deepEqual(called, { then: 0, catch: 1 });
-        done();
       });
     });
   });

@@ -1,10 +1,11 @@
-/*eslint max-statements:[1, 50]*/
+/*eslint max-statements:[1, 100]*/
 /*jshint -W100*/
 var nstatic = require('node-static');
 var http    = require('http');
 var path    = require('path');
 var strip   = require('strip-ansi');
 var each    = require('foreach');
+var random  = require('random-string');
 var fs      = require('fs');
 var qs      = require('querystring');
 
@@ -95,6 +96,18 @@ module.exports = {
           if (pdata.length > 0) {
             headers.push([ 'post-data', pdata ]);
           }
+          res.writeHead(200, headers);
+          return res.end('<html></html>');
+        }
+
+        if (/~session/.test(req.url)) {
+          // セッションID保持
+          var setCookie = (/x_session_id=/.test(req.headers.cookie || ''))
+            ? req.headers.cookie
+            : ('x_session_id=user_' + random({ length: 32 }));
+          headers = [
+            [ 'Set-Cookie', setCookie ]
+          ];
           res.writeHead(200, headers);
           return res.end('<html></html>');
         }

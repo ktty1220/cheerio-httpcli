@@ -115,15 +115,14 @@ describe('clickSync(a要素)', function () {
     });
   });
 
-  it('fetch(promise)からのclickSync => 非同期 -> 同期の流れでリンク先を取得する', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'))
+  it('fetch(promise)からのclickSync => 非同期 -> 同期の流れでリンク先を取得する', function () {
+    return cli.fetch(helper.url('form', 'utf-8'))
     .then(function (result1) {
       var result2 = result1.$('.root').clickSync();
       assert(result2.$.documentInfo().url === helper.url('~info') + '?hoge=fuga&piyo=');
       assert(typeOf(result2.response) === 'object');
       assert(typeOf(result2.$) === 'function');
       assert(typeOf(result2.body) === 'string');
-      done();
     });
   });
 
@@ -278,8 +277,8 @@ describe('submitSync', function () {
     });
   });
 
-  it('fetch(promise)からのclickSync => 非同期 -> 同期の流れでリンク先を取得する', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'))
+  it('fetch(promise)からのclickSync => 非同期 -> 同期の流れでリンク先を取得する', function () {
+    return cli.fetch(helper.url('form', 'utf-8'))
     .then(function (result1) {
       var result2 = result1.$('form[name=post]').submitSync();
       assert(result2.$.documentInfo().url === helper.url('~info'));
@@ -289,7 +288,6 @@ describe('submitSync', function () {
       assert(h['post-data'] === 'hoge=fuga');
       assert(typeOf(result2.$) === 'function');
       assert(typeOf(result2.body) === 'string');
-      done();
     });
   });
 
