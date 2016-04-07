@@ -61,6 +61,7 @@ npm install cheerio-httpcli
   * [fetchSync()](#fetchsyncurl-get-param-encode)
   * [setBrowser()](#setbrowserbrowser-type)
   * [setIconvEngine()](#seticonvengineiconv-module-name)
+  * [reset()](#reset)
 * [プロパティ](#%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3)
   * [version](#version)
   * [headers](#headers)
@@ -307,6 +308,12 @@ client.setIconvEngine('iconv-lite');
 client.fetch( ...
 ```
 
+### reset()
+
+cheerio-httpcliはシングルインスタンスで動作するモジュールなので、そのプロセスが動作している間は各種設定やクッキーを共有して保持し続けます。
+
+`reset()`を実行すると、設定情報やクッキーをすべて初期化してプロセス起動時と同じ状態に戻します。
+
 ## プロパティ
 
 ### version
@@ -331,7 +338,7 @@ requestモジュールで指定するタイムアウト情報をミリ秒で指�
 
 ### followMetaRefresh
 
-`<meta http-equiv="refresh" content="0;URL=...">`といったMETAタグをHTML内に発見した場合に自動でそのURLにリダイレクトします。ただし、`<!--[if IE]>〜<![endif]-->`のようなIE条件付きコメント内にある場合はリダイレクトしません。デフォルトは`false`です。
+`<meta http-equiv="refresh" content="0;URL=...">`といったMETAタグをHTML内に発見した場合に自動でそのURLにリダイレクトします。ただし、`<!--[if IE]>～<![endif]-->`のようなIE条件付きコメント内にある場合はリダイレクトしません。デフォルトは`false`です。
 
 > Google検索をする場合は`followMetaRefresh`は`false`にしてください。
 >
