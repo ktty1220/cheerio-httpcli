@@ -2,6 +2,8 @@
 /*eslint max-len:[1, 200, 2], no-invalid-this:0*/
 /*jshint -W100*/
 var assert = require('power-assert');
+var fs     = require('fs');
+var path   = require('path');
 var he     = require('he');
 var helper = require('./_helper');
 var cli    = require('../index');
@@ -85,6 +87,22 @@ describe('entities:decode', function () {
     cli.fetch(helper.url('entities', 'etc'), function (err, $, res, body) {
       assert($('p').data('tips') === expected.sign);
       done();
+    });
+  });
+
+  describe('$.html', function () {
+    it('元htmlにエンティティなし => そのまま取得', function (done) {
+      cli.fetch(helper.url('auto', 'utf-8'), function (err, $, res, body) {
+        assert($.html() === fs.readFileSync(path.join(__dirname, 'fixtures/auto/utf-8.html'), 'utf-8'));
+        done();
+      });
+    });
+    it('元htmlにエンティティあり => 文字列に変換されている', function (done) {
+      cli.fetch(helper.url('entities', 'sign'), function (err, $, res, body) {
+        var html = he.decode(fs.readFileSync(path.join(__dirname, 'fixtures/entities/sign.html'), 'utf-8'));
+        assert($.html() === html);
+        done();
+      });
     });
   });
 });
