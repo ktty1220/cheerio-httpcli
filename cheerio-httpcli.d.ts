@@ -2,8 +2,7 @@
  * cheerio-httpcli for TypeScript definition file (very very very alpha)
  *
  * install
- * $ typings i node -A -S
- * $ typings i cheerio -A -S
+ * $ typings i node cheerio -A -S
  * $ typings i file:node_modules/cheerio-httpcli/cheerio-httpcli.d.ts --name cheerio-httpcli -A -S
  */
 declare module Rsvp {
@@ -37,6 +36,7 @@ interface CheerioStatic {
 interface Cheerio {
   entityHtml(): string;
   entityHtml(html: string): Cheerio;
+  // TODO: cheerio拡張メソッド追加
 }
 
 declare module 'cheerio-httpcli' {
