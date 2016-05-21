@@ -1,11 +1,15 @@
 {
   "extends": "eslint:recommended",
   "env": {
-    "node": true
+    "node": true,
+    "es6": false,
+    "browser": false
   },
   "ecmaFeatures": {
     "modules": true
   },
+  "plugins": [
+  ],
   "rules": {
     "curly": 2,
     "camelcase": [1, {
@@ -35,7 +39,9 @@
     "no-duplicate-case": 2,
     "no-duplicate-imports": 2,
     "no-else-return": 2,
-    "no-empty": 1,
+    "no-empty": [1, {
+      "allowEmptyCatch": true
+    }],
     "no-empty-character-class": 2,
     "no-eq-null": 2,
     "no-eval": 2,
@@ -43,6 +49,10 @@
     "no-extend-native": 2,
     "no-extra-bind": 1,
     "no-extra-boolean-cast": 2,
+    "no-extra-parens": [0, "all", {
+      "returnAssign": false,
+      "nestedBinaryExpressions": false
+    }],
     "no-extra-semi": 2,
     "no-fallthrough": 2,
     "no-floating-decimal": 2,
@@ -92,7 +102,7 @@
     "no-unused-vars": [2, {
       "vars": "all",
       "args": "none",
-      "caughtErrors": "all"
+      "caughtErrors": "none"
     }],
     "no-use-before-define": 2,
     "no-useless-call": 2,
@@ -184,6 +194,7 @@
       "objectsInObjects": false,
       "arraysInObjects": false
     }],
+    "object-property-newline": 0,
     "no-trailing-spaces": [2, {
       "skipBlankLines": false
     }],
