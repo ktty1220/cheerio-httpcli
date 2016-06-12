@@ -7,15 +7,15 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "node testrunner.js && true || true",
-    "cov": "istanbul cover -x index.js -x testrunner.js testrunner.js -- -R nyan && true || true",
-    "lint": "eslint lib test example --ext .js && true || true",
-    "cs": "jscs lib test example && true || true",
-    "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=iconv-lite,os-locale,espower-loader && true || true",
-    "todo": "leasot -S lib/**/**/* test/** example/** && true || true"
+    "test": "node testrunner.js || true",
+    "cov": "istanbul cover -x index.js -x testrunner.js testrunner.js -- -R nyan || true",
+    "lint": "eslint lib test example --ext .js || true",
+    "cs": "jscs lib test example || true",
+    "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=iconv-lite,os-locale,espower-loader || true",
+    "todo": "leasot -S lib/**/**/* test/** example/** || true"
   },
   "dependencies": {
-    "async": "^2.0.0-rc.5",
+    "async": "^2.0.0-rc.6",
     "cheerio": "^0.20.0",
     "colors": "^1.1.2",
     "constants": "0.0.2",
@@ -36,14 +36,14 @@
   },
   "devDependencies": {
     "dev-null": "^0.1.1",
-    "eslint": "^2.10.2",
+    "eslint": "^2.12.0",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.1",
     "isstream": "^0.1.2",
     "istanbul": "^0.4.3",
-    "jscs": "^3.0.3",
+    "jscs": "^3.0.4",
     "leasot": "^3.2.2",
-    "mocha": "^2.4.5",
+    "mocha": "^2.5.3",
     "mocha-clean": "^1.0.0",
     "node-static": "^0.7.7",
     "power-assert": "^1.4.1",

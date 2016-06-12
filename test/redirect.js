@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*eslint no-invalid-this:0*/
+/*eslint no-invalid-this:0, max-nested-callbacks:[1, 6]*/
 /*jshint -W100*/
 var assert = require('power-assert');
 var typeOf = require('type-of');

@@ -26,7 +26,7 @@
     "no-cond-assign": 2,
     "no-confusing-arrow": 2,
     "no-console": [1, {
-      "allow": [ "info", "warn", "error" ]
+      "allow": ["info", "warn", "error"]
     }],
     "no-const-assign": 2,
     "no-constant-condition": 2,
@@ -113,7 +113,9 @@
     "use-isnan": 2,
     "accessor-pairs": 2,
     "block-scoped-var": 2,
-    "consistent-return": 2,
+    "consistent-return": [2, {
+      "treatUndefinedAsUnspecified": true
+    }],
     "linebreak-style": [2, "unix"],
     "new-cap": 2,
     "new-parens": 2,
@@ -122,6 +124,7 @@
       "before": true,
       "after": false
     }],
+    "complexity": [2, 20],
     "dot-notation": 1,
     "guard-for-in": 1,
     "require-yield": 2,
@@ -140,17 +143,18 @@
     "yoda": 2,
     "prefer-arrow-callback": 0,
     "prefer-template": 0,
-    "prefer-const": 1,
+    "prefer-const": 0,
     "prefer-spread": 0,
+    "rest-spread-spacing": 0,
     "constructor-super": 2,
     "default-case": 1,
     "vars-on-top": 0,
     "eqeqeq": 2,
     "radix": 2,
-    "consistent-this": [ 2, "_this" ],
+    "consistent-this": [2, "_this"],
     "eol-last": 2,
     "func-style": 0,
-    "jsx-quotes": [2, "prefer-double" ],
+    "jsx-quotes": [2, "prefer-double"],
     "semi": [2, "always"],
     "semi-spacing": [2, {
       "before": false,
@@ -166,6 +170,16 @@
       "allowSingleLine": true
     }],
     "no-mixed-spaces-and-tabs": [2, "smart-tabs"],
+    "no-mixed-operators": [2, {
+      "groups": [
+        ["+", "-", "*", "/", "%", "**"],
+        ["&", "|", "^", "~", "<<", ">>", ">>>"],
+        ["==", "!=", "===", "!==", ">", ">=", "<", "<="],
+        ["&&", "||"],
+        ["in", "instanceof"]
+      ],
+      "allowSamePrecedence": true
+    }],
     "indent": [2,
       2, {
         "SwitchCase": 1
@@ -193,6 +207,10 @@
     "object-curly-spacing": [2, "always", {
       "objectsInObjects": false,
       "arraysInObjects": false
+    }],
+    "object-curly-newline": [0, {
+      "ObjectExpression": "always",
+      "ObjectPattern": {"multiline": true}
     }],
     "object-property-newline": 0,
     "no-trailing-spaces": [2, {
@@ -223,7 +241,10 @@
     ],
     "max-statements-per-line": [1, { "max": 1 }],
     "max-len": [1, 100, 2],
+    "max-lines": [1, 2000],
     "max-params": [1, 5],
+    "max-depth": [1, 4],
+    "max-nested-callbacks": [1, 5],
     "max-statements": [1, 30]
   }
 }

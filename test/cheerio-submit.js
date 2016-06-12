@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*eslint no-invalid-this:0, no-undefined:0, max-len:[1, 150, 2]*/
+/*eslint no-invalid-this:0, no-undefined:0, max-len:[1, 150, 2], max-nested-callbacks:[1, 6]*/
 /*jscs:disable requireDotNotation*/
 /*jshint -W100*/
 var assert = require('power-assert');
