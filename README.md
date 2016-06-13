@@ -485,7 +485,7 @@ client.fetch('http://foo.bar.baz/', function (err, $, res, body) {
 var client = require('cheerio-httpcli');
 
 // フォームのあるページに同期リクエスト
-var result1 = client.fetch('http://foo.bar.baz/');
+var result1 = client.fetchSync('http://foo.bar.baz/');
 var form = result1.$('form[name=login]');
 
 form.field({
@@ -788,16 +788,16 @@ console.log($('#top').url({ relative: false })); // => undefined
 <img src="blank.gif" data-original-src="http://this.is/real-image.png">
 ```
 
-このようなHTMLで、`src`の`blank.gif`ではなく`data-original-src`の`http://this.is/real-image.png`をダウンロードしたい場合は以下のように指定します。
+このようなHTMLで、`src`の`blank.gif`ではなく`data-original-src`の`http://this.is/real-image.png`を取得したい場合は以下のように指定します。
 
 ```js
 // filterオプションは省略可能
 $('img').url('data-original-src');
 ```
 
-`data-original-src`がその要素に存在しない場合は`src`属性のURLをダウンロードします。
+`data-original-src`がその要素に存在しない場合は`src`属性のURLを取得します。
 
-なお、デフォルトでは`data-original`>`data-lazy-src`>`data-src`>`src`の優先順になっています。デフォルトの優先順位を破棄して`src`属性の画像を最優先でダウンロードしたい場合は、
+なお、デフォルトでは`data-original`>`data-lazy-src`>`data-src`>`src`の優先順になっています。デフォルトの優先順位を破棄して`src`属性の画像を最優先で取得したい場合は、
 
 ```js
 $('img').url({ invalid: false }, []);
