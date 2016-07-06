@@ -304,4 +304,25 @@ describe('submitSync', function () {
     assert(Object.keys(result2), [ 'error' ]);
     assert(result2.error.message === 'no content');
   });
+
+  describe('Electron', function () {
+    beforeEach(function () {
+      process.versions.electron = '1.0.0';
+    });
+
+    it('同期リクエストは未サポート', function () {
+      try {
+        cli.fetchSync(helper.url('form', 'utf-8'));
+        throw new Error('not thrown');
+      } catch (e) {
+        assert(e.message === 'sync request is not support on Electron');
+      }
+    });
+
+    it('非同期リクエストは可能', function () {
+      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
+        assert(res.statusCode === 200);
+      });
+    });
+  });
 });
