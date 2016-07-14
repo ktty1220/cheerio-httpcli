@@ -1052,7 +1052,7 @@ client.fetch('http://foo.bar.baz/', ...
 
 ### Electronに組み込む
 
-いろいろと工夫するとwebpackで固められますが, それでも`Sync`系メソッドは正常に動作しません(利用不可)。また、webpackの際に大量のwarningが発生するので、その他の機能に関しても正常に動作するかは分かりません。詳細は[こちら](https://github.com/ktty1220/cheerio-httpcli/issues/14#issuecomment-230733142)をご覧ください。
+いろいろと工夫するとwebpackで固められますが、それでも`Sync`系メソッドは正常に動作しません(利用不可)。また、webpackの際に大量のwarningが発生するので、その他の機能に関しても正常に動作するかは分かりません。詳細は[こちら](https://github.com/ktty1220/cheerio-httpcli/issues/14#issuecomment-230733142)をご覧ください。
 
 ご利用の際は自己責任でお願いします。
 
