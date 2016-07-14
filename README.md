@@ -1022,7 +1022,7 @@ client.fetch('http://securet.example.com', function (err, $, res, body) {
   .
   .
   .
-  // 不要になったら消去
+  // 不要になったら消去(これを忘れるとその後別のページにアクセスするときにも認証情報を送信してしまう)
   delete(client.headers['Authorization']);
 });
 ```
@@ -1038,6 +1038,25 @@ client.fetch('http://' + user + ':' + password + '@securet.example.com', functio
 ```
 
 詳細は[こちら](http://qiita.com/ktty1220/items/e9e42247ede476d04ce2#comment-02b5b12c8be4f193834b)
+
+### プロキシサーバー経由でアクセス
+
+環境変数`HTTP_PROXY`に`http://プロキシサーバーのアドレス:ポート/`をセットするとプロキシサーバー経由でWEBページを取得します。
+
+```js
+process.env.HTTP_PROXY = 'http://proxy.hoge.com:18080/';  // プロキシサーバーを指定
+
+var client = require('cheerio-httpcli');
+client.fetch('http://foo.bar.baz/', ...
+```
+
+### Electronに組み込む
+
+いろいろと工夫するとwebpackで固められますが, それでも`Sync`系メソッドは正常に動作しません(利用不可)。また、webpackの際に大量のwarningが発生するので、その他の機能に関しても正常に動作するかは分かりません。詳細は[こちら](https://github.com/ktty1220/cheerio-httpcli/issues/14#issuecomment-230733142)をご覧ください。
+
+ご利用の際は自己責任でお願いします。
+
+また、Electronという環境に起因する動作不良に関しては、ちょっとした修正で解決するものは対応しますが、現行の仕組みを大きく変える必要がある場合は対応しない事もあります。ご了承ください。
 
 ### 文字コード判別の仕様
 
