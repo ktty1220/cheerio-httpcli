@@ -91,6 +91,7 @@
     "no-spaced-func": 2,
     "no-sparse-arrays": 2,
     "no-this-before-super": 2,
+    "no-tabs": 2,
     "no-throw-literal": 2,
     "no-undef": 2,
     "no-undef-init": 2,
@@ -182,7 +183,8 @@
     }],
     "indent": [2,
       2, {
-        "SwitchCase": 1
+        "SwitchCase": 1,
+        "MemberExpression": 0
       }
     ],
     "keyword-spacing": [2, {

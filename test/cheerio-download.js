@@ -259,7 +259,7 @@ describe('cheerio:download', function () {
         assert.deepEqual(this.state, { queue: 0, complete: 0, error: 1 });
         done();
       });
-      cli.timeout = 500;
+      cli.timeout = 3000;
       assert($('.mega').download() === 1);
     });
   });
