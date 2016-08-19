@@ -57,6 +57,7 @@
     "no-fallthrough": 2,
     "no-floating-decimal": 2,
     "no-func-assign": 2,
+    "no-global-assign": 2,
     "no-implicit-coercion": 2,
     "no-implied-eval": 2,
     "no-inner-declarations": 1,
@@ -68,8 +69,6 @@
     "no-loop-func": 0,
     "no-multi-str": 1,
     "no-multiple-empty-lines": [1, {"max": 2}],
-    "no-native-reassign": 2,
-    "no-negated-in-lhs": 2,
     "no-nested-ternary": 2,
     "no-new": 1,
     "no-new-func": 2,
@@ -86,19 +85,23 @@
     "no-regex-spaces": 1,
     "no-return-assign": 2,
     "no-self-compare": 1,
+    "no-self-assign": [2, {
+      "props": true
+    }],
     "no-sequences": 2,
     "no-shadow-restricted-names": 2,
-    "no-spaced-func": 2,
     "no-sparse-arrays": 2,
     "no-this-before-super": 2,
     "no-tabs": 2,
     "no-throw-literal": 2,
+    "no-template-curly-in-string": 1,
     "no-undef": 2,
     "no-undef-init": 2,
     "no-undefined": 2,
     "no-unexpected-multiline": 2,
     "no-unneeded-ternary": 2,
     "no-unreachable": 1,
+    "no-unsafe-negation": 2,
     "no-unused-expressions": 1,
     "no-unused-vars": [2, {
       "vars": "all",
@@ -114,6 +117,7 @@
     "use-isnan": 2,
     "accessor-pairs": 2,
     "block-scoped-var": 2,
+    "func-call-spacing": [2, "never"],
     "consistent-return": [2, {
       "treatUndefinedAsUnspecified": true
     }],
@@ -129,7 +133,9 @@
     "dot-notation": 1,
     "guard-for-in": 1,
     "require-yield": 2,
-    "arrow-parens": [2, "always"],
+    "arrow-parens": [2, "always", {
+      "requireForBlockBody": true
+    }],
     "arrow-spacing": 2,
     "callback-return": [1, [
       "callback", "cb", "next", "done"
@@ -149,8 +155,11 @@
     "rest-spread-spacing": 0,
     "constructor-super": 2,
     "default-case": 1,
+    "sort-keys": 0,
     "vars-on-top": 0,
-    "eqeqeq": 2,
+    "eqeqeq": [2, "always", {
+      "null": "always"
+    }],
     "radix": 2,
     "consistent-this": [2, "_this"],
     "eol-last": 2,
@@ -218,6 +227,7 @@
     "no-trailing-spaces": [2, {
       "skipBlankLines": false
     }],
+    "object-shorthand": [1, "consistent" ],
     "key-spacing": [2, {
       "beforeColon": false,
       "afterColon": true
