@@ -115,6 +115,10 @@ module.exports = {
         if (/~redirect/.test(req.url)) {
           // リダイレクト
           var loc = _this.url('manual', 'euc-jp');
+          if (/_relative/.test(req.url)) {
+            // 相対パスバージョン
+            loc = loc.replace(/^http:\/\/localhost:\d+\//, '');
+          }
           headers = [
             [ 'location', loc ]
           ];

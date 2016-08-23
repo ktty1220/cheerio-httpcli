@@ -17,16 +17,36 @@ describe('redirect', function () {
         });
       });
 
-      it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ', function (done) {
+      it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ(絶対パス)', function (done) {
         var url = helper.url('manual', 'euc-jp');
         cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
-          $('form[name=login]').submit(function (err, $, res, body) {
+          $('form[name=login]')
+          .submit(function (err, $, res, body) {
             assert(typeOf(res.cookies) === 'object');
             assert(res.cookies.user === 'guest');
             assert($.documentInfo().url === url);
             assert.deepEqual(JSON.parse(res.headers['trace-route']), [
               '/form/utf-8.html?reset_trace_route',
               '/~redirect',
+              '/manual/euc-jp.html'
+            ]);
+            done();
+          });
+        });
+      });
+
+      it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ(相対パス)', function (done) {
+        var url = helper.url('manual', 'euc-jp');
+        cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
+          $('form[name=login]')
+          .attr('action', '/~redirect_relative')
+          .submit(function (err, $, res, body) {
+            assert(typeOf(res.cookies) === 'object');
+            assert(res.cookies.user === 'guest');
+            assert($.documentInfo().url === url);
+            assert.deepEqual(JSON.parse(res.headers['trace-route']), [
+              '/form/utf-8.html?reset_trace_route',
+              '/~redirect_relative',
               '/manual/euc-jp.html'
             ]);
             done();
