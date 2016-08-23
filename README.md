@@ -129,7 +129,7 @@ npm install cheerio-httpcli
 
 #### プロミス形式での呼び出し
 
-`fetch()`の第3引数である`callback`関数を省略すると、戻り値としてPromiseオブジェクトが返ります。先ほどのサンプルをプロミス形式で呼び出すと以下のようになります。
+`fetch()`の第4引数である`callback`関数を省略すると、戻り値としてPromiseオブジェクトが返ります。先ほどのサンプルをプロミス形式で呼び出すと以下のようになります。
 
 ```js
 var client = require('cheerio-httpcli');
@@ -215,7 +215,7 @@ client.fetch(<TOPページのURL>)
 
 実体は[rsvp](http://npmjs.org/package/rsvp)のPromiseオブジェクトなので、詳細はそちらのドキュメントをご覧ください。
 
-> `fetch()`の第3引数の`callback`関数を指定した場合はPromiseオブジェクトは返しません。したがってコールバック形式で呼び出しつつPromiseオブジェクトで何かをするということはできません。
+> `fetch()`の第4引数の`callback`関数を指定した場合はPromiseオブジェクトは返しません。したがってコールバック形式で呼び出しつつPromiseオブジェクトで何かをするということはできません。
 
 ### fetchSync(url[, get-param, encode])
 
