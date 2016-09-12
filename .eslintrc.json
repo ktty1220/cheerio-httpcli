@@ -121,7 +121,7 @@
     "consistent-return": [2, {
       "treatUndefinedAsUnspecified": true
     }],
-    "linebreak-style": [2, "unix"],
+    "linebreak-style": [0, "unix"],
     "new-cap": 2,
     "new-parens": 2,
     "newline-after-var": [0, "always"],
@@ -130,6 +130,7 @@
       "after": false
     }],
     "complexity": [2, 20],
+    "lines-around-directive": 1,
     "dot-notation": 1,
     "guard-for-in": 1,
     "require-yield": 2,
@@ -152,6 +153,7 @@
     "prefer-template": 0,
     "prefer-const": 0,
     "prefer-spread": 0,
+    "prefer-numeric-literals": 1,
     "rest-spread-spacing": 0,
     "constructor-super": 2,
     "default-case": 1,
@@ -174,6 +176,15 @@
     "quote-props": [2, "as-needed"],
     "init-declarations": [2, "always"],
     "computed-property-spacing": [2, "never"],
+    "no-underscore-dangle": [2, {
+      "allowAfterThis": true,
+      "allowAfterSuper": true,
+      "allow": [
+        "_this",
+        "_root", "_documentInfo", "_html", "_text",
+        "_originalRoot", "_traceRoute", "_$"
+      ]
+    }],
     "comma-dangle": [2, "never"],
     "comma-style": [2, "last"],
     "brace-style": [1, "1tbs", {
@@ -190,10 +201,13 @@
       ],
       "allowSamePrecedence": true
     }],
-    "indent": [2,
-      2, {
+    "indent": [2, 2, {
         "SwitchCase": 1,
-        "MemberExpression": 0
+        "MemberExpression": 0,
+        "FunctionDeclaration": {
+          "parameters": "first",
+          "body": 1
+        }
       }
     ],
     "keyword-spacing": [2, {
@@ -252,7 +266,15 @@
       "single", "avoid-escape"
     ],
     "max-statements-per-line": [1, { "max": 1 }],
-    "max-len": [1, 100, 2],
+    "max-len": [1, {
+      "code": 100,
+      "tabWidth": 2,
+      "ignoreComments": true,
+      "ignoreTrailingComments": true,
+      "ignoreUrls": true,
+      "ignoreStrings": true,
+      "ignoreTemplateLiterals": true
+    }],
     "max-lines": [1, 2000],
     "max-params": [1, 5],
     "max-depth": [1, 4],
