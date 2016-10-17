@@ -81,7 +81,7 @@ describe('fetchSync', function () {
     var url = helper.url('~slow');
     var result = cli.fetchSync(url);
     var err = result.error;
-    assert(err.message === 'ETIMEDOUT');
+    assert(err.message === 'ESOCKETTIMEDOUT');
     assert(! err.statusCode);
     assert(err.url === url);
     assert(! result.body);

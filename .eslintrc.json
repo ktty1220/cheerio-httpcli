@@ -117,6 +117,9 @@
     "use-isnan": 2,
     "accessor-pairs": 2,
     "block-scoped-var": 2,
+    "func-name-matching": [2, {
+      "includeCommonJSModuleExports": true
+    }],
     "func-call-spacing": [2, "never"],
     "consistent-return": [2, {
       "treatUndefinedAsUnspecified": true
@@ -147,7 +150,9 @@
         "||": "after"
       }
     }],
-    "wrap-iife": [2, "inside"],
+    "wrap-iife": [2, "inside", {
+      "functionPrototypeMethods": true
+    }],
     "yoda": 2,
     "prefer-arrow-callback": 0,
     "prefer-template": 0,
@@ -217,7 +222,8 @@
     }],
     "space-before-blocks": [2, "always"],
     "space-before-function-paren": [2, {
-      "named": "never"
+      "named": "never",
+      "asyncArrow": "always"
     }],
     "space-in-parens": [2, "never"],
     "space-infix-ops": 2,
