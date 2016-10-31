@@ -111,7 +111,7 @@
     "no-use-before-define": 2,
     "no-useless-call": 2,
     "no-useless-concat": 1,
-    "no-useless-escape": 2,
+    "no-useless-escape": 0,
     "no-void": 2,
     "no-with": 2,
     "use-isnan": 2,
@@ -210,6 +210,7 @@
         "SwitchCase": 1,
         "MemberExpression": 0,
         "FunctionDeclaration": {
+          "CallExpression": "first",
           "parameters": "first",
           "body": 1
         }
@@ -279,7 +280,8 @@
       "ignoreTrailingComments": true,
       "ignoreUrls": true,
       "ignoreStrings": true,
-      "ignoreTemplateLiterals": true
+      "ignoreTemplateLiterals": true,
+      "ignoreRegExpLiterals": true
     }],
     "max-lines": [1, 2000],
     "max-params": [1, 5],
