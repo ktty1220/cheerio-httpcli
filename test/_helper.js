@@ -257,6 +257,13 @@ module.exports = {
   },
 
   /**
+   * エラー内容がタイムアウトかどうか判定
+   */
+  isTimedOut: function (err) {
+    return ([ 'ESOCKETTIMEDOUT', 'ETIMEDOUT' ].indexOf(err.message) !== -1);
+  },
+
+  /**
    * stderr出力をキャプチャ
    */
   hookStderr: function (callback) {

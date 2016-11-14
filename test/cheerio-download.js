@@ -238,7 +238,7 @@ describe('cheerio:download', function () {
       .on('error', function (e) {
         var img = helper.url('img') + '/img/cat.png';
         assert(e.url === img);
-        assert(e.message === 'ESOCKETTIMEDOUT');
+        assert(helper.isTimedOut(e));
         assert.deepEqual(this.state, { queue: 0, complete: 0, error: 1 });
         done();
       });

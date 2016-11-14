@@ -48,7 +48,7 @@ describe('error', function () {
     cli.timeout = 300;
     var url = helper.url('~slow');
     cli.fetch(url, function (err, $, res, body) {
-      assert(err.message === 'ESOCKETTIMEDOUT');
+      assert(helper.isTimedOut(err));
       assert(! err.statusCode);
       assert(err.url === url);
       assert(! body);
