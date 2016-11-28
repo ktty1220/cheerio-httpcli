@@ -1,12 +1,9 @@
-// Type definitions for cheerio-httpcli@0.6.9
-// Project: https://github.com/ktty1220/cheerio-httpcli
-// Definitions by: ktty1220 <ktty1220@gmail.com>
-
 import * as http from 'http';
 import * as url from 'url';
 import * as stream from 'stream';
 
 // rsvp.Promise
+// TODO: 丸ごと定義ではなく既存のPromise<FetchResult>にfinally()を生やしたい
 declare namespace Rsvp {
   interface Thenable {
     then(cb1: Function, cb2?: Function): Thenable;
@@ -47,11 +44,11 @@ declare namespace CheerioHttpcli {
   }
   interface FetchResult {
     error: Error;
-    $: CheerioStatic;
+    $: CheerioStaticEx;
     response: FetchResponse;
     body: string;
   }
-  type FetchCallback = (error: Error, $: CheerioStatic, response: FetchResponse, body: string) => void;
+  type FetchCallback = (error: Error, $: CheerioStaticEx, response: FetchResponse, body: string) => void;
   type IconvModule = 'iconv' | 'iconv-jp' | 'iconv-lite';
   type BrowserType =
     'ie' | 'edge' | 'chrome' | 'firefox' | 'opera' | 'vivaldi' |
@@ -132,8 +129,8 @@ declare namespace CheerioHttpcli {
 }
 
 // cheerio本体拡張
-interface CheerioStatic {
-  documentInfo: CheerioHttpcli.DocumentInfo;
+interface CheerioStaticEx extends CheerioStatic {
+  documentInfo(): CheerioHttpcli.DocumentInfo;
   entityHtml(options?: CheerioOptionsInterface): string;
   entityHtml(selector: string, options?: CheerioOptionsInterface): string;
   entityHtml(element: Cheerio, options?: CheerioOptionsInterface): string;
@@ -141,6 +138,8 @@ interface CheerioStatic {
 }
 
 // cheerio拡張メソッド
+// TODO: originalのCheerioインターフェイスにマージしたい(できてない)
+//       @types/cheerio/index.d.tsの内容を丸ごと持ってくるしかない？
 interface Cheerio {
   click(callback: CheerioHttpcli.FetchCallback): void;
   click(): Rsvp.Promise;
@@ -161,6 +160,4 @@ interface Cheerio {
   url(srcAttrs?: CheerioHttpcli.StringOrStringArray): CheerioHttpcli.StringOrStringArray;
 }
 
-declare module 'cheerio-httpcli' {
-  export default CheerioHttpcli;
-}
+export = CheerioHttpcli;

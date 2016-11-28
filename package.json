@@ -17,6 +17,7 @@
   "pre-commit": [
     "lint"
   ],
+  "typings": "./index.d.ts",
   "dependencies": {
     "@types/cheerio": "^0.17.31",
     "@types/node": "^6.0.51",
