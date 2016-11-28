@@ -137,6 +137,7 @@
     "lines-around-directive": 1,
     "dot-notation": 1,
     "guard-for-in": 1,
+    "require-await": 2,
     "require-yield": 2,
     "arrow-parens": [2, "always", {
       "requireForBlockBody": true
