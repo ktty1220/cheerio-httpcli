@@ -2,45 +2,10 @@ import * as http from 'http';
 import * as url from 'url';
 import * as stream from 'stream';
 
-// rsvp.Promise
-// TODO: 丸ごと定義ではなく既存のPromise<FetchResult>にfinally()を生やしたい
-declare namespace Rsvp {
-  interface Thenable {
-    then(cb1: Function, cb2?: Function): Thenable;
-  }
-
-  export class Promise implements Thenable {
-    public static cast(p: Promise): Promise;
-    public static cast(object?: any): Promise;
-    public static resolve(t: Thenable): Promise;
-    public static resolve(obj?: any): Promise;
-    public static reject(error?: any): Promise;
-    public static all(p: Promise[]): Promise;
-    public static race(p: Promise[]): Promise;
-    constructor(cb: Function);
-    public then(cb1: Function, cb2?: Function): Thenable;
-    public catch(onReject?: (error: any) => Thenable): Promise;
-    public catch(onReject?: Function): Promise;
-    public finally(): void;
-  }
-}
-
 // cheerio-httpcli本体
 declare namespace CheerioHttpcli {
-  interface Headers {
-    [ name: string ]: string;
-  }
-  interface Cookies {
-    [ name: string ]: string;
-  }
-  interface FetchParams {
-    [ name: string ]: any;
-  }
-  interface FormInputs {
-    [ name: string ]: string | number;
-  }
   interface FetchResponse extends http.IncomingMessage {
-    cookies: Cookies;
+    cookies: {[ name: string ]: string};
   }
   interface FetchResult {
     error: Error;
@@ -49,57 +14,36 @@ declare namespace CheerioHttpcli {
     body: string;
   }
   type FetchCallback = (error: Error, $: CheerioStaticEx, response: FetchResponse, body: string) => void;
-  type IconvModule = 'iconv' | 'iconv-jp' | 'iconv-lite';
-  type BrowserType =
-    'ie' | 'edge' | 'chrome' | 'firefox' | 'opera' | 'vivaldi' |
-    'safari' | 'ipad' | 'iphone'| 'ipod' | 'android'| 'googlebot';
-  type ReturnStringFunction = () => string;
-  type StringOrStringArray = string | string[];
-  type OnNotFound = 'append' | 'throw';
 
-  interface URLFilter {
-    absolute?: boolean;
-    relative?: boolean;
-    invalid?: boolean;
-  }
-
-  interface DocumentInfo {
-    url: string;
-    encoding: string | null;
+  // やっつけPromise
+  interface Promise {
+    then: (callback: {(result: FetchResult): void}) => Promise;
+    catch: (callbck: {(error: Error): void}) => Promise;
+    finally: (callback: {(): void}) => Promise;
   }
 
   namespace Download {
-    type ToBufferCallback = (error: Error, buffer: Buffer) => void;
-    interface State {
-      queue: number;
-      complete: number;
-      error: number;
-    }
     interface Stream extends stream.Stream {
       url: url.Url;
       type: string;
       length: number;
-      toBuffer: ToBufferCallback;
+      toBuffer: (callback: {(error: Error, buffer: Buffer): void}) => void;
       end(): void;
     }
     interface ErrorEx extends Error {
       url: string;
     }
-    type EventOnReady = (stream: Stream) => void;
-    type EventOnError = (error: ErrorEx) => void;
-    type EventOnEnd = () => void;
-    type Events = EventOnReady | EventOnError | EventOnEnd;
 
     export interface Manager {
       parallel: number;
-      state: State;
+      state: { queue: number, complete: number, error: number };
       clearCache(): void;
-      on(events: string, handler: Events): void;
+      on(events: string, handler: {(stream: Stream): void} | {(error: ErrorEx): void} | {(): void}): void;
     }
   }
 
   let version: string;
-  let headers: Headers;
+  let headers: {[ name: string ]: string};
   let timeout: number;
   let gzip: boolean;
   let referer: boolean;
@@ -109,55 +53,57 @@ declare namespace CheerioHttpcli {
   const download: Download.Manager;
 
   function reset(): void;
-  function setIconvEngine(icmod: IconvModule): void;
-  function setBrowser(type: BrowserType): boolean;
+  function setIconvEngine(icmod: 'iconv' | 'iconv-jp' | 'iconv-lite'): void;
+  //tslint:disable-next-line: max-line-length
+  function setBrowser(type: 'ie' | 'edge' | 'chrome' | 'firefox' | 'opera' | 'vivaldi' | 'safari' | 'ipad' | 'iphone'| 'ipod' | 'android'| 'googlebot'): boolean;
 
-  function fetch(url: string, param: FetchParams, encode: string, callback: FetchCallback): void;
-  function fetch(url: string, param: FetchParams, callback: FetchCallback): void;
+  function fetch(url: string, param: {[ name: string ]: any}, encode: string, callback: FetchCallback): void;
+  function fetch(url: string, param: {[ name: string ]: any}, callback: FetchCallback): void;
   function fetch(url: string, encode: string, callback: FetchCallback): void;
   function fetch(url: string, callback: FetchCallback): void;
 
-  function fetch(url: string, param: FetchParams, encode: string): Rsvp.Promise;
-  function fetch(url: string, param: FetchParams): Rsvp.Promise;
-  function fetch(url: string, encode: string): Rsvp.Promise;
-  function fetch(url: string): Rsvp.Promise;
+  function fetch(url: string, param: {[ name: string ]: any}, encode: string): Promise;
+  function fetch(url: string, param: {[ name: string ]: any}): Promise;
+  function fetch(url: string, encode: string): Promise;
+  function fetch(url: string): Promise;
 
-  function fetchSync(url: string, param: FetchParams, encode: string): FetchResult;
-  function fetchSync(url: string, param: FetchParams): FetchResult;
+  function fetchSync(url: string, param: {[ name: string ]: any}, encode: string): FetchResult;
+  function fetchSync(url: string, param: {[ name: string ]: any}): FetchResult;
   function fetchSync(url: string, encode: string): FetchResult;
   function fetchSync(url: string): FetchResult;
 }
 
-// cheerio本体拡張
+// cheerio本体拡張(オリジナルのinterfaceを継承)
 interface CheerioStaticEx extends CheerioStatic {
-  documentInfo(): CheerioHttpcli.DocumentInfo;
+  documentInfo(): { url: string, encoding: string | null };
   entityHtml(options?: CheerioOptionsInterface): string;
   entityHtml(selector: string, options?: CheerioOptionsInterface): string;
   entityHtml(element: Cheerio, options?: CheerioOptionsInterface): string;
   entityHtml(element: CheerioElement, options?: CheerioOptionsInterface): string;
 }
 
-// cheerio拡張メソッド
-// TODO: originalのCheerioインターフェイスにマージしたい(できてない)
-//       @types/cheerio/index.d.tsの内容を丸ごと持ってくるしかない？
-interface Cheerio {
-  click(callback: CheerioHttpcli.FetchCallback): void;
-  click(): Rsvp.Promise;
-  clickSync(): CheerioHttpcli.FetchResult;
-  download(srcAttr?: CheerioHttpcli.StringOrStringArray): void;
-  field(name: string): string | number;
-  field(name: string, value: string | CheerioHttpcli.ReturnStringFunction, onNotFound?: CheerioHttpcli.OnNotFound): Cheerio;
-  field(name: CheerioHttpcli.FormInputs, onNotFound?: CheerioHttpcli.OnNotFound): Cheerio;
-  entityHtml(): string;
-  entityHtml(html: string): Cheerio;
-  submit(param: CheerioHttpcli.FormInputs, callback: CheerioHttpcli.FetchCallback): void;
-  submit(callback: CheerioHttpcli.FetchCallback): void;
-  submit(param?: CheerioHttpcli.FormInputs): Rsvp.Promise;
-  submitSync(param?: CheerioHttpcli.FormInputs): CheerioHttpcli.FetchResult;
-  tick(): Cheerio;
-  untick(): Cheerio;
-  url(optFilter: CheerioHttpcli.URLFilter, srcAttrs?: CheerioHttpcli.StringOrStringArray): CheerioHttpcli.StringOrStringArray;
-  url(srcAttrs?: CheerioHttpcli.StringOrStringArray): CheerioHttpcli.StringOrStringArray;
+// cheerio拡張メソッド(オリジナルのinterfaceにマージ)
+declare global {
+  interface Cheerio {
+    click(callback: CheerioHttpcli.FetchCallback): void;
+    click(): CheerioHttpcli.Promise;
+    clickSync(): CheerioHttpcli.FetchResult;
+    download(srcAttr?: string | string[]): void;
+    field(): {[ name: string ]: string | number};
+    field(name: string): string | number;
+    field(name: string, value: string | {(): string}, onNotFound?: 'append' | 'throw'): Cheerio;
+    field(name: {[ name: string ]: string | number}, onNotFound?: 'append' | 'throw'): Cheerio;
+    entityHtml(): string;
+    entityHtml(html: string): Cheerio;
+    submit(param: {[ name: string ]: string | number}, callback: CheerioHttpcli.FetchCallback): void;
+    submit(callback: CheerioHttpcli.FetchCallback): void;
+    submit(param?: {[ name: string ]: string | number}): CheerioHttpcli.Promise;
+    submitSync(param?: {[ name: string ]: string | number}): CheerioHttpcli.FetchResult;
+    tick(): Cheerio;
+    untick(): Cheerio;
+    url(optFilter: { absolute?: boolean, relative?: boolean, invalid?: boolean }, srcAttrs?: string | string[]): string | string[];
+    url(srcAttrs?: string | string[]): string | string[];
+  }
 }
 
 export = CheerioHttpcli;
