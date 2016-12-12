@@ -115,6 +115,7 @@
     "no-void": 2,
     "no-with": 2,
     "no-return-await": 1,
+    "no-await-in-loop": 2,
     "use-isnan": 2,
     "accessor-pairs": 2,
     "block-scoped-var": 2,
