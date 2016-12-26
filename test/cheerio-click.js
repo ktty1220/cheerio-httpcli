@@ -61,7 +61,8 @@ describe('cheerio:click', function () {
         $('.rel').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
             url: helper.url('auto', 'euc-jp'),
-            encoding: 'euc-jp'
+            encoding: 'euc-jp',
+            isXml: false
           });
           assert(typeOf(res) === 'object');
           assert(typeOf($) === 'function');
@@ -76,7 +77,8 @@ describe('cheerio:click', function () {
         $('.external').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
             url: 'http://www.yahoo.co.jp/',
-            encoding: 'utf-8'
+            encoding: 'utf-8',
+            isXml: false
           });
           assert(typeOf(res) === 'object');
           assert(typeOf($) === 'function');
@@ -128,7 +130,8 @@ describe('cheerio:click', function () {
         $('a').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
             url: helper.url('auto', 'euc-jp'),
-            encoding: 'euc-jp'
+            encoding: 'euc-jp',
+            isXml: false
           });
           assert(typeOf(res) === 'object');
           assert(typeOf($) === 'function');
@@ -144,7 +147,8 @@ describe('cheerio:click', function () {
           $($('.rel')[idx]).click(function (err, $, res, body) {
             assert.deepEqual($.documentInfo(), {
               url: helper.url('auto', 'euc-jp'),
-              encoding: 'euc-jp'
+              encoding: 'euc-jp',
+              isXml: false
             });
             assert(typeOf(res) === 'object');
             assert(typeOf($) === 'function');
@@ -161,7 +165,8 @@ describe('cheerio:click', function () {
         $('<a/>').attr('href', url).click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
             url: url,
-            encoding: 'utf-8'
+            encoding: 'utf-8',
+            isXml: false
           });
           assert(typeOf(res) === 'object');
           assert(typeOf($) === 'function');
@@ -177,7 +182,8 @@ describe('cheerio:click', function () {
         $('<a href="' + url + '">link</a>').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
             url: url,
-            encoding: 'shift_jis'
+            encoding: 'shift_jis',
+            isXml: false
           });
           assert(typeOf(res) === 'object');
           assert(typeOf($) === 'function');

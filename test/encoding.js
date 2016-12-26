@@ -20,7 +20,8 @@ describe('encoding:auto', function () {
         }
         assert.deepEqual($.documentInfo(), {
           url: url,
-          encoding: enc
+          encoding: enc,
+          isXml: false
         });
         assert($('title').text() === '夏目漱石「私の個人主義」');
         assert($('h1').html() === '<span>夏目漱石「私の個人主義」</span>');
@@ -41,7 +42,8 @@ describe('encoding:manual', function () {
       cli.fetch(url, function (err, $, res, body) {
         assert.deepEqual($.documentInfo(), {
           url: url,
-          encoding: enc.replace(/\(.+\)/, '')
+          encoding: enc.replace(/\(.+\)/, ''),
+          isXml: false
         });
         assert($('title').text() === '１');
         done();
@@ -78,7 +80,8 @@ describe('encoding:unknown', function () {
     cli.fetch(url, function (err, $, res, body) {
       assert.deepEqual($.documentInfo(), {
         url: url,
-        encoding: null
+        encoding: null,
+        isXml: false
       });
       assert($('title').text() === '１');
       done();
@@ -90,7 +93,8 @@ describe('encoding:unknown', function () {
     cli.fetch(url, function (err, $, res, body) {
       assert.deepEqual($.documentInfo(), {
         url: url,
-        encoding: null
+        encoding: null,
+        isXml: false
       });
       assert($('title').text() !== '１');
       done();
@@ -102,7 +106,8 @@ describe('encoding:unknown', function () {
     cli.fetch(url, {}, 'sjis', function (err, $, res, body) {
       assert.deepEqual($.documentInfo(), {
         url: url,
-        encoding: 'sjis'
+        encoding: 'sjis',
+        isXml: false
       });
       assert($('title').text() === '１');
       done();
@@ -114,7 +119,8 @@ describe('encoding:unknown', function () {
     cli.fetch(url, 'sjis', function (err, $, res, body) {
       assert.deepEqual($.documentInfo(), {
         url: url,
-        encoding: 'sjis'
+        encoding: 'sjis',
+        isXml: false
       });
       assert($('title').text() === '１');
       done();

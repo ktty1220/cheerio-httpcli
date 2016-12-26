@@ -21,6 +21,7 @@ Node.jsでWEBページのスクレイピングを行う際に必要となる文�
 7. `$('a,img')`要素のURLを絶対パスで取得可能
 8. ブラウザ指定による簡単User-Agent切り替え機能
 9. 現在のクッキーの内容を簡単に取得(読み取り専用)
+10. XMLドキュメントを自動判別してパース処理を切り替え
 
 > 静的なHTMLをベースに処理するモジュールなのでSPAなどクライアントサイドのJavaScriptによってコンテンツを取得/変更するタイプのWEBページには対応していません。
 
@@ -70,6 +71,7 @@ npm install cheerio-httpcli
   * [referer](#referer)
   * [followMetaRefresh](#followmetarefresh)
   * [maxDataSize](#maxdatasize)
+  * [forceHtml](#forcehtml)
   * [debug](#debug)
   * [download](#download)
 * [cheerioオブジェクトの独自拡張](#cheerio%E3%82%AA%E3%83%96%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E7%8B%AC%E8%87%AA%E6%8B%A1%E5%BC%B5)
@@ -366,6 +368,12 @@ client.fetch('http://big.large.huge/data.html', function (err, $, res, body) {
 
 なお、`maxDataSize`を超えた場合は途中まで受信したデータは破棄されます。
 
+### forceHtml
+
+cheerio-httpcliは取得したページがXMLであると判別した場合、自動的にcheerioのXMLモードを有効にしてコンテンツをパースします(`Content-Type`とURLの拡張子を見て判別しています)。
+
+`true`にするとこの自動判別を無効にして常にHTMLモードでコンテンツをパースするようになります。デフォルトは`false`(自動判別する)です。
+
 ### debug
 
 `true`にするとリクエストの度にデバッグ情報を出力します(`stderr`)。デフォルトは`false`です。
@@ -388,13 +396,14 @@ cheerio-httpcliではcheerioオブジェクトのprototypeを拡張していく�
 
 ### $.documentInfo()
 
-取得したWEBページに関する情報(`url`と`encoding`)を取得できます。
+取得したWEBページに関する情報(`url`、`encoding`、`isXml`)を取得できます。
 
 ```js
 client.fetch('http://hogehoge/', function (err, $, res, body) {
   var docInfo = $.documentInfo();
   console.log(docInfo.url);      // http://hogehoge/
   console.log(docInfo.encoding); // 'utf-8'
+  console.log(docInfo.isXml);    // XMLモードでパースされた場合はtrue
 });
 ```
 
@@ -1049,6 +1058,26 @@ process.env.HTTP_PROXY = 'http://proxy.hoge.com:18080/';  // プロキシサー�
 var client = require('cheerio-httpcli');
 client.fetch('http://foo.bar.baz/', ...
 ```
+
+### XMLの名前空間付きタグの指定方法
+
+```xml
+<dc:title>タイトル</dc:title>
+```
+
+このようなXMLタグは
+
+```js
+$('dc:title').text();
+```
+
+では取得できません。
+
+```js
+$('dc\\:title').text();
+```
+
+といった具合にコロンを「\\」でエスケープすることで取得することができます。
 
 ### Electronに組み込む
 

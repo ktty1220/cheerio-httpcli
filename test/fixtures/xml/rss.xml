@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>タイトル</title>
+    <link>http://this.is.rss/</link>
+    <description>RSSテスト</description>
+    <language>ja</language>
+    <pubDate>Thu, 1 Dec 2016 00:00:00 +0900</pubDate>
+    <item>
+      <title>RSS記事1</title>
+      <link>http://this.is.rss/news1.html</link>
+      <pubDate>Fri, 2 Dec 2016 00:00:00 +0900</pubDate>
+      <dc:author>山田太郎</dc:author>
+      <category>その他</category>
+    </item>
+    <item>
+      <title>RSS記事2</title>
+      <link>http://this.is.rss/news2.php?aaa=%E3%83%86%E3%82%B9%E3%83%88%E3%81%A7%E3%81%99</link>
+      <pubDate>Sat, 3 Dec 2016 00:00:00 +0900</pubDate>
+      <dc:author>山田次郎</dc:author>
+      <category><![CDATA[ 未登録 ]]></category>
+    </item>
+  </channel>
+</rss>

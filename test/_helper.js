@@ -66,6 +66,103 @@ module.exports = {
       gzip: true,
       cache: 0
     });
+
+    var defaultHeaders = function () {
+      return [
+        [ 'content-type', 'text/html' ]
+      ];
+    };
+
+    // 特殊な結果を返すURLルーティング
+    var router = {
+      /*** ソフト404ページ ***/
+      404: function (req, res, pdata) {
+        return file.serveFile('/error/404.html', 404, {}, req, res);
+      },
+      /*** アクセス情報 ***/
+      info: function (req, res, pdata) {
+        var headers = defaultHeaders();
+        // アクセス元のヘッダ情報などをレスポンスヘッダにセットして返す
+        each([
+          [ 'request-url', req.url ],
+          [ 'request-method', req.method.toUpperCase() ],
+          [ 'Set-Cookie', 'session_id=hahahaha' ],
+          [ 'Set-Cookie', 'login=1' ]
+        ], function (h) {
+          headers.push(h);
+        });
+        var props = [ 'user-agent', 'referer', 'accept-language' ];
+        for (var i = 0; i < props.length; i++) {
+          var p = props[i];
+          if (req.headers[p]) {
+            headers.push([ p, req.headers[p] ]);
+          }
+        }
+        if (pdata.length > 0) {
+          headers.push([ 'post-data', pdata ]);
+        }
+        res.writeHead(200, headers);
+        return res.end('<html></html>');
+      },
+      /*** セッションID保持 ***/
+      session: function (req, res, pdata) {
+        var headers = defaultHeaders();
+        var setCookie = (/x_session_id=/.test(req.headers.cookie || ''))
+          ? req.headers.cookie
+          : ('x_session_id=user_' + random({ length: 32 }));
+        headers.push([ 'Set-Cookie', setCookie ]);
+        res.writeHead(200, headers);
+        return res.end('<html></html>');
+      },
+      /*** リダイレクト ***/
+      redirect: function (req, res, pdata) {
+        var headers = defaultHeaders();
+        var loc = _this.url('manual', 'euc-jp');
+        if (/_relative/.test(req.url)) {
+          // 相対パスバージョン
+          loc = loc.replace(/^http:\/\/localhost:\d+\//, '');
+        }
+        headers.push([ 'location', loc ]);
+        // ログインフォームから来た場合はログイン情報も
+        if (pdata.length > 0) {
+          var pq = qs.parse(pdata);
+          headers.push([ 'Set-Cookie', 'user=' + pq.user ]);
+        }
+        res.writeHead(301, headers);
+        return res.end('location: ' + loc);
+      },
+      /*** レスポンスに5秒かかるページ ***/
+      slow: function (req, res, pdata) {
+        var headers = defaultHeaders();
+        return setTimeout(function () {
+          res.writeHead(200, headers);
+          res.end('<html></html>');
+        }, 5000);
+      },
+      /*** 巨大サイズ ***/
+      mega: function (req, res, pdata) {
+        res.writeHead(200);
+        var buf = new Array(1024 * 1024).join().split(',').map(function (v, i, a) {
+          return 'a';
+        }).join('');
+        return res.end(buf);
+      },
+      // XML
+      xml: function (req, res, pdata) {
+        var headers = defaultHeaders();
+        var opt = {
+          ext: (req.url.match(/\.(\w+)$/) || [])[1] || 'xml'
+        };
+        if (opt.ext === 'xml') {
+          headers = [
+            [ 'content-type', 'application/xml' ]
+          ];
+        }
+        res.writeHead(200, headers);
+        return res.end(fs.readFileSync(path.join(this.root, 'xml/rss.xml')));
+      }
+    };
+
     return http.createServer(function (req, res) {
       var pdata = '';
       req.on('data', function (data) {
@@ -77,80 +174,14 @@ module.exports = {
         }
         _traceRoute.push(req.url);
 
-        var headers = [];
-        if (/~info/.test(req.url)) {
-          // アクセス元のヘッダ情報などをレスポンスヘッダにセットして返す
-          headers = [
-            [ 'request-url', req.url ],
-            [ 'request-method', req.method.toUpperCase() ],
-            [ 'Set-Cookie', 'session_id=hahahaha' ],
-            [ 'Set-Cookie', 'login=1' ]
-          ];
-          var props = [ 'user-agent', 'referer', 'accept-language' ];
-          for (var i = 0; i < props.length; i++) {
-            var p = props[i];
-            if (req.headers[p]) {
-              headers.push([ p, req.headers[p] ]);
-            }
+        if (Object.keys(router).some(function (route) {
+          if (! new RegExp('~' + route).test(req.url)) {
+            return false;
           }
-          if (pdata.length > 0) {
-            headers.push([ 'post-data', pdata ]);
-          }
-          res.writeHead(200, headers);
-          return res.end('<html></html>');
-        }
-
-        if (/~session/.test(req.url)) {
-          // セッションID保持
-          var setCookie = (/x_session_id=/.test(req.headers.cookie || ''))
-            ? req.headers.cookie
-            : ('x_session_id=user_' + random({ length: 32 }));
-          headers = [
-            [ 'Set-Cookie', setCookie ]
-          ];
-          res.writeHead(200, headers);
-          return res.end('<html></html>');
-        }
-
-        if (/~redirect/.test(req.url)) {
-          // リダイレクト
-          var loc = _this.url('manual', 'euc-jp');
-          if (/_relative/.test(req.url)) {
-            // 相対パスバージョン
-            loc = loc.replace(/^http:\/\/localhost:\d+\//, '');
-          }
-          headers = [
-            [ 'location', loc ]
-          ];
-          // ログインフォームから来た場合はログイン情報も
-          if (pdata.length > 0) {
-            var pq = qs.parse(pdata);
-            headers.push([ 'Set-Cookie', 'user=' + pq.user ]);
-          }
-          res.writeHead(301, headers);
-          return res.end('location: ' + loc);
-        }
-
-        if (/~404/.test(req.url)) {
-          // ソフト404ページ
-          return file.serveFile('/error/404.html', 404, {}, req, res);
-        }
-
-        if (/~slow/.test(req.url)) {
-          // レスポンスに5秒かかるページ
-          return setTimeout(function () {
-            res.writeHead(200, headers);
-            res.end('<html></html>');
-          }, 5000);
-        }
-
-        if (/~mega/.test(req.url)) {
-          // 巨大サイズ
-          res.writeHead(200);
-          var buf = new Array(1024 * 1024).join().split(',').map(function (v, i, a) {
-            return 'a';
-          }).join('');
-          return res.end(buf);
+          router[route].apply(_this, [ req, res, pdata ]);
+          return true;
+        })) {
+          return;
         }
 
         // 通常ファイル

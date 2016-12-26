@@ -49,7 +49,8 @@ describe('fetchSync', function () {
     var result = cli.fetchSync(url, {}, 'sjis');
     assert.deepEqual(result.$.documentInfo(), {
       url: url,
-      encoding: 'sjis'
+      encoding: 'sjis',
+      isXml: false
     });
     assert(result.$('title').text() === '１');
   });
@@ -59,7 +60,8 @@ describe('fetchSync', function () {
     var result = cli.fetchSync(url, 'sjis');
     assert.deepEqual(result.$.documentInfo(), {
       url: url,
-      encoding: 'sjis'
+      encoding: 'sjis',
+      isXml: false
     });
     assert(result.$('title').text() === '１');
   });
@@ -94,7 +96,8 @@ describe('clickSync(a要素)', function () {
     var result2 = result1.$('.rel').clickSync();
     assert.deepEqual(result2.$.documentInfo(), {
       url: helper.url('auto', 'euc-jp'),
-      encoding: 'euc-jp'
+      encoding: 'euc-jp',
+      isXml: false
     });
     assert(typeOf(result2.response) === 'object');
     assert(typeOf(result2.$) === 'function');
@@ -106,7 +109,8 @@ describe('clickSync(a要素)', function () {
       var result = $('.rel').clickSync();
       assert.deepEqual(result.$.documentInfo(), {
         url: helper.url('auto', 'euc-jp'),
-        encoding: 'euc-jp'
+        encoding: 'euc-jp',
+        isXml: false
       });
       assert(typeOf(result.response) === 'object');
       assert(typeOf(result.$) === 'function');
