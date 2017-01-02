@@ -42,6 +42,7 @@ declare namespace CheerioHttpcli {
     }
   }
 
+  /*tslint:disable prefer-const*/
   let version: string;
   let headers: {[ name: string ]: string};
   let timeout: number;
@@ -50,6 +51,7 @@ declare namespace CheerioHttpcli {
   let followMetaRefresh: boolean;
   let maxDataSize: boolean;
   let debug: boolean;
+  /*tslint:enable prefer-const*/
   const download: Download.Manager;
 
   function reset(): void;
@@ -75,7 +77,7 @@ declare namespace CheerioHttpcli {
 
 // cheerio本体拡張(オリジナルのinterfaceを継承)
 interface CheerioStaticEx extends CheerioStatic {
-  documentInfo(): { url: string, encoding: string | null };
+  documentInfo(): { url: string, encoding: string | null, isXml: boolean };
   entityHtml(options?: CheerioOptionsInterface): string;
   entityHtml(selector: string, options?: CheerioOptionsInterface): string;
   entityHtml(element: Cheerio, options?: CheerioOptionsInterface): string;

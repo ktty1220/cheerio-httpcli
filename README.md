@@ -1087,6 +1087,19 @@ $('dc\\:title').text();
 
 また、Electronという環境に起因する動作不良に関しては、ちょっとした修正で解決するものは対応しますが、現行の仕組みを大きく変える必要がある場合は対応しない事もあります。ご了承ください。
 
+### TypeScriptからの利用
+
+@typesではなくcheerio-httpcli本体に定義ファイルが同梱されています。
+
+```ts
+import * as client from 'cheerio-httpcli';
+
+client.fetch('http://foo.bar.baz/', (err, $, res, body) => {
+  ...
+```
+
+といった形でTypeScriptから利用できます。
+
 ### 文字コード判別の仕様
 
 文字コードの判別はjschardetで高精度で判別できた場合はその情報を使用しますが、そうでない場合は`<head>`タグのcharset情報を参照します。後者での判別時においてcharsetで指定された文字コードとWEBページの実際の文字コードが異なる場合は変換エラーや文字化けが発生します。
