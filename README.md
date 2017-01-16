@@ -7,6 +7,7 @@
 [![test-coverage](https://codeclimate.com/github/ktty1220/cheerio-httpcli/badges/coverage.svg)](https://codeclimate.com/github/ktty1220/cheerio-httpcli/coverage)
 [![code-climate](https://codeclimate.com/github/ktty1220/cheerio-httpcli/badges/gpa.svg)](https://codeclimate.com/github/ktty1220/cheerio-httpcli)
 [![license](https://img.shields.io/npm/l/cheerio-httpcli.svg)](https://github.com/ktty1220/cheerio-httpcli/blob/master/LICENSE)
+[![Known Vulnerabilities](https://snyk.io/test/github/ktty1220/cheerio-httpcli/badge.svg)](https://snyk.io/test/github/ktty1220/cheerio-httpcli)
 
 Node.jsでWEBページのスクレイピングを行う際に必要となる文字コードの変換と、[cheerio](http://npmjs.org/package/cheerio)によってパースしたHTMLをjQueryのように操作できるHTTPクライアントモジュールです。
 
