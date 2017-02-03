@@ -55,6 +55,7 @@ declare namespace CheerioHttpcli {
   const download: Download.Manager;
 
   function reset(): void;
+  function set(name: string, value: any, nomerge?: boolean): void;
   function setIconvEngine(icmod: 'iconv' | 'iconv-jp' | 'iconv-lite'): void;
   //tslint:disable-next-line: max-line-length
   function setBrowser(type: 'ie' | 'edge' | 'chrome' | 'firefox' | 'opera' | 'vivaldi' | 'safari' | 'ipad' | 'iphone'| 'ipod' | 'android'| 'googlebot'): boolean;

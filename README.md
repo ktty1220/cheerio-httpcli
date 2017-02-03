@@ -60,6 +60,7 @@ npm install cheerio-httpcli
 * [メソッド](#%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89)
   * [fetch()](#fetchurl-get-param-encode-callback)
   * [fetchSync()](#fetchsyncurl-get-param-encode)
+  * [set()](#setname-value-nomerge)
   * [setBrowser()](#setbrowserbrowser-type)
   * [setIconvEngine()](#seticonvengineiconv-module-name)
   * [reset()](#reset)
@@ -247,6 +248,19 @@ console.log(result2.$('title')); // => http://hoge.fuga.piyo/のタイトルが�
 > * 同期リクエストは、外部スクリプトをspawnSync()で実行して処理が完了するまで待つ、という形で実装しているのでパフォーマンスは非常に悪いです(非同期リクエストの10倍程度は時間がかかります)。したがって、実装しておいてなんですが、基本は非同期リクエストで処理を行い、どうしてもここだけは同期リクエストにしたいといった場合のみ、という使い方をお勧めします。
 > * 同期リクエストの戻り値内のレスポンスはresponse.toJSON()されたものなので非同期版とは内容が若干異なります。statusCodeやheaders、requestなどの主要プロパティは共通して使用できるので特に大きな問題はないかと思いますが、特殊な使い方をする場合には注意が必要です。
 
+### set(name, value, nomerge)
+
+`name`で指定したプロパティに値`value`を設定するメソッドです。  
+オブジェクトはマージされます。`nomerge`が`true`の時はマージしません。
+
+```js
+var client = require('cheerio-httpcli');
+
+client.set("timeout", 10000); // タイムアウトを30秒から10秒へ変更
+```
+
+存在するプロパティについては [プロパティ](#%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3) を参照してください。
+
 ### setBrowser(browser-type)
 
 ブラウザごとのUser-Agentをワンタッチで設定するメソッドです。
@@ -280,7 +294,7 @@ User-Agentを指定したブラウザのものに変更した場合は`true`、�
 
 ```js
 // IE6のUser-Agentを手動で指定
-client.headers['User-Agent'] = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
+client.set("headers", {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'});
 ```
 
 ### setIconvEngine(iconv-module-name)
@@ -358,7 +372,7 @@ requestモジュールで指定するタイムアウト情報をミリ秒で指�
 var client = require('cheerio-httpcli');
 
 // 受信料制限を1MBに指定
-client.maxDataSize = 1024 * 1024;
+client.set("maxDataSize", 1024 * 1024);
 
 // 1MB以上ののHTMLを指定
 client.fetch('http://big.large.huge/data.html', function (err, $, res, body) {
@@ -382,7 +396,7 @@ cheerio-httpcliは取得したページがXMLであると判別した場合、�
 var client = require('cheerio-httpcli');
 
 // デバッグ表示ON
-client.debug = true;
+client.set("debug", true);
 client.fetch( ...
 ```
 
@@ -1026,7 +1040,7 @@ var client = require('cheerio-httpcli');
 var user = 'hoge';
 var password = 'foobarbaz';
 
-client.headers['Authorization'] = 'Basic ' + new Buffer(user + ':' + password).toString('base64');
+client.set("headers", {'Authorization': 'Basic ' + new Buffer(user + ':' + password).toString('base64')});
 client.fetch('http://securet.example.com', function (err, $, res, body) {
   .
   .
