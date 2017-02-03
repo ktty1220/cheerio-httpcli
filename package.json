@@ -1,6 +1,6 @@
 {
   "name": "cheerio-httpcli",
-  "version": "0.6.10",
+  "version": "0.6.11",
   "description": "http client module with cheerio & iconv(-lite) & promise",
   "main": "index.js",
   "engines": {
@@ -20,17 +20,17 @@
   "typings": "./index.d.ts",
   "dependencies": {
     "@types/cheerio": "^0.17.31",
-    "@types/node": "^6.0.59",
+    "@types/node": "^6.0.62",
     "async": "^2.1.4",
     "cheerio": "^0.22.0",
     "colors": "^1.1.2",
     "constants": "0.0.2",
     "foreach": "^2.0.5",
-    "he": "^1.1.0",
+    "he": "^1.1.1",
     "iconv-lite": "^0.4.15",
     "jschardet": "^1.4.1",
-    "object-assign": "^4.1.0",
-    "os-locale": "^1.4.0",
+    "object-assign": "^4.1.1",
+    "os-locale": "~1.4.0",
     "prettyjson": "^1.2.1",
     "request": "^2.79.0",
     "require-uncached": "^1.0.3",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "dev-null": "^0.1.1",
-    "eslint": "^3.13.1",
+    "eslint": "^3.14.1",
     "espower-loader": "^1.2.0",
     "intelli-espower-loader": "^1.0.1",
     "isstream": "^0.1.2",
