@@ -8,6 +8,16 @@ declare namespace CheerioHttpcli {
   interface FetchResponse extends http.IncomingMessage {
     cookies: {[ name: string ]: string};
   }
+
+  // CheerioStatic拡張
+  interface CheerioStaticEx extends CheerioStatic {
+    documentInfo(): { url: string, encoding: string | null, isXml: boolean };
+    entityHtml(options?: CheerioOptionsInterface): string;
+    entityHtml(selector: string, options?: CheerioOptionsInterface): string;
+    entityHtml(element: Cheerio, options?: CheerioOptionsInterface): string;
+    entityHtml(element: CheerioElement, options?: CheerioOptionsInterface): string;
+  }
+
   interface FetchResult {
     error: Error;
     $: CheerioStaticEx;
@@ -74,15 +84,6 @@ declare namespace CheerioHttpcli {
   function fetchSync(url: string, param: {[ name: string ]: any}): FetchResult;
   function fetchSync(url: string, encode: string): FetchResult;
   function fetchSync(url: string): FetchResult;
-}
-
-// cheerio本体拡張(オリジナルのinterfaceを継承)
-interface CheerioStaticEx extends CheerioStatic {
-  documentInfo(): { url: string, encoding: string | null, isXml: boolean };
-  entityHtml(options?: CheerioOptionsInterface): string;
-  entityHtml(selector: string, options?: CheerioOptionsInterface): string;
-  entityHtml(element: Cheerio, options?: CheerioOptionsInterface): string;
-  entityHtml(element: CheerioElement, options?: CheerioOptionsInterface): string;
 }
 
 // cheerio拡張メソッド(オリジナルのinterfaceにマージ)
