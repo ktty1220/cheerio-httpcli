@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as url from 'url';
 import * as stream from 'stream';
+import 'cheerio';
 
 // cheerio-httpcli本体
 declare namespace CheerioHttpcli {
