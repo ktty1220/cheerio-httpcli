@@ -20,7 +20,7 @@
   "typings": "./index.d.ts",
   "dependencies": {
     "@types/cheerio": "^0.17.31",
-    "@types/node": "^6.0.53",
+    "@types/node": "^6.0.59",
     "async": "^2.1.4",
     "cheerio": "^0.22.0",
     "colors": "^1.1.2",
@@ -38,11 +38,12 @@
     "spawn-sync": "^1.0.15",
     "tough-cookie": "^2.3.2",
     "type-of": "^2.0.1",
-    "valid-url": "^1.0.9"
+    "valid-url": "^1.0.9",
+    "yargs": "^6.6.0"
   },
   "devDependencies": {
     "dev-null": "^0.1.1",
-    "eslint": "^3.12.2",
+    "eslint": "^3.13.1",
     "espower-loader": "^1.2.0",
     "intelli-espower-loader": "^1.0.1",
     "isstream": "^0.1.2",
