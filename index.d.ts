@@ -65,15 +65,11 @@ declare namespace CheerioHttpcli {
   const version: string;
   const download: Download.Manager;
 
-  type NumberProperties = 'timeout' | 'maxDataSize';
-  type BooleanProperties = 'gzip' | 'referer' | 'followMetaRefresh' | 'debug';
-  type KeyValueProperties = 'headers';
-
   function reset(): void;
 
-  function set(name: NumberProperties, value: number): void;
-  function set(name: BooleanProperties, value: boolean): void;
-  function set(name: KeyValueProperties, value: {[ name: string ]: string }, nomerge?: boolean): void;
+  function set(name: 'timeout' | 'maxDataSize', value: number): void;
+  function set(name: 'gzip' | 'referer' | 'followMetaRefresh' | 'debug', value: boolean): void;
+  function set(name: 'headers', value: {[ name: string ]: string }, nomerge?: boolean): void;
 
   function setIconvEngine(icmod: 'iconv' | 'iconv-jp' | 'iconv-lite'): void;
   //tslint:disable-next-line: max-line-length
