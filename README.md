@@ -250,16 +250,18 @@ console.log(result2.$('title')); // => http://hoge.fuga.piyo/のタイトルが�
 
 ### set(name, value, nomerge)
 
-`name`で指定したプロパティに値`value`を設定するメソッドです。  
+`name`で指定したプロパティに値`value`を設定するメソッドです。
 オブジェクトはマージされます。`nomerge`が`true`の時はマージしません。
 
 ```js
 var client = require('cheerio-httpcli');
 
-client.set("timeout", 10000); // タイムアウトを30秒から10秒へ変更
+client.set('timeout', 10000); // タイムアウトを30秒から10秒へ変更
 ```
 
 存在するプロパティについては [プロパティ](#%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3) を参照してください。
+
+> 現状ではTypeScript上でのプロパティ更新用のメソッドですが、直接プロパティに値を代入する方式は将来的に廃止する予定です。
 
 ### setBrowser(browser-type)
 
@@ -294,7 +296,9 @@ User-Agentを指定したブラウザのものに変更した場合は`true`、�
 
 ```js
 // IE6のUser-Agentを手動で指定
-client.set("headers", {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'});
+client.set('headers', {
+  'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
+});
 ```
 
 ### setIconvEngine(iconv-module-name)
@@ -372,7 +376,7 @@ requestモジュールで指定するタイムアウト情報をミリ秒で指�
 var client = require('cheerio-httpcli');
 
 // 受信料制限を1MBに指定
-client.set("maxDataSize", 1024 * 1024);
+client.set('maxDataSize', 1024 * 1024);
 
 // 1MB以上ののHTMLを指定
 client.fetch('http://big.large.huge/data.html', function (err, $, res, body) {
@@ -396,7 +400,7 @@ cheerio-httpcliは取得したページがXMLであると判別した場合、�
 var client = require('cheerio-httpcli');
 
 // デバッグ表示ON
-client.set("debug", true);
+client.set('debug', true);
 client.fetch( ...
 ```
 
@@ -1040,7 +1044,9 @@ var client = require('cheerio-httpcli');
 var user = 'hoge';
 var password = 'foobarbaz';
 
-client.set("headers", {'Authorization': 'Basic ' + new Buffer(user + ':' + password).toString('base64')});
+client.set('headers', {
+  Authorization: 'Basic ' + new Buffer(user + ':' + password).toString('base64')
+});
 client.fetch('http://securet.example.com', function (err, $, res, body) {
   .
   .

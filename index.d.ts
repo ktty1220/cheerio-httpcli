@@ -54,19 +54,27 @@ declare namespace CheerioHttpcli {
   }
 
   /*tslint:disable prefer-const*/
-  let version: string;
   let headers: {[ name: string ]: string};
   let timeout: number;
   let gzip: boolean;
   let referer: boolean;
   let followMetaRefresh: boolean;
-  let maxDataSize: boolean;
+  let maxDataSize: number;
   let debug: boolean;
   /*tslint:enable prefer-const*/
+  const version: string;
   const download: Download.Manager;
 
+  type NumberProperties = 'timeout' | 'maxDataSize';
+  type BooleanProperties = 'gzip' | 'referer' | 'followMetaRefresh' | 'debug';
+  type KeyValueProperties = 'headers';
+
   function reset(): void;
-  function set(name: string, value: any, nomerge?: boolean): void;
+
+  function set(name: NumberProperties, value: number): void;
+  function set(name: BooleanProperties, value: boolean): void;
+  function set(name: KeyValueProperties, value: {[ name: string ]: string }, nomerge?: boolean): void;
+
   function setIconvEngine(icmod: 'iconv' | 'iconv-jp' | 'iconv-lite'): void;
   //tslint:disable-next-line: max-line-length
   function setBrowser(type: 'ie' | 'edge' | 'chrome' | 'firefox' | 'opera' | 'vivaldi' | 'safari' | 'ipad' | 'iphone'| 'ipod' | 'android'| 'googlebot'): boolean;
