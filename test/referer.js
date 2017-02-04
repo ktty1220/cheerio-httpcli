@@ -7,7 +7,7 @@ var cli    = require('../index');
 
 describe('referer:enable', function () {
   it('Referer自動設定を有効 => リクエストの度にRefererがセットされる', function (done) {
-    cli.referer = true;
+    cli.set('referer', true);
     var url = helper.url('auto', 'euc-jp');
     cli.fetch(url, function (err, $, res, body) {
       cli.fetch(helper.url('~info'), function (err, $, res, body) {
@@ -33,7 +33,7 @@ describe('referer:enable', function () {
 
 describe('referer:disable', function () {
   it('Referer自動設定を無効 => Refererはセットされない', function (done) {
-    cli.referer = false;
+    cli.set('referer', false);
     delete cli.headers.Referer;
     var url = helper.url('auto', 'euc-jp');
     cli.fetch(url, function (err, $, res, body) {

@@ -12,6 +12,7 @@ describe('cheerio:html', function () {
         $('h1')._html();
         var expected = '[DEPRICATED] _html() will be removed in the future)';
         var actual = unhook();
+        actual = actual.replace(/\n\s*at\s.+$/, '');
         assert(actual === expected);
         done();
       });
@@ -24,6 +25,7 @@ describe('cheerio:html', function () {
         $('h1')._text();
         var expected = '[DEPRICATED] _text() will be removed in the future)';
         var actual = unhook();
+        actual = actual.replace(/\n\s*at\s.+$/, '');
         assert(actual === expected);
         done();
       });

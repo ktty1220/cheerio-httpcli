@@ -57,7 +57,7 @@ describe('redirect', function () {
 
     describe('meta refresh', function () {
       beforeEach(function () {
-        cli.followMetaRefresh = true;
+        cli.set('followMetaRefresh', true);
       });
 
       it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(絶対URL)', function (done) {
@@ -79,7 +79,7 @@ describe('redirect', function () {
       });
 
       it('followMetaRefresh:false => meta[refresh]タグがあってもリダイレクトしない', function (done) {
-        cli.followMetaRefresh = false;
+        cli.set('followMetaRefresh', false);
         var url = helper.url('refresh', 'absolute');
         cli.fetch(url, function (err, $, res, body) {
           assert($.documentInfo().url === url);
@@ -125,7 +125,7 @@ describe('redirect', function () {
 
     describe('meta refresh', function () {
       beforeEach(function () {
-        cli.followMetaRefresh = true;
+        cli.set('followMetaRefresh', true);
       });
 
       it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(絶対URL)', function () {
@@ -143,7 +143,7 @@ describe('redirect', function () {
       });
 
       it('followMetaRefresh:false => meta[refresh]タグがあってもリダイレクトしない', function () {
-        cli.followMetaRefresh = false;
+        cli.set('followMetaRefresh', false);
         var url = helper.url('refresh', 'absolute');
         var result = cli.fetchSync(url);
         assert(result.$.documentInfo().url === url);

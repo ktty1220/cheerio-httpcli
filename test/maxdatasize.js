@@ -7,7 +7,7 @@ var cli      = require('../index');
 
 describe('maxdatasize', function () {
   before(function () {
-    cli.timeout = 30000;
+    cli.set('timeout', 30000);
   });
 
   it('デフォルトは受信無制限', function (done) {
@@ -19,7 +19,7 @@ describe('maxdatasize', function () {
   });
 
   it('maxDataSizeを指定 => 指定したバイト数で受信制限がかかる', function (done) {
-    cli.maxDataSize = 1024 * 64;
+    cli.set('maxDataSize', 1024 * 64);
     cli.fetch(helper.url('~mega'), function (err, $, res, body) {
       assert(err.message === 'data size limit over');
       assert(! $);

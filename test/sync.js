@@ -79,7 +79,7 @@ describe('fetchSync', function () {
   });
 
   it('タイムアウトの値を超えるとエラーになる', function () {
-    cli.timeout = 300;
+    cli.set('timeout', 300);
     var url = helper.url('~slow');
     var result = cli.fetchSync(url);
     var err = result.error;

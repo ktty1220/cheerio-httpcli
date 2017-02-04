@@ -24,10 +24,10 @@ describe('set', function () {
   });
 
   it('存在するプロパティ(オブジェクト) => 指定したキーのみ更新される', function () {
-    cli.headers = {
+    cli.headers = [ true, {
       'Accept-Language': 'en-US',
       Referer: 'http://hoge.com/'
-    };
+    }, true ];
     cli.set('headers', {
       'Accept-Language': 'ja'
     });
@@ -38,10 +38,10 @@ describe('set', function () {
   });
 
   it('存在するプロパティ(オブジェクト) + nomerge => プロパティそのものが上書きされる', function () {
-    cli.headers = {
+    cli.headers = [ true, {
       'Accept-Language': 'en-US',
       Referer: 'http://hoge.com/'
-    };
+    }, true ];
     cli.set('headers', {
       'Accept-Language': 'ja'
     }, true);

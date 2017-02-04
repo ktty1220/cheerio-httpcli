@@ -8,12 +8,12 @@ var cli    = require('../index');
 describe('reset', function () {
   it('パラメータ変更 => reset => 各パラメータが初期化される', function () {
     cli.setBrowser('googlebot');
-    cli.timeout = 9999;
-    cli.gzip = false;
-    cli.referer = false;
-    cli.followMetaRefresh = true;
-    cli.maxDataSize = 9999;
-    cli.debug = true;
+    cli.set('timeout', 9999);
+    cli.set('gzip', false);
+    cli.set('referer', false);
+    cli.set('followMetaRefresh', true);
+    cli.set('maxDataSize', 9999);
+    cli.set('debug', true);
 
     cli.reset();
 

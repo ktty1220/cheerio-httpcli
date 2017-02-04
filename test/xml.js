@@ -63,11 +63,11 @@ describe('xml', function () {
 
   describe('forceHtml: true', function () {
     before(function () {
-      cli.forceHtml = true;
+      cli.set('forceHtml', true);
     });
 
     after(function () {
-      cli.forceHtml = false;
+      cli.set('forceHtml', false);
     });
 
     each([ 'xml', 'rss', 'rdf', 'atom', 'opml', 'xsl', 'xslt' ], function (ext) {

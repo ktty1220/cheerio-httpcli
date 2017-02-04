@@ -45,7 +45,7 @@ describe('error', function () {
   });
 
   it('タイムアウトの値を超えるとエラーになる', function (done) {
-    cli.timeout = 300;
+    cli.set('timeout', 300);
     var url = helper.url('~slow');
     cli.fetch(url, function (err, $, res, body) {
       assert(helper.isTimedOut(err));

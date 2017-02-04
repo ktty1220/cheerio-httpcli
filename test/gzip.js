@@ -7,7 +7,7 @@ var cli    = require('../index');
 
 describe('gzip:enable', function () {
   before(function () {
-    cli.gzip = true;
+    cli.set('gzip', true);
   });
 
   it('gzipヘッダを送信して返ってきた圧縮HTMLが解凍されてからUTF-8に変換される', function (done) {
@@ -21,7 +21,7 @@ describe('gzip:enable', function () {
 
 describe('gzip:disable', function () {
   before(function () {
-    cli.gzip = false;
+    cli.set('gzip', false);
   });
 
   it('gzipヘッダを送信しないで返ってきた生のHTMLがそのままUTF-8に変換される', function (done) {

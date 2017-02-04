@@ -15,7 +15,7 @@ describe('cheerio:download', function () {
     cli.download.on('ready', function () {});
   });
   afterEach(function () {
-    cli.timeout = 30000;
+    cli.set('timeout', 30000);
   });
 
   it('img要素以外 => エラー', function (done) {
@@ -242,7 +242,7 @@ describe('cheerio:download', function () {
         assert.deepEqual(this.state, { queue: 0, complete: 0, error: 1 });
         done();
       });
-      cli.timeout = 1;
+      cli.set('timeout', 1);
       assert($('.rel').download() === 1);
     });
   });
@@ -259,7 +259,7 @@ describe('cheerio:download', function () {
         assert.deepEqual(this.state, { queue: 0, complete: 0, error: 1 });
         done();
       });
-      cli.timeout = 3000;
+      cli.set('timeout', 3000);
       assert($('.mega').download() === 1);
     });
   });
