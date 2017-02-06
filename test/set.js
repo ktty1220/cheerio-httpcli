@@ -1,6 +1,8 @@
 /*eslint-env mocha*/
 /*jshint -W100*/
 var assert = require('power-assert');
+var each   = require('foreach');
+var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('set', function () {
@@ -61,5 +63,57 @@ describe('set', function () {
     assert.deepEqual(cli.headers, {
       'accept-language': 'ja'
     });
+  });
+
+  it('直接値を更新 => 更新できるがDEPLICATEDメッセージが表示される', function () {
+    cli.set('timeout', 7777);
+    helper.hookStderr(function (unhook) {
+      cli.timeout = 3333;
+      var expected = '[DEPRICATED] direct property update will be refused in the future. use set(key, value)';
+      var actual = unhook();
+      actual = actual.replace(/\n\s*at\s.+$/, '');
+      assert(actual === expected);
+      assert(cli.timeout === 3333);
+    });
+  });
+
+  describe('型チェック', function () {
+    var types = {
+      headers: { ok: [{}], ng: [ 1, true, 'str', null ], type: 'object' },
+      timeout: { ok: [ 0, 100 ], ng: [ -1, false, 'str', {}, [], null ], type: 'number' },
+      gzip: { ok: [ true, false ], ng: [ 1, 'str', {}, [], null ], type: 'boolean' },
+      referer: { ok: [ true, false ], ng: [ 1, 'str', {}, [], null ], type: 'boolean' },
+      followMetaRefresh: { ok: [ true, false ], ng: [ 1, 'str', {}, [], null ], type: 'boolean' },
+      maxDataSize: { ok: [ 0, 100, null ], ng: [ -1, false, 'str', {}, [] ], type: 'number or null' },
+      forceHtml: { ok: [ true, false ], ng: [ 1, 'str', {}, [], null ], type: 'boolean' },
+      debug: { ok: [ true, false ], ng: [ 1, 'str', {}, [], null ], type: 'boolean' }
+    };
+    /*eslint-disable max-nested-callbacks*/
+    each(types, function (values, name) {
+      describe(name, function () {
+        it('OK', function () {
+          each(values.ok, function (v) {
+            helper.hookStderr(function (unhook) {
+              cli.set(name, v);
+              var expected = '';
+              var actual = unhook();
+              assert(actual === expected);
+            });
+          });
+        });
+        it('NG', function () {
+          each(values.ng, function (v) {
+            helper.hookStderr(function (unhook) {
+              cli.set(name, v);
+              var expected = 'invalid value: ' + String(v) + '\n'
+              + 'property "' + name + '" can accept only ' + values.type;
+              var actual = unhook();
+              assert(actual === expected);
+            });
+          });
+        });
+      });
+    });
+    /*eslint-enable max-nested-callbacks*/
   });
 });
