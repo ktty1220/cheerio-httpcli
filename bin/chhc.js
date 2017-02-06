@@ -20,7 +20,68 @@ var argv = require('yargs')
 .alias('v', 'version')
 .help('h')
 .alias('h', 'help')
-.locale('ja')
+.locale('en')
 .argv;
 
 console.info(argv);
+
+/*
+<URL>
+  fetch URL [params]
+  ex)
+    http://hoge.fuga/
+    http://foo.bar/ a=hoge b="あいうえお かきくけこ"
+
+response
+  show response info
+
+$(...)
+  show element info
+  ex)
+    $('title')
+
+$(...).<method>([option])
+  exec cheerio method
+  ex)
+    $('#menu').children()
+    $('form').eq(0).fields()
+
+<method>
+  exec cheerio method(current element)
+  ex)
+    click()
+    submit({ q: 'what is it' })
+    val('hello world!')
+
+timeout <number>
+  set timeout property
+
+gzip
+  toggle gzip property
+
+referer
+  toggle referer property
+
+followMetaRefresh
+  toggle followMetaRefresh property
+
+maxDataSize <number|null>
+  set maxDataSize property
+
+forceHtml
+  toggle forceHtml property
+
+open
+  open current page in browser
+
+debug
+  toggle debug property
+
+log
+  show command log
+
+> <filename>
+  output previous command result to file(JSON fromat)
+  ex)
+    > links.json
+*/
