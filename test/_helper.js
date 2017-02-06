@@ -61,7 +61,7 @@ module.exports = {
    */
   server: function () {
     var _this = this;
-    var _traceRoute = [];
+    var _traceRoute = null;
     var file = new nstatic.Server(this.root, {
       gzip: true,
       cache: 0
@@ -169,10 +169,18 @@ module.exports = {
         pdata += data;
       });
       req.on('end', function () {
-        if (req.url.indexOf('?reset_trace_route') !== -1) {
-          _traceRoute.length = 0;
+        if (req.url.indexOf('?start_trace_route') !== -1) {
+          _traceRoute = [];
         }
-        _traceRoute.push(req.url);
+        if (req.url.indexOf('?stop_trace_route') !== -1) {
+          _traceRoute = null;
+        }
+        if (_traceRoute !== null) {
+          if (req.url.indexOf('?reset_trace_route') !== -1) {
+            _traceRoute.length = 0;
+          }
+          _traceRoute.push(req.url);
+        }
 
         if (Object.keys(router).some(function (route) {
           if (! new RegExp('~' + route).test(req.url)) {
@@ -187,7 +195,9 @@ module.exports = {
         // 通常ファイル
         var wait = (req.url.match(/[\?&]wait=(\d+)/i) || [])[1] || 5;
         setTimeout(function () {
-          res.setHeader('trace-route', JSON.stringify(_traceRoute));
+          if (_traceRoute !== null) {
+            res.setHeader('trace-route', JSON.stringify(_traceRoute));
+          }
           file.serve(req, res);
         }, parseInt(wait, 10));
         /*eslint-disable consistent-return*/ return; /*eslint-enable consistent-return*/

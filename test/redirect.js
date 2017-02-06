@@ -7,6 +7,13 @@ var helper = require('./_helper');
 var cli    = require('../index');
 
 describe('redirect', function () {
+  before(function (done) {
+    cli.fetch(helper.url() + '?start_trace_route').finally(done);
+  });
+  after(function (done) {
+    cli.fetch(helper.url() + '?stop_trace_route').finally(done);
+  });
+
   describe('async', function () {
     describe('30x', function () {
       it('documentInfoにリダイレクト先のURLが登録される', function (done) {

@@ -16,6 +16,7 @@
 
 ### DEPRICATED
 
+* サポート対象Node.jsバージョンを0.12に変更
 * `setBrowser()`/`setIconvEngine()`メソッドを将来廃止予定に
 * プロパティ値の直接更新を将来廃止予定に
 
