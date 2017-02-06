@@ -66,6 +66,8 @@ npm install cheerio-httpcli
   * [reset()](#reset)
 * [プロパティ](#%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3)
   * [version](#version)
+  * [browser](#browser)
+  * [iconv](#iconv)
   * [headers](#headers)
   * [timeout](#timeout)
   * [gzip](#gzip)
@@ -256,7 +258,32 @@ console.log(result2.$('title')); // => http://hoge.fuga.piyo/のタイトルが�
 ```js
 var client = require('cheerio-httpcli');
 
-client.set('timeout', 10000); // タイムアウトを30秒から10秒へ変更
+client.set('timeout', 10000);     // タイムアウトを30秒から10秒へ変更
+client.set('headers', {           // リクエストヘッダのrefereのみを変更
+  referer: 'http://hoge.fuga/piyo.html'
+});
+client.set('headers', {}, true);  // リクエストヘッダを空に
+```
+
+オブジェクトの場合、キーに対する値に`null`をセットするとその値は削除されます。
+
+```js
+// [before]
+// client.headers => {
+//   lang: 'ja-JP',
+//   referer: 'http://hoge.fuga/piyo.html',
+//   'user-agent': 'my custom user-agent'
+// }
+
+client.set('headers', {
+  referer: null
+});
+
+// [after]
+// client.headers => {
+//   lang: 'ja-JP',
+//   'user-agent': 'my custom user-agent'
+// }
 ```
 
 存在するプロパティについては [プロパティ](#%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3) を参照してください。
@@ -275,7 +302,9 @@ client.setBrowser('android');   // AndroidのUser-Agentに変更
 client.setBrowser('googlebot'); // GooglebotのUser-Agentに変更
 ```
 
-User-Agentを指定したブラウザのものに変更した場合は`true`、対応していないブラウザを指定するとUser-Agentは変更されずに`false`が返ります。
+~~User-Agentを指定したブラウザのものに変更した場合は`true`、対応していないブラウザを指定するとUser-Agentは変更されずに`false`が返ります。~~
+
+> `0.7`から値を返さないようになりました。
 
 対応しているブラウザは以下のとおりです。
 
@@ -301,6 +330,12 @@ client.set('headers', {
 });
 ```
 
+> `setBrowser()`は将来的に削除予定です。代わりに以下のように`set()`メソッドを使用するようにしてください。
+
+```js
+client.set('browser', 'firefox');
+```
+
 ### setIconvEngine(iconv-module-name)
 
 cheerio-httpcliは、実行時にインストールされているiconv系のモジュールをチェックして利用するモジュールを自動的に決定しています。優先順位は以下のとおりです。
@@ -316,7 +351,7 @@ iconv-liteはcheerio-httpcliのインストール時に依存モジュールと�
 
 このメソッドは自動的にロードされたiconv系モジュールを破棄して、使用するiconv系モジュールを手動で指定するためのものです。モジュールテスト時の切り替え用メソッドなので基本的には実用性はありません。
 
-`iconv-module-name`には使用するiconv系モジュール名(`'iconv'`, `'iconv-lite'`, `'iconv-jp'`)のいずれかの文字列を指定します。
+`iconv-module-name`には使用するiconv系モジュール名(`iconv`, `iconv-lite`, `iconv-jp`)のいずれかの文字列を指定します。
 
 ##### サンプル
 
@@ -328,6 +363,12 @@ client.setIconvEngine('iconv-lite');
 client.fetch( ...
 ```
 
+> `setIconvEngine()`は将来的に削除予定です。代わりに以下のように`set()`メソッドを使用するようにしてください。
+
+```js
+client.set('iconv', 'iconv-lite');
+```
+
 ### reset()
 
 cheerio-httpcliはシングルインスタンスで動作するモジュールなので、そのプロセスが動作している間は各種設定やクッキーを共有して保持し続けます。
@@ -336,9 +377,34 @@ cheerio-httpcliはシングルインスタンスで動作するモジュール�
 
 ## プロパティ
 
-### version
+各プロパティは以下のように取得、更新します。
+
+```js
+// バージョン情報を表示
+console.log(client.version);
+
+// タイムアウト時間を変更
+client.set('timeout', 5000);
+
+// [非推奨] 直接更新することも可能ですが将来的に不可となります
+client.timeout = 3000;
+```
+
+### version `readonly`
 
 cheerio-httpcliのバージョン情報です。
+
+### browser
+
+`set()`や`setBrowser()`でセットしたブラウザ名です(`ie`、`chrome`など)。
+
+未設定の場合は`null`、手動でUser-Agentを設定した場合は`custom`と入っています。
+
+※未設定時には初回`fetch()`時に`chrome`がセットされます。
+
+### iconv
+
+使用中のiconv系モジュール名です(`iconv`、`iconv-lite`、`iconv-jp`のいずれか)。
 
 ### headers
 
@@ -404,7 +470,7 @@ client.set('debug', true);
 client.fetch( ...
 ```
 
-### download
+### download `readonly`
 
 ファイルダウンロードマネージャーオブジェクトです。このオブジェクトを通してファイルダウンロードに関する設定を行います(詳細は[$(_image-element_).download()](#image-elementdownload-src-attr-)を参照)。
 

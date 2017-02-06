@@ -41,7 +41,7 @@ client.fetch('http://nicovideo.jp/')
   console.info(result.$('#siteHeaderUserNickNameContainer').text());
 })
 .catch(function (err) {
-  console.error('エラーが発生しました', err);
+  console.error('エラーが発生しました', err.message);
 })
 .finally(function () {
   console.info('終了します');

@@ -1,3 +1,24 @@
+# 0.7.0 (2017-02-XX)
+
+### NEW(beta)
+
+* CLI用ツール同梱(`chhc`)
+
+### IMPROVEMENTS
+
+* `form`の`accept-charset`属性に対応
+* プロパティ更新時の値の型チェック追加
+
+### FIXES(breaking)
+
+* `setBrowser()`が値を返さないように変更
+* DEPRICATEDな操作やメソッド実行時にメッセージを表示するように変更
+
+### DEPRICATED
+
+* `setBrowser()`/`setIconvEngine()`メソッドを将来廃止予定に
+* プロパティ値の直接更新を将来廃止予定に
+
 # 0.6.11 (2017-02-03)
 
 * 依存ライブラリを最新バージョンに更新

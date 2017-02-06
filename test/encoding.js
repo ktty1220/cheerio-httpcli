@@ -8,7 +8,7 @@ var cli    = require('../index');
 
 describe('encoding:auto', function () {
   before(function () {
-    cli.setIconvEngine('iconv-lite');
+    cli.set('iconv', 'iconv-lite');
   });
 
   each(helper.files('auto'), function (enc) {
@@ -33,7 +33,7 @@ describe('encoding:auto', function () {
 
 describe('encoding:manual', function () {
   before(function () {
-    cli.setIconvEngine('iconv-lite');
+    cli.set('iconv', 'iconv-lite');
   });
 
   each(helper.files('manual'), function (enc) {
@@ -54,7 +54,7 @@ describe('encoding:manual', function () {
 
 describe('encoding:error', function () {
   before(function () {
-    cli.setIconvEngine('iconv-lite');
+    cli.set('iconv', 'iconv-lite');
   });
 
   it('iconv-liteで未対応のページは変換エラーとなる(iso-2022-jp)', function (done) {
@@ -72,7 +72,7 @@ describe('encoding:error', function () {
 
 describe('encoding:unknown', function () {
   before(function () {
-    cli.setIconvEngine('iconv-lite');
+    cli.set('iconv', 'iconv-lite');
   });
 
   it('自動判定でも<head>タグからも文字コードが判別できない => UTF-8として処理される(utf-8)', function (done) {

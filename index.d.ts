@@ -67,7 +67,8 @@ declare namespace CheerioHttpcli {
 
   function reset(): void;
 
-  function set(name: 'timeout' | 'maxDataSize', value: number): void;
+  function set(name: 'timeout', value: number): void;
+  function set(name: 'maxDataSize', value: number | null): void;
   function set(name: 'gzip' | 'referer' | 'followMetaRefresh' | 'debug', value: boolean): void;
   function set(name: 'headers', value: {[ name: string ]: string }, nomerge?: boolean): void;
 
