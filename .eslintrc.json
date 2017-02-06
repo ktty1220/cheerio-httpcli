@@ -11,7 +11,7 @@
   "plugins": [
   ],
   "rules": {
-    "curly": 2,
+    "curly": [2, "multi-line"],
     "camelcase": [1, {
       "properties": "never"
     }],
@@ -67,6 +67,7 @@
     "no-labels": 2,
     "no-lonely-if": 1,
     "no-loop-func": 0,
+    "no-multi-assign": 1,
     "no-multi-str": 1,
     "no-multiple-empty-lines": [1, {"max": 2}],
     "no-nested-ternary": 2,
@@ -94,6 +95,7 @@
     "no-this-before-super": 2,
     "no-tabs": 2,
     "no-throw-literal": 2,
+    "prefer-promise-reject-errors": 2,
     "no-template-curly-in-string": 1,
     "no-undef": 2,
     "no-undef-init": 2,

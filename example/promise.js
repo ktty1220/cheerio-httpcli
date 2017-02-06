@@ -22,10 +22,10 @@ client.fetch('http://www.yahoo.co.jp/')
 }).then(function (result) {
   console.info('<then>', result.$('title').text());
   // 例外を発生させる
-  throw new Error('<error>');
+  throw new Error('!!! error !!!');
 }).catch(function (err) {
   // 例外発生時の処理
-  console.error('<catch>', err);
+  console.error('<catch>', err.message);
 }).finally(function () {
   // 最終的に必ず実行される処理
   console.info('<finally>');

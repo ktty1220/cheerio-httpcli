@@ -3,6 +3,9 @@
   "version": "0.6.11",
   "description": "http client module with cheerio & iconv(-lite) & promise",
   "main": "index.js",
+  "bin": {
+    "chhc": "bin/chhc.js"
+  },
   "engines": {
     "node": ">=0.10.0"
   },

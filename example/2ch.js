@@ -23,12 +23,12 @@ client.fetch('http://www.2ch.net/')
 .then(function (result) {
   var $ = result.$;
   var results = [];
-  $('.box').each(function () {
+  $('.list_line').each(function () {
     var $a = $(this).find('a').eq(0);
     results.push({
       title: $a.text().trim(),
       url: $a.attr('href'),
-      timestamp: $(this).find('.timestamp').text().trim()
+      info: $(this).find('.list_line_info_container').text().trim()
     });
   });
   console.info(results);
