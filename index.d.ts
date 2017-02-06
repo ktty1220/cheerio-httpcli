@@ -29,7 +29,7 @@ declare namespace CheerioHttpcli {
   // やっつけPromise
   interface Promise {
     then: (callback: {(result: FetchResult): void}) => Promise;
-    catch: (callbck: {(error: Error): void}) => Promise;
+    catch: (callback: {(error: Error): void}) => Promise;
     finally: (callback: {(): void}) => Promise;
   }
 

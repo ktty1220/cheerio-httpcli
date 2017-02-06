@@ -264,6 +264,24 @@ describe('submitSync', function () {
         assert.deepEqual(qp.select, [ escapes['ははははは'][enc], escapes['へへへへへ'][enc] ]);
         assert(qp.textarea === '');
       });
+
+      /*jscs:disable disallowQuotedKeysInObjects*/
+      /*eslint-disable quote-props*/
+      var expectedEncodings = {
+        'shift_jis': 'utf-8',
+        'euc-jp': 'shift_jis',
+        'utf-8': 'euc-jp'
+      };
+      /*jscs:enable disallowQuotedKeysInObjects*/
+      /*eslint-enable quote-props*/
+      it('accept-chaset属性あり => accept-charsetで指定されたURLエンコードで送信される(' + expectedEncodings[enc] + ')', function () {
+        var param = { q: 'かきくけこ' };
+        var result1 = cli.fetchSync(helper.url('form', enc));
+        var result2 = result1.$('form[name=charset]').submitSync(param);
+        var actual = result2.response.headers['request-url'];
+        var expected = '/~info?q=' + escapes[param.q][expectedEncodings[enc]];
+        assert(actual === expected);
+      });
     });
   });
 
