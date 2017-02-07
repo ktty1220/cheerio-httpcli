@@ -17,8 +17,9 @@ module.exports = {
    * プロパティ
    */
 
-  port: 5555,              // テストサーバーのポート
-  root: './test/fixtures', // テストサーバーのドキュメントルート
+  // テストサーバー設定
+  port: 5555,
+  root: path.join(__dirname, 'fixtures'),
 
   /**
    * メソッド
@@ -198,7 +199,12 @@ module.exports = {
           if (_traceRoute !== null) {
             res.setHeader('trace-route', JSON.stringify(_traceRoute));
           }
-          file.serve(req, res);
+          file.serve(req, res, function (err) {
+            if (err) {
+              res.writeHead(err.status, err.headers);
+              res.end();
+            }
+          });
         }, parseInt(wait, 10));
         /*eslint-disable consistent-return*/ return; /*eslint-enable consistent-return*/
       }).resume();
@@ -302,6 +308,13 @@ module.exports = {
    */
   isTimedOut: function (err) {
     return ([ 'ESOCKETTIMEDOUT', 'ETIMEDOUT' ].indexOf(err.message) !== -1);
+  },
+
+  /**
+   * colorMessageで出力されたメッセージの詳細部分を除去
+   */
+  stripMessageDetail: function (msg) {
+    return msg.replace(/\s+at\s.*?$/, '');
   },
 
   /**

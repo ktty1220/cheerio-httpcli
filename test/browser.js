@@ -31,8 +31,8 @@ describe('browser', function () {
     var now = cli.headers['user-agent'];
     helper.hookStderr(function (unhook) {
       cli.set('browser', 'w3m');
-      var expected = 'unknown browser: w3m';
-      var actual = unhook();
+      var expected = '[WARNING] unknown browser: w3m';
+      var actual = helper.stripMessageDetail(unhook());
       assert(actual === expected);
       cli.fetch(helper.url('~info'), function (err, $, res, body) {
         assert(now === res.headers['user-agent']);

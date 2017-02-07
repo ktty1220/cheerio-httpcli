@@ -11,12 +11,12 @@
 
 ### FIXES(breaking)
 
-* `setBrowser()`が値を返さないように変更
-* DEPRICATEDな操作やメソッド実行時にメッセージを表示するように変更
-
-### DEPRICATED
-
 * サポート対象Node.jsバージョンを0.12に変更
+* `setBrowser()`が値を返さないように変更
+* DEPRECATEDな操作やメソッド実行時にメッセージを表示するように変更
+
+### DEPRECATED
+
 * `setBrowser()`/`setIconvEngine()`メソッドを将来廃止予定に
 * プロパティ値の直接更新を将来廃止予定に
 
@@ -55,7 +55,7 @@
 
 * `field()`でフォーム部品の値をセットした後にメソッドチェーンできていなかったのを修正
 * 依存ライブラリを最新バージョンに更新
-* eslintのdepricatedなルールを修正して最新版でもlintできるように修正
+* eslintのdeprecatedなルールを修正して最新版でもlintできるように修正
 
 # 0.6.5 (2016-02-05)
 
@@ -110,7 +110,7 @@
 * `$('form').submit()`時にsubmit系ボタンの情報を送信パラメータにセットしないように変更(1つのフォームに複数submit系ボタンがある場合の挙動がおかしくなっていたのを修正)
 * `setBrowser()`メソッドで指定するブラウザ種類の`ios`を`ipad`/`iphone`/`ipod`に分離
 
-### DEPRICATED
+### DEPRECATED
 
 * `_text()`/`_html()`メソッドを将来廃止予定に
 

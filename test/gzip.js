@@ -5,13 +5,27 @@ var assert = require('power-assert');
 var helper = require('./_helper');
 var cli    = require('../index');
 
-describe('gzip:enable', function () {
+describe('gzip', function () {
   before(function () {
-    cli.set('gzip', true);
+    // - Windows10 + Node.js6の環境においてUser-AgentをGUIブラウザにすると
+    //   "content-encoding: gzip"ではなく"transfer-encoding: chunked"になる
+    //   (なぜかoperaは対象外)
+    //   (Ubuntu16.04では発生しない)
+    // - どちらもgzip圧縮はされているので動作としては問題はないが
+    //   どこで書き換わっているのかが不明で気持ち悪いのでUser-Agentを変更してテスト
+    // - node-staticが送信するresponse headerは"content-encoding: gzip"
+    // - requestが受信したresponse headerは"transfer-encoding: chunked"
+    // - 上記の状況を見るにNode.js本体のhttpが何かしているような予感
+    cli.set('browser', 'googlebot');
+  });
+  after(function () {
+    cli.set('headers', {
+      'user-agent': null
+    });
   });
 
-  it('gzipヘッダを送信して返ってきた圧縮HTMLが解凍されてからUTF-8に変換される', function (done) {
-    cli.set('browser', 'chrome');
+  it('enable => gzipヘッダを送信して返ってきた圧縮HTMLが解凍されてからUTF-8に変換される', function (done) {
+    cli.set('gzip', true);
     cli.fetch(helper.url('gzip', 'utf-8'), function (err, $, res, body) {
       assert(res.headers['content-encoding'] === 'gzip');
       //assert(res.headers.vary === 'Accept-Encoding');
@@ -20,14 +34,9 @@ describe('gzip:enable', function () {
       done();
     });
   });
-});
 
-describe('gzip:disable', function () {
-  before(function () {
+  it('disable => gzipヘッダを送信しないで返ってきた生のHTMLがそのままUTF-8に変換される', function (done) {
     cli.set('gzip', false);
-  });
-
-  it('gzipヘッダを送信しないで返ってきた生のHTMLがそのままUTF-8に変換される', function (done) {
     cli.fetch(helper.url('gzip', 'utf-8'), function (err, $, res, body) {
       assert(! ('content-encoding' in res.headers));
       assert(! ('transfer-encoding' in res.headers));
