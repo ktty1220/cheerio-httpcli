@@ -60,11 +60,14 @@ declare namespace CheerioHttpcli {
   const followMetaRefresh: boolean;
   const maxDataSize: number;
   const debug: boolean;
+  const browser: string;
+  const iconv: string;
   const version: string;
   const download: Download.Manager;
 
   function reset(): void;
 
+  function set(name: 'browser' | 'iconv', value: string): void;
   function set(name: 'timeout' | 'maxDataSize', value: number): void;
   function set(name: 'gzip' | 'referer' | 'followMetaRefresh' | 'debug', value: boolean): void;
   function set(name: 'headers', value: {[ name: string ]: string }, nomerge?: boolean): void;
