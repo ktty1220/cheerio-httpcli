@@ -28,9 +28,9 @@ declare namespace CheerioHttpcli {
 
   // やっつけPromise
   interface Promise {
-    then: (callback: {(result: FetchResult): void}) => Promise;
-    catch: (callback: {(error: Error): void}) => Promise;
-    finally: (callback: {(): void}) => Promise;
+    then(callback: (result: FetchResult) => void): Promise;
+    catch(callbck: (error: Error) => void): Promise;
+    finally(callback: () => void): Promise;
   }
 
   namespace Download {
@@ -38,7 +38,7 @@ declare namespace CheerioHttpcli {
       url: url.Url;
       type: string;
       length: number;
-      toBuffer: (callback: {(error: Error, buffer: Buffer): void}) => void;
+      toBuffer(callback: (error: Error, buffer: Buffer) => void): void;
       end(): void;
     }
     interface ErrorEx extends Error {
@@ -49,32 +49,32 @@ declare namespace CheerioHttpcli {
       parallel: number;
       state: { queue: number, complete: number, error: number };
       clearCache(): void;
-      on(events: string, handler: {(stream: Stream): void} | {(error: ErrorEx): void} | {(): void}): void;
+      on(events: string, handler: ((stream: Stream) => void) | ((error: ErrorEx) => void) | (() => void)): void;
     }
   }
 
-  /*tslint:disable prefer-const*/
-  let headers: {[ name: string ]: string};
-  let timeout: number;
-  let gzip: boolean;
-  let referer: boolean;
-  let followMetaRefresh: boolean;
-  let maxDataSize: number;
-  let debug: boolean;
-  /*tslint:enable prefer-const*/
+  const headers: {[ name: string ]: string};
+  const timeout: number;
+  const gzip: boolean;
+  const referer: boolean;
+  const followMetaRefresh: boolean;
+  const maxDataSize: number;
+  const debug: boolean;
   const version: string;
   const download: Download.Manager;
 
   function reset(): void;
 
-  function set(name: 'timeout', value: number): void;
-  function set(name: 'maxDataSize', value: number | null): void;
+  function set(name: 'timeout' | 'maxDataSize', value: number): void;
   function set(name: 'gzip' | 'referer' | 'followMetaRefresh' | 'debug', value: boolean): void;
   function set(name: 'headers', value: {[ name: string ]: string }, nomerge?: boolean): void;
 
   function setIconvEngine(icmod: 'iconv' | 'iconv-jp' | 'iconv-lite'): void;
-  //tslint:disable-next-line: max-line-length
-  function setBrowser(type: 'ie' | 'edge' | 'chrome' | 'firefox' | 'opera' | 'vivaldi' | 'safari' | 'ipad' | 'iphone'| 'ipod' | 'android'| 'googlebot'): boolean;
+  function setBrowser(type:
+                      'ie' | 'edge' | 'chrome' | 'firefox' |
+                      'opera' | 'vivaldi' | 'safari' |
+                      'ipad' | 'iphone'| 'ipod' | 'android' |
+                      'googlebot'): boolean;
 
   function fetch(url: string, param: {[ name: string ]: any}, encode: string, callback: FetchCallback): void;
   function fetch(url: string, param: {[ name: string ]: any}, callback: FetchCallback): void;
@@ -101,7 +101,7 @@ declare global {
     download(srcAttr?: string | string[]): void;
     field(): {[ name: string ]: string | number};
     field(name: string): string | number;
-    field(name: string, value: string | {(): string}, onNotFound?: 'append' | 'throw'): Cheerio;
+    field(name: string, value: string | (() => string), onNotFound?: 'append' | 'throw'): Cheerio;
     field(name: {[ name: string ]: string | number}, onNotFound?: 'append' | 'throw'): Cheerio;
     entityHtml(): string;
     entityHtml(html: string): Cheerio;
