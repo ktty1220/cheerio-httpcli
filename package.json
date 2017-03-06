@@ -10,6 +10,7 @@
     "node": ">=0.12.0"
   },
   "scripts": {
+    "prepublish": "pkg-ok",
     "test": "node testrunner.js || true",
     "cov": "istanbul cover -x index.js -x testrunner.js testrunner.js -- -R nyan || true",
     "lint": "eslint lib test example --ext .js",
@@ -59,6 +60,7 @@
     "mocha": "^3.2.0",
     "mocha-clean": "^1.0.0",
     "node-static": "^0.7.9",
+    "pkg-ok": "^1.0.1",
     "power-assert": "^1.4.2",
     "pre-commit": "^1.2.2",
     "random-string": "^0.1.2",
