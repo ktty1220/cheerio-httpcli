@@ -23,6 +23,7 @@
     "no-caller": 1,
     "no-catch-shadow": 2,
     "no-class-assign": 2,
+    "no-compare-neg-zero": 2,
     "no-cond-assign": 2,
     "no-confusing-arrow": 2,
     "no-console": [1, {
@@ -118,6 +119,7 @@
     "no-with": 2,
     "no-return-await": 1,
     "no-await-in-loop": 2,
+    "nonblock-statement-body-position": [2, "beside"],
     "use-isnan": 2,
     "accessor-pairs": 2,
     "block-scoped-var": 2,
