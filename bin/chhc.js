@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*eslint no-console:0*/
+/*eslint no-console:0, no-underscore-dangle:0*/
 
 var readcommand = require('readcommand');
 var ora = require('ora');
@@ -47,6 +47,17 @@ var showError = function (err) {
   console.error(logSymbols.error, String(err));
 };
 
+var showElementInfo = function ($, $el) {
+  showData($el.map(function (i, el) {
+    var dom = $(el).get(0);
+    return {
+      tagName: dom.name,
+      attributes: dom.attribs,
+      outerHTML: $.html($(el))
+    };
+  }).get());
+};
+
 var commands = {
   help: {
     description: 'Show help',
@@ -54,8 +65,18 @@ var commands = {
       console.info(Object.keys(commands).map(function (com) {
         var c = commands[com];
         var p = colors.yellow((c.params || []).join(' '));
-        return com + ' ' + p + '\n  ' + colors.gray(c.description);
-      }).join('\n'));
+        var lines = [
+          com + ' ' + p,
+          '  ' + colors.gray(c.description)
+        ];
+        if (c.examples) {
+          lines = lines.concat([
+            '  ' + colors.cyan('ex)'),
+            '    ' + colors.cyan(c.examples.join('    '))
+          ]);
+        }
+        return lines.join('\n');
+      }).join('\n\n'));
     }
   },
   exit: {
@@ -83,6 +104,38 @@ var commands = {
         headers: res.headers,
         cookies: res.cookies
       });
+    }
+  },
+  $: {
+    description: 'Show element info',
+    examples: [
+      '$ #contents > .entry a[href*=hoge]'
+    ],
+    exec: function (args, location) {
+      var $ = location.$;
+      location._selector = args.join(' ');
+      var $result = $(location._selector);
+      location._$target = $result;
+      showElementInfo($, $result);
+    }
+  },
+  '.': {
+    description: 'Execute cheerio method of current element',
+    examples: [
+      '. text',
+      '. attr src',
+      '. click'
+    ],
+    exec: function (args, location) {
+      var $el = location._$target;
+      if (! $el) return;
+      var method = args.shift();
+      var result = $el[method].apply($el, args);
+      if (result.cheerio === '[cheerio object]') {
+        showElementInfo(location.$, result);
+      } else {
+        console.info(result);
+      }
     }
   }
 };
@@ -123,11 +176,6 @@ Object.keys(client).forEach(function (prop) {
     http://hoge.fuga/
     http://foo.bar/ a=hoge b="あいうえお かきくけこ"
 
-$(...)
-  show element info
-  ex)
-    $('title')
-
 $(...).<method>([option])
   exec cheerio method
   ex)
@@ -152,6 +200,15 @@ log
   ex)
     > links.json
 */
+var normalizeUrl = function (url) {
+  if (/:\/\//.test(url)) {
+    return url;
+  }
+  if (/.+\.\w{2,}$/.test(url)) {
+    url = 'http://' + url;
+  }
+  return url;
+};
 
 var fetch = function (url, params) {
   var spinner = ora('fetch ' + url);
@@ -169,19 +226,25 @@ var fetch = function (url, params) {
 
 var repl = function (init) {
   var location = init;
+  var prompt = function (next) {
+    console.info('\n' + colors.blue(location.$.documentInfo().url));
+    // eslint-disable-next-line callback-return
+    if (next) next();
+  };
+  prompt();
 
   readcommand.loop({
     ps1: function () {
-      return [
-        '',
-        colors.cyan(location.$.documentInfo().url),
-        colors.green('》')
-      ].join('\n');
+      var target = '';
+      if (location._selector) {
+        target = "$('" + location._selector + "')[" + location._$target.length + '] ';
+      }
+      return colors.yellow(target) + colors.green('》');
     }
   }, function (err, args, str, next) {
     if (err && err.code !== 'SIGINT') {
       console.error(colors.red(err.message));
-      return next();
+      return prompt(next);
     }
 
     // eslint-disable-next-line eqeqeq, no-eq-null
@@ -193,30 +256,30 @@ var repl = function (init) {
       return (com.indexOf(args[0]) === 0);
     });
     if (matches.length === 1) {
+      // 基本コマンドに該当
       args.shift();
       var ret = commands[matches[0]].exec(args, location);
       if (ret instanceof Promise) {
-        return ret.catch(showError).finally(next);
+        return ret.catch(showError).finally(function () {
+          prompt(next);
+        });
       }
-      return next();
+      return prompt(next);
     }
 
-    if (valUrl.isUri(args[0])) {
-      fetch(args[0]).then(function (result) {
+    // 特殊コマンド: URL => fetch
+    var checkUrl = normalizeUrl(args[0]);
+    if (valUrl.isUri(checkUrl)) {
+      fetch(checkUrl).then(function (result) {
         location = result;
-      }).finally(next);
+      }).finally(function () { prompt(next); });
       return null;
     }
 
     console.info(logSymbols.warning, 'no such command');
-    return next();
+    return prompt(next);
   });
 };
 
 if (argv.proxy) process.env.HTTP_PROXY = argv.proxy;
-var startUrl = argv._[0];
-if (! /:\/\//.test(startUrl)) {
-  startUrl = 'http://' + startUrl;
-}
-
-fetch(startUrl).then(repl).catch(process.exit);
+fetch(normalizeUrl(argv._[0])).then(repl).catch(process.exit);
