@@ -10,6 +10,7 @@ var prettyjson = require('prettyjson');
 var Promise = require('rsvp').Promise;
 var colors = require('colors/safe');
 var client = require('../index');
+var complete = require('./complete.json');
 
 var argv = require('yargs')
 .usage('Usage: chhc <url> [options]')
@@ -44,24 +45,34 @@ var showSuccess = function () {
 };
 
 var showError = function (err) {
-  console.error(logSymbols.error, String(err));
+  console.error(logSymbols.error, colors.red(String(err)));
 };
 
-var showElementInfo = function ($, $el) {
+var showWarn = function (msg) {
+  console.warn(logSymbols.warning, msg);
+};
+
+var showInfo = function (msg) {
+  console.info(logSymbols.info, msg);
+};
+
+var showElementInfo = function ($, $el, showHtml) {
   showData($el.map(function (i, el) {
     var dom = $(el).get(0);
-    return {
+    var result = {
       tagName: dom.name,
       attributes: dom.attribs,
-      outerHTML: $.html($(el))
+      childrens: dom.children.length
     };
+    if (showHtml) result.outerHTML = $.html($(el));
+    return result;
   }).get());
 };
 
 var commands = {
   help: {
     description: 'Show help',
-    exec: function (args, location) {
+    exec: function (args, location, flag) {
       console.info(Object.keys(commands).map(function (com) {
         var c = commands[com];
         var p = colors.yellow((c.params || []).join(' '));
@@ -72,7 +83,7 @@ var commands = {
         if (c.examples) {
           lines = lines.concat([
             '  ' + colors.cyan('ex)'),
-            '    ' + colors.cyan(c.examples.join('    '))
+            '    ' + colors.cyan(c.examples.join('\n    '))
           ]);
         }
         return lines.join('\n');
@@ -81,14 +92,14 @@ var commands = {
   },
   exit: {
     description: 'Exit chhc',
-    exec: function (args, location) {
+    exec: function (args, location, flag) {
       console.info('bye\n');
       process.exit();
     }
   },
   setting: {
     description: 'Show current settings',
-    exec: function (args, location) {
+    exec: function (args, location, flag) {
       var settings = {};
       Object.keys(client)
       .filter(function (prop) { return (commands[prop]); })
@@ -98,7 +109,7 @@ var commands = {
   },
   response: {
     description: 'Show response info',
-    exec: function (args, location) {
+    exec: function (args, location, flag) {
       var res = location.response;
       showData({
         headers: res.headers,
@@ -111,30 +122,94 @@ var commands = {
     examples: [
       '$ #contents > .entry a[href*=hoge]'
     ],
-    exec: function (args, location) {
+    exec: function (args, location, flag) {
       var $ = location.$;
-      location._selector = args.join(' ');
-      var $result = $(location._selector);
-      location._$target = $result;
-      showElementInfo($, $result);
+      var selector = args.join(' ');
+      var $result = $(selector);
+      showElementInfo($, $result, flag);
+      if ($result.length > 0) {
+        location._$target = $result;
+        location._history = [{
+          selector: selector
+        }];
+      }
     }
   },
   '.': {
     description: 'Execute cheerio method of current element',
+    params: [
+      '<method>',
+      '[arg1, arg2, ...]'
+    ],
     examples: [
       '. text',
       '. attr src',
+      '. find .links > a',
       '. click'
     ],
-    exec: function (args, location) {
+    exec: function (args, location, flag) {
+      if (args.length === 0) return false;
+      var matches = complete.filter(function (com) {
+        return (com.toLowerCase().indexOf(args[0].toLowerCase()) === 0);
+      });
+
+      if (matches.length > 1) {
+        showInfo('Did you mean one of these?\n.' + matches.join(' .'));
+        return true;
+      }
+
+      if (matches.length === 1) {
+        args[0] = matches[0];
+      }
+
+      var sameElementKey = '__is_same_element__';
       var $el = location._$target;
-      if (! $el) return;
+      if (! $el) {
+        showWarn('No element selected');
+        return true;
+      }
       var method = args.shift();
+      if (! $el[method]) return false;
+
+      $el[sameElementKey] = true;
       var result = $el[method].apply($el, args);
       if (result.cheerio === '[cheerio object]') {
-        showElementInfo(location.$, result);
+        if (result.length > 0 && ! result[sameElementKey]) {
+          location._$target = result;
+          location._history.push({
+            method: method,
+            selector: (args.length > 0) ? args.join(' ') : null
+          });
+        }
+        showElementInfo(location.$, result, flag);
       } else {
         console.info(result);
+      }
+      delete $el[sameElementKey];
+      return true;
+    }
+  },
+  '-': {
+    description: 'Back to previous element selection',
+    exec: function (args, location, flag) {
+      location._history.pop();
+      if (location._history.length === 0) {
+        location._$target = null;
+        return;
+      }
+      var $tmp = location.$(location._history[0].selector);
+      location._history.forEach(function (h, i) {
+        if (i === 0) return;
+        $tmp = $tmp[h.method](h.selector);
+      });
+      location._$target = $tmp;
+    }
+  },
+  '@': {
+    description: 'Redisplay current element',
+    exec: function (args, location, flag) {
+      if (location._$target) {
+        showElementInfo(location.$, location._$target, flag);
       }
     }
   }
@@ -147,7 +222,11 @@ Object.keys(client).forEach(function (prop) {
       description: 'Set ' + prop + ' property',
       params: [ '<number>' ],
       exec: function (args, $, res, body) {
-        client.set(prop, parseInt(args[0], 10));
+        var n = parseInt(args[0], 10);
+        if (isNaN(n)) {
+          n = (type === 'number') ? 0 : null;
+        }
+        client.set(prop, n);
         showSuccess(
           'changed', colors.magenta(prop),
           'property to', colors.red(client[prop])
@@ -220,63 +299,107 @@ var fetch = function (url, params) {
   })
   .catch(function (err) {
     spinner.fail(err.message);
-    throw new Error(err);
+  });
+};
+
+var newLocation = function (location) {
+  return Object.assign(location, {
+    _$target: null,
+    _history: []
   });
 };
 
 var repl = function (init) {
-  var location = init;
+  var location = newLocation(init);
+
   var prompt = function (next) {
     console.info('\n' + colors.blue(location.$.documentInfo().url));
     // eslint-disable-next-line callback-return
     if (next) next();
   };
-  prompt();
 
-  readcommand.loop({
-    ps1: function () {
-      var target = '';
-      if (location._selector) {
-        target = "$('" + location._selector + "')[" + location._$target.length + '] ';
-      }
-      return colors.yellow(target) + colors.green('》');
-    }
-  }, function (err, args, str, next) {
-    if (err && err.code !== 'SIGINT') {
-      console.error(colors.red(err.message));
+  var done = function (next) {
+    return function () {
       return prompt(next);
-    }
+    };
+  };
 
-    // eslint-disable-next-line eqeqeq, no-eq-null
-    if (str == null) {
-      return commands.exit.exec();
-    }
-
+  var run = function (args, flag) {
     var matches = Object.keys(commands).filter(function (com) {
       return (com.indexOf(args[0]) === 0);
     });
     if (matches.length === 1) {
       // 基本コマンドに該当
       args.shift();
-      var ret = commands[matches[0]].exec(args, location);
-      if (ret instanceof Promise) {
-        return ret.catch(showError).finally(function () {
-          prompt(next);
-        });
+      try {
+        var ret = commands[matches[0]].exec(args, location, flag);
+        return (ret === false) ? false : ret || true;
+      } catch (e) {
+        showError(e);
       }
-      return prompt(next);
     }
 
     // 特殊コマンド: URL => fetch
     var checkUrl = normalizeUrl(args[0]);
     if (valUrl.isUri(checkUrl)) {
-      fetch(checkUrl).then(function (result) {
-        location = result;
-      }).finally(function () { prompt(next); });
-      return null;
+      return fetch(checkUrl).then(function (result) {
+        if (result) location = newLocation(result);
+      });
     }
 
-    console.info(logSymbols.warning, 'no such command');
+    return false;
+  };
+
+  prompt();
+  readcommand.loop({
+    ps1: function () {
+      var target = '';
+      if (location._history.length > 0) {
+        var selector = location._history.map(function (h) {
+          var method = (h.method) ? '.' + h.method : '$';
+          var sel = (h.selector) ? "'" + h.selector + "'" : '';
+          return method + '(' + sel + ')';
+        }).join('');
+        target = selector + '[' + location._$target.length + '] ';
+      }
+      return colors.yellow(target) + colors.green('》');
+    }
+  }, function (err, args, str, next) {
+    if (err && err.code !== 'SIGINT') {
+      showError(err);
+      return prompt(next);
+    }
+
+    // eslint-disable-next-line eqeqeq, no-eq-null
+    if (str == null) return commands.exit.exec();
+    if (str.length === 0) return prompt(next);
+
+    var m = args[0].match(/^([\.\$])(.+)$/);
+    if (m) {
+      args.splice(0, 1, m[1], m[2]);
+    }
+
+    var tail = args.length - 1;
+    m = args[tail].match(/^.+!$/);
+    if (m) {
+      args[tail] = args[tail].substr(0, args[tail].length - 1);
+      args.push('!');
+    }
+
+    str = args.join(' ');
+
+    var flag = false;
+    if (args[args.length - 1] === '!') {
+      args.pop();
+      flag = true;
+    }
+
+    var ret = run(args, flag);
+    if (ret instanceof Promise) {
+      return ret.catch(showError).finally(done(next));
+    }
+
+    if (! ret) showWarn('No such command');
     return prompt(next);
   });
 };
