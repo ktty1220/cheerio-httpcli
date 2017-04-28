@@ -76,7 +76,7 @@ describe('cheerio:click', function () {
       cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
         $('.external').click(function (err, $, res, body) {
           assert.deepEqual($.documentInfo(), {
-            url: 'http://www.yahoo.co.jp/',
+            url: 'https://www.yahoo.co.jp:443/',
             encoding: 'utf-8',
             isXml: false
           });

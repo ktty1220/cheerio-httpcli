@@ -8,6 +8,7 @@
 
 * `form`の`accept-charset`属性に対応
 * プロパティ更新時の値の型チェック追加
+* 依存ライブラリを最新バージョンに更新
 
 ### FIXES(breaking)
 

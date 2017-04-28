@@ -2,15 +2,17 @@
 /*eslint no-console:0, no-underscore-dangle:0*/
 
 var readcommand = require('readcommand');
-var ora = require('ora');
-var logSymbols = require('log-symbols');
-var typeOf = require('type-of');
-var valUrl    = require('valid-url');
-var prettyjson = require('prettyjson');
-var Promise = require('rsvp').Promise;
-var colors = require('colors/safe');
-var client = require('../index');
-var complete = require('./complete.json');
+var ora         = require('ora');
+var logSymbols  = require('log-symbols');
+var assign      = require('object-assign');
+var typeOf      = require('type-of');
+var valUrl      = require('valid-url');
+var prettyjson  = require('prettyjson');
+var Promise     = require('rsvp').Promise;
+var colors      = require('colors/safe');
+var beautify    = require('js-beautify').html;
+var client      = require('../index');
+var complete    = require('./complete.json');
 
 var argv = require('yargs')
 .usage('Usage: chhc <url> [options]')
@@ -56,15 +58,49 @@ var showInfo = function (msg) {
   console.info(logSymbols.info, msg);
 };
 
-var showElementInfo = function ($, $el, showHtml) {
+var normalizeUrl = function (url) {
+  if (/:\/\//.test(url)) {
+    return url;
+  }
+  if (/.+\.\w{2,}$/.test(url)) {
+    url = 'http://' + url;
+  }
+  return url;
+};
+
+var fetch = function (url, params) {
+  var spinner = ora('fetch ' + url);
+  spinner.start();
+  return client.fetch(url)
+  .then(function (result) {
+    spinner.succeed('ready');
+    return result;
+  })
+  .catch(function (err) {
+    spinner.fail(err.message);
+  });
+};
+
+var newLocation = function (location) {
+  return assign(location, {
+    _$target: null,
+    _history: []
+  });
+};
+
+var showElementInfo = function ($, $el, showFlag) {
   showData($el.map(function (i, el) {
     var dom = $(el).get(0);
     var result = {
       tagName: dom.name,
       attributes: dom.attribs,
-      childrens: dom.children.length
+      childrens: $(dom).children().length
     };
-    if (showHtml) result.outerHTML = $.html($(el));
+    if (showFlag === '!') {
+      result.outerHTML = beautify($.html($(el)), { indent_size: 2 });
+    } else if (showFlag === '!!') {
+      result.text = $(el).text();
+    }
     return result;
   }).get());
 };
@@ -72,7 +108,7 @@ var showElementInfo = function ($, $el, showHtml) {
 var commands = {
   help: {
     description: 'Show help',
-    exec: function (args, location, flag) {
+    exec: function (args, location) {
       console.info(Object.keys(commands).map(function (com) {
         var c = commands[com];
         var p = colors.yellow((c.params || []).join(' '));
@@ -92,14 +128,14 @@ var commands = {
   },
   exit: {
     description: 'Exit chhc',
-    exec: function (args, location, flag) {
+    exec: function (args, location) {
       console.info('bye\n');
       process.exit();
     }
   },
   setting: {
     description: 'Show current settings',
-    exec: function (args, location, flag) {
+    exec: function (args, location) {
       var settings = {};
       Object.keys(client)
       .filter(function (prop) { return (commands[prop]); })
@@ -109,12 +145,23 @@ var commands = {
   },
   response: {
     description: 'Show response info',
-    exec: function (args, location, flag) {
+    exec: function (args, location) {
       var res = location.response;
       showData({
         headers: res.headers,
         cookies: res.cookies
       });
+    }
+  },
+  onlyHtml: {
+    description: 'Remove <script>, <style> and inline style',
+    exec: function (args, location) {
+      var $ = location.$;
+      $('script, style').remove();
+      $('[style]').each(function () {
+        $(this).removeAttr('style');
+      });
+      showSuccess('Removed <script>, <style> and inline style');
     }
   },
   $: {
@@ -150,8 +197,14 @@ var commands = {
     exec: function (args, location, flag) {
       if (args.length === 0) return false;
       var matches = complete.filter(function (com) {
-        return (com.toLowerCase().indexOf(args[0].toLowerCase()) === 0);
+        return (com.toLowerCase() === args[0].toLowerCase());
       });
+
+      if (matches.length === 0) {
+        matches = complete.filter(function (com) {
+          return (com.toLowerCase().indexOf(args[0].toLowerCase()) === 0);
+        });
+      }
 
       if (matches.length > 1) {
         showInfo('Did you mean one of these?\n.' + matches.join(' .'));
@@ -163,7 +216,7 @@ var commands = {
       }
 
       var sameElementKey = '__is_same_element__';
-      var $el = location._$target;
+      var $el = location._$target || location.$('body');
       if (! $el) {
         showWarn('No element selected');
         return true;
@@ -173,7 +226,17 @@ var commands = {
 
       $el[sameElementKey] = true;
       var result = $el[method].apply($el, args);
-      if (result.cheerio === '[cheerio object]') {
+      if (result instanceof Promise) {
+        var spinner = ora(method);
+        spinner.start();
+        return result.then(function (r) {
+          spinner.succeed('ready');
+          return r;
+        })
+        .catch(function (err) {
+          spinner.fail(err.message);
+        });
+      } else if (result.cheerio === '[cheerio object]') {
         if (result.length > 0 && ! result[sameElementKey]) {
           location._$target = result;
           location._history.push({
@@ -183,6 +246,7 @@ var commands = {
         }
         showElementInfo(location.$, result, flag);
       } else {
+        if (method === 'html') result = beautify(result);
         console.info(result);
       }
       delete $el[sameElementKey];
@@ -191,7 +255,7 @@ var commands = {
   },
   '-': {
     description: 'Back to previous element selection',
-    exec: function (args, location, flag) {
+    exec: function (args, location) {
       location._history.pop();
       if (location._history.length === 0) {
         location._$target = null;
@@ -248,67 +312,6 @@ Object.keys(client).forEach(function (prop) {
   }
 });
 
-/*
-<URL>
-  fetch URL [params]
-  ex)
-    http://hoge.fuga/
-    http://foo.bar/ a=hoge b="あいうえお かきくけこ"
-
-$(...).<method>([option])
-  exec cheerio method
-  ex)
-    $('#menu').children()
-    $('form').eq(0).fields()
-
-<method>
-  exec cheerio method(current element)
-  ex)
-    click()
-    submit({ q: 'what is it' })
-    val('hello world!')
-
-open
-  open current page in browser
-
-log
-  show command log
-
-> <filename>
-  output previous command result to file(JSON fromat)
-  ex)
-    > links.json
-*/
-var normalizeUrl = function (url) {
-  if (/:\/\//.test(url)) {
-    return url;
-  }
-  if (/.+\.\w{2,}$/.test(url)) {
-    url = 'http://' + url;
-  }
-  return url;
-};
-
-var fetch = function (url, params) {
-  var spinner = ora('fetch ' + url);
-  spinner.start();
-  return client.fetch(url)
-  .then(function (result) {
-    spinner.succeed('ready');
-    return result;
-  })
-  .catch(function (err) {
-    spinner.fail(err.message);
-  });
-};
-
-var newLocation = function (location) {
-  return Object.assign(location, {
-    _$target: null,
-    _history: []
-  });
-};
-
 var repl = function (init) {
   var location = newLocation(init);
 
@@ -341,11 +344,7 @@ var repl = function (init) {
 
     // 特殊コマンド: URL => fetch
     var checkUrl = normalizeUrl(args[0]);
-    if (valUrl.isUri(checkUrl)) {
-      return fetch(checkUrl).then(function (result) {
-        if (result) location = newLocation(result);
-      });
-    }
+    if (valUrl.isUri(checkUrl)) return fetch(checkUrl);
 
     return false;
   };
@@ -380,23 +379,25 @@ var repl = function (init) {
     }
 
     var tail = args.length - 1;
-    m = args[tail].match(/^.+!$/);
+    m = args[tail].match(/^.*?(!+)$/);
     if (m) {
-      args[tail] = args[tail].substr(0, args[tail].length - 1);
-      args.push('!');
+      args[tail] = args[tail].substr(0, args[tail].length - m[1].length);
+      args.push(m[1]);
     }
 
     str = args.join(' ');
 
-    var flag = false;
-    if (args[args.length - 1] === '!') {
-      args.pop();
-      flag = true;
-    }
+    var flag = null;
+    if (/^!+$/.test(args[args.length - 1])) flag = args.pop();
 
+    if ([ '$', '.' ].indexOf(args[0]) !== -1 && args.length > 1) {
+      args[1] = args[1].replace(/(\[\w+.?=)(.*?)(\])/g, '$1"$2"$3');
+    }
     var ret = run(args, flag);
     if (ret instanceof Promise) {
-      return ret.catch(showError).finally(done(next));
+      return ret.then(function (result) {
+        if (result) location = newLocation(result);
+      }).catch(showError).finally(done(next));
     }
 
     if (! ret) showWarn('No such command');
