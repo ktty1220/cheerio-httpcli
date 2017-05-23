@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>linkタグテスト</title>
+    <link class="rel" rel="stylesheet" type="text/css" href="./css/cat.css">
+    <link class="undef" rel="stylesheet" type="text/css">
+    <link class="empty" rel="stylesheet" type="text/css" href="">
+    <link class="root" rel="stylesheet" type="text/css" href="/link/css/food.css?hoge=fuga&piyo=">
+    <link class="external" rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link class="err404" rel="stylesheet" type="text/css" href="./not-found.css">
+    <link class="notcss" rel="alternate" hreflang="en" type="text/html" href="./en.html">
+  </head>
+  <body>
+    <div>
+      <link class="body" rel="stylesheet" type="text/css" href="./css/dog.css">
+    </div>
+
+    <a href="http://www.google.co.jp/">google</a>
+    <a href="/~info?foo=1&bar=2&baz=3">~info</a>
+  </body>
+</html>

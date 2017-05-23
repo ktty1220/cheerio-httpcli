@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>scriptタグテスト</title>
+    <script class="rel" src="./js/cat.js"></script>
+    <script class="undef"></script>
+    <script class="empty" src=""></script>
+    <script class="root" src="/script/js/food.js?hoge=fuga&piyo="></script>
+    <script class="external" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script class="err404" src="./not-found.js"></script>
+    <script class="inline">
+      var animal = 'dog';
+    </script>
+  </head>
+  <body>
+    <div>
+      <script class="body" src="./js/dog.js"></script>
+    </div>
+
+    <a href="http://www.google.co.jp/">google</a>
+    <a href="/~info?foo=1&bar=2&baz=3">~info</a>
+  </body>
+</html>

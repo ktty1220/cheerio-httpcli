@@ -18,7 +18,7 @@ Node.jsでWEBページのスクレイピングを行う際に必要となる文�
 4. Node.jsお馴染みのコールバック形式と最近の流行であるプロミス形式どちらにも対応
 5. 同期リクエスト対応
 6. `$('img')`要素画像のダウンロード(LazyLoad対応)
-7. `$('a,img')`要素のURLを絶対パスで取得可能
+7. `$('a,img,script,link')`要素のURLを絶対パスで取得可能
 8. ブラウザ指定による簡単User-Agent切り替え機能
 9. 現在のクッキーの内容を簡単に取得(読み取り専用)
 10. XMLドキュメントを自動判別してパース処理を切り替え
@@ -781,7 +781,7 @@ $('input[type=radio]').untick();              // => 全ラジオボタンを非�
 
 ### $(_link-element_ or _image-element_).url([ filter, src-attr ])
 
-`a`要素の`href`、もしくは`img`要素の`src`のURLを完全な形(絶対パス)にしたものを取得します。元から完全なURLになっている場合(外部リンクなど)や`javascript:void(0)`といったURLでないリンクはその内容をそのまま返します。
+`a`要素の`href`、`img`要素の`src`、`script`要素の`src`、もしくは`link`要素の`href`のURLを完全な形(絶対パス)にしたものを取得します。元から完全なURLになっている場合(外部リンクなど)や`javascript:void(0)`といったURLでないリンクはその内容をそのまま返します。
 
 ```html
 <a id="top" href="../index.html">トップページ</a>
