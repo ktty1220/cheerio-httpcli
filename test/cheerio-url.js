@@ -26,7 +26,7 @@ describe('cheerio:url', function () {
             $(elem).eq(0).url();
             throw new Error('not thrown');
           } catch (e) {
-            assert(e.message === 'element is not link or img');
+            assert(e.message === 'element is not link, img, script or link');
           }
           done();
         });
@@ -450,6 +450,74 @@ describe('cheerio:url', function () {
           'http://www.google.co.jp/'
         ];
         var actual = $('img, a').url({ relative: false, invalid: false });
+        assert.deepEqual(actual, expected);
+        done();
+      });
+    });
+  });
+
+  describe('script要素', function () {
+    it('単一要素 => srcに指定したURLを絶対URLにして返す', function (done) {
+      cli.fetch(helper.url('script', 'index'), function (err, $, res, body) {
+        var expected = helper.url('script', 'js/cat').replace(/\.html/, '.js');
+        var actual = $('.rel').url();
+        assert(actual === expected);
+        done();
+      });
+    });
+
+    it('単一のインラインでJavaScriptが書かれているscript要素 => srcには何も指定がないのでundefinedで返す', function (done) {
+      cli.fetch(helper.url('script', 'index'), function (err, $, res, body) {
+        var actual = $('.inline').url();
+        assert(typeOf(actual) === 'undefined');
+        done();
+      });
+    });
+
+    it('複数要素 => 各要素のsrcのURLを絶対URLにした配列を返す', function (done) {
+      cli.fetch(helper.url('script', 'index'), function (err, $, res, body) {
+        var base = helper.url('script');
+        var expected = [
+          base + '/js/cat.js',
+          undefined,
+          '',
+          base + '/js/food.js?hoge=fuga&piyo=',
+          'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js',
+          base + '/not-found.js',
+          undefined,
+          base + '/js/dog.js'
+        ];
+        var actual = $('script').url([]);
+        assert.deepEqual(actual, expected);
+        done();
+      });
+    });
+  });
+
+  describe('link要素', function () {
+    it('単一要素 => hrefに指定したURLを絶対URLにして返す', function (done) {
+      cli.fetch(helper.url('link', 'index'), function (err, $, res, body) {
+        var expected = helper.url('link', 'css/cat').replace(/\.html/, '.css');
+        var actual = $('.rel').url();
+        assert(actual === expected);
+        done();
+      });
+    });
+
+    it('複数要素 => 各要素のhrefのURLを絶対URLにした配列を返す', function (done) {
+      cli.fetch(helper.url('link', 'index'), function (err, $, res, body) {
+        var base = helper.url('link');
+        var expected = [
+          base + '/css/cat.css',
+          undefined,
+          '',
+          base + '/css/food.css?hoge=fuga&piyo=',
+          'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
+          base + '/not-found.css',
+          base + '/en.html',
+          base + '/css/dog.css'
+        ];
+        var actual = $('link').url([]);
         assert.deepEqual(actual, expected);
         done();
       });
