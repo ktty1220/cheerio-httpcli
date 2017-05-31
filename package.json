@@ -3,9 +3,6 @@
   "version": "0.7.0",
   "description": "http client module with cheerio & iconv(-lite) & promise",
   "main": "index.js",
-  "bin": {
-    "chhc": "bin/chhc.js"
-  },
   "engines": {
     "node": ">=0.12.0"
   },
@@ -13,7 +10,7 @@
     "prepublish": "pkg-ok",
     "test": "node testrunner.js || true",
     "cov": "istanbul cover -x index.js -x testrunner.js testrunner.js -- -R nyan || true",
-    "lint": "eslint lib test example bin --ext .js",
+    "lint": "eslint lib test example --ext .js",
     "cs": "jscs lib test example || true",
     "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=iconv-lite,os-locale,espower-loader || true",
     "todo": "leasot -S lib/**/**/* test/** example/** || true"
@@ -24,17 +21,19 @@
   "typings": "./index.d.ts",
   "dependencies": {
     "@types/cheerio": "^0.22.1",
-    "@types/node": "^7.0.14",
-    "async": "^2.3.0",
+    "@types/node": "^7.0.22",
+    "async": "^2.4.1",
     "cheerio": "^0.22.0",
     "colors": "^1.1.2",
     "constants": "0.0.2",
     "foreach": "^2.0.5",
     "he": "^1.1.1",
-    "iconv-lite": "^0.4.16",
-    "js-beautify": "^1.6.12",
+    "iconv-lite": "^0.4.17",
+    "js-beautify": "^1.6.14",
     "jschardet": "^1.4.2",
+    "leasot": "^4.7.0",
     "log-symbols": "^1.0.2",
+    "mocha": "^3.4.2",
     "object-assign": "^4.1.1",
     "ora": "^1.2.0",
     "os-locale": "^1.4.0",
@@ -47,7 +46,7 @@
     "tough-cookie": "^2.3.2",
     "type-of": "^2.0.1",
     "valid-url": "^1.0.9",
-    "yargs": "^6.6.0"
+    "yargs": "^7.1.0"
   },
   "devDependencies": {
     "dev-null": "^0.1.1",

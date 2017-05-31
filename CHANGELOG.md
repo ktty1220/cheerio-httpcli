@@ -1,14 +1,15 @@
-# 0.7.0 (2017-02-XX)
-
-### NEW(beta)
-
-* CLI用ツール同梱(`chhc`)
+# 0.7.0 (2017-05-31)
 
 ### IMPROVEMENTS
 
 * `form`の`accept-charset`属性に対応
 * プロパティ更新時の値の型チェック追加
-* 依存ライブラリを最新バージョンに更新
+* 依存ライブラリを(ほぼ)最新バージョンに更新
+* 主要ブラウザのUserAgent更新
+
+### FIXES(bug)
+
+* `src`のない`img`要素の`download()`でエラーになるのを修正
 
 ### FIXES(breaking)
 

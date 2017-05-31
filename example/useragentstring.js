@@ -9,7 +9,7 @@
 var client = require('../index');
 
 client.set('debug', true);
-client.setBrowser('firefox');
+client.set('browser', 'firefox');
 
 client.fetch('http://www.useragentstring.com/')
 .then(function (result) {
