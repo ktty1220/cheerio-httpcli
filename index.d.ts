@@ -49,7 +49,7 @@ declare namespace CheerioHttpcli {
       parallel: number;
       state: { queue: number, complete: number, error: number };
       clearCache(): void;
-      on(events: string, handler: ((stream: Stream) => void) | ((error: ErrorEx) => void) | (() => void)): void;
+      on(events: string, handler: ((stream: Stream) => void) | ((error: ErrorEx) => void) | (() => void)): Manager;
     }
   }
 
