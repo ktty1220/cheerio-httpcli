@@ -1194,4 +1194,4 @@ client.fetch('http://foo.bar.baz/', (err, $, res, body) => {
 
 [MIT license](http://www.opensource.org/licenses/mit-license)で配布します。
 
-&copy; 2013-2015 [ktty1220](mailto:ktty1220@gmail.com)
+&copy; 2013-2017 [ktty1220](mailto:ktty1220@gmail.com)
