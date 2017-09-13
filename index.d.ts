@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as url from 'url';
 import * as stream from 'stream';
+//tslint:disable:next-line: no-import-side-effect
 import 'cheerio';
 
 // cheerio-httpcli本体
@@ -49,7 +50,9 @@ declare namespace CheerioHttpcli {
       parallel: number;
       state: { queue: number, complete: number, error: number };
       clearCache(): void;
-      on(events: string, handler: ((stream: Stream) => void) | ((error: ErrorEx) => void) | (() => void)): Manager;
+      on(event: 'ready', handler: ((stream: Stream) => void)): Manager;
+      on(event: 'error', handler: ((error: ErrorEx) => void)): Manager;
+      on(event: 'end', handler: (() => void)): Manager;
     }
   }
 
@@ -76,7 +79,7 @@ declare namespace CheerioHttpcli {
   function setBrowser(type:
                       'ie' | 'edge' | 'chrome' | 'firefox' |
                       'opera' | 'vivaldi' | 'safari' |
-                      'ipad' | 'iphone'| 'ipod' | 'android' |
+                      'ipad' | 'iphone' | 'ipod' | 'android' |
                       'googlebot'): boolean;
 
   function fetch(url: string, param: {[ name: string ]: any}, encode: string, callback: FetchCallback): void;

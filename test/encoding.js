@@ -15,9 +15,6 @@ describe('encoding:auto', function () {
     it('エンコーディング自動判定により正常にUTF-8に変換される(' + enc + ')', function (done) {
       var url = helper.url('auto', enc);
       cli.fetch(url, function (err, $, res, body) {
-        if (enc === 'x-sjis') {
-          enc = 'shift_jis';
-        }
         assert.deepEqual($.documentInfo(), {
           url: url,
           encoding: enc,

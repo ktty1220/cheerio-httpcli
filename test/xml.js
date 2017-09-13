@@ -9,6 +9,7 @@ var cli    = require('../index');
 describe('xml', function () {
   // 名前空間のコロンはフィルタと混同されないように「\\」でエスケープする
   before(function () {
+    //eslint-disable-next-line no-invalid-this
     this.expected = {
       channel: {
         title: 'タイトル',
@@ -41,6 +42,7 @@ describe('xml', function () {
         caption = 'Content-Type';
       }
       it(ext + ': ' + caption + 'で判別', function (done) {
+        //eslint-disable-next-line no-invalid-this
         var _this = this;
         cli.fetch(helper.url('~xml') + '.' + ext, function (err, $, res, body) {
           assert(res.headers['content-type'] === contentType);
@@ -73,6 +75,7 @@ describe('xml', function () {
     each([ 'xml', 'rss', 'rdf', 'atom', 'opml', 'xsl', 'xslt' ], function (ext) {
       var contentType = (ext === 'xml') ? 'application/xml' : 'text/html';
       it(ext + ': xmlModeが使用されない', function (done) {
+        //eslint-disable-next-line no-invalid-this
         var _this = this;
         cli.fetch(helper.url('~xml') + '.' + ext, function (err, $, res, body) {
           assert(res.headers['content-type'] === contentType);
