@@ -17,8 +17,7 @@
     "dts": "tsc --noEmit dts/check.ts"
   },
   "pre-commit": [
-    "lint",
-    "dts"
+    "lint"
   ],
   "typings": "./index.d.ts",
   "dependencies": {
