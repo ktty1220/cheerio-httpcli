@@ -14,7 +14,7 @@
     "cs": "jscs lib test example || true",
     "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=iconv-lite,os-locale,constants,pre-commit,@types/*,espower-loader || true",
     "todo": "leasot -S lib/**/**/* test/** example/** || true",
-    "dts": "tsc --noEmit dts/check.ts"
+    "dts": "tsc -p dts"
   },
   "pre-commit": [
     "lint"

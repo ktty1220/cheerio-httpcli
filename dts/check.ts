@@ -52,3 +52,27 @@ cli.fetch(url, 'euc-jp')
   const { error, $, response, body } = cli.fetchSync(url, { q: 'hoge' });
   console.info(error, $, response, body);
 }
+
+// #18
+{
+  const wrapper = async (u: string): Promise<cli.CheerioStaticEx> => {
+    const result = await cli.fetch(u);
+    const type: string = result.response.headers['content-type'] as string;
+
+    /* rejects */
+    if (result.error !== undefined && result.error !== null) {
+      throw new Error('happend-error');
+    }
+
+    if (! /text\/html/.test(type)) {
+      throw new Error('not-html');
+    }
+
+    /* resolve result */
+    return result.$;
+  };
+
+  wrapper(url).then((result) => {
+    console.dir(result);
+  });
+}
