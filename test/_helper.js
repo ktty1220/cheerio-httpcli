@@ -80,6 +80,7 @@ module.exports = {
       404: function (req, res, pdata) {
         return file.serveFile('/error/404.html', 404, {}, req, res);
       },
+
       /*** アクセス情報 ***/
       info: function (req, res, pdata) {
         var headers = defaultHeaders();
@@ -105,6 +106,7 @@ module.exports = {
         res.writeHead(200, headers);
         return res.end('<html></html>');
       },
+
       /*** セッションID保持 ***/
       session: function (req, res, pdata) {
         var headers = defaultHeaders();
@@ -115,6 +117,7 @@ module.exports = {
         res.writeHead(200, headers);
         return res.end('<html></html>');
       },
+
       /*** リダイレクト ***/
       redirect: function (req, res, pdata) {
         var headers = defaultHeaders();
@@ -132,6 +135,7 @@ module.exports = {
         res.writeHead(301, headers);
         return res.end('location: ' + loc);
       },
+
       /*** レスポンスに5秒かかるページ ***/
       slow: function (req, res, pdata) {
         var headers = defaultHeaders();
@@ -140,6 +144,7 @@ module.exports = {
           res.end('<html></html>');
         }, 5000);
       },
+
       /*** 巨大サイズ ***/
       mega: function (req, res, pdata) {
         res.writeHead(200);
@@ -148,7 +153,8 @@ module.exports = {
         }).join('');
         return res.end(buf);
       },
-      // XML
+
+      /*** XML ***/
       xml: function (req, res, pdata) {
         var headers = defaultHeaders();
         var opt = {

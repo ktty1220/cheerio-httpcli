@@ -43,7 +43,9 @@
     "no-dupe-keys": 2,
     "no-duplicate-case": 2,
     "no-duplicate-imports": 2,
-    "no-else-return": 2,
+    "no-else-return": [2, {
+      "allowElseIf": false
+    }],
     "no-empty": [1, {
       "allowEmptyCatch": true
     }],
@@ -241,6 +243,19 @@
       "after": true,
       "overrides": {}
     }],
+    "lines-between-class-members": [2, "always"],
+    "lines-around-comment": [2, {
+      "beforeBlockComment": true,
+      "afterBlockComment": false,
+      "beforeLineComment": false,
+      "afterLineComment": false,
+      "allowBlockStart": true,
+      "allowBlockEnd": true,
+      "allowObjectStart": true,
+      "allowObjectEnd": true,
+      "allowArrayStart": true,
+      "allowArrayEnd": true
+    }],
     "space-before-blocks": [2, "always"],
     "space-before-function-paren": [2, {
       "named": "never",
@@ -293,6 +308,7 @@
       "objectsInArrays": false,
       "arraysInArrays": true
     }],
+    "array-bracket-newline": [2, "consistent"],
     "quotes": [1,
       "single", "avoid-escape"
     ],
