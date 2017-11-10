@@ -465,8 +465,6 @@ cheerio-httpcliは取得したページがXMLであると判別した場合、�
 
 基本的には何も設定する必要はありませんが、httpsページへのアクセスができない場合にこのオプションを設定することにより解決する可能性があります。設定方法などの詳細は[requestモジュールのドキュメント](https://github.com/request/request#using-optionsagentoptions)を参照してください。
 
-#### 設定例
-
 ```js
 // TLS1.2での接続を強制する
 client.set('agentOptions', {
