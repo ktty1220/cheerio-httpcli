@@ -20,6 +20,8 @@
     "noFallthroughCasesInSwitch": true,
     "suppressImplicitAnyIndexErrors": true,
     "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "strictFunctionTypes": true,
     "strictNullChecks": true,
     "pretty": true,
     "importHelpers": false,

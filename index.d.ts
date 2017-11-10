@@ -56,12 +56,15 @@ declare namespace CheerioHttpcli {
     }
   }
 
-  const headers: {[ name: string ]: string};
+  type FreeObject = {[ name: string ]: string};
+  const headers: FreeObject;
+  const agentOptions: FreeObject;
   const timeout: number;
+  const maxDataSize: number;
   const gzip: boolean;
   const referer: boolean;
   const followMetaRefresh: boolean;
-  const maxDataSize: number;
+  const forceHtml: boolean;
   const debug: boolean;
   const browser: string;
   const iconv: string;
@@ -72,8 +75,8 @@ declare namespace CheerioHttpcli {
 
   function set(name: 'browser' | 'iconv', value: string): void;
   function set(name: 'timeout' | 'maxDataSize', value: number): void;
-  function set(name: 'gzip' | 'referer' | 'followMetaRefresh' | 'debug', value: boolean): void;
-  function set(name: 'headers', value: {[ name: string ]: string }, nomerge?: boolean): void;
+  function set(name: 'gzip' | 'referer' | 'followMetaRefresh' | 'forceHtml' | 'debug', value: boolean): void;
+  function set(name: 'headers' | 'agentOptions', value: FreeObject, nomerge?: boolean): void;
 
   function setIconvEngine(icmod: 'iconv' | 'iconv-jp' | 'iconv-lite'): void;
   function setBrowser(type:

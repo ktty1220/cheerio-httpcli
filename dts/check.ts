@@ -5,6 +5,9 @@ import * as fs from 'fs';
 cli.set('debug', true);
 cli.set('browser', 'edge');
 cli.set('timeout', 3000);
+cli.set('agentOptions', {
+  secureProtocol: 'TLSv1_2_method'
+}, true);
 console.info(cli.headers);
 
 cli.download
