@@ -22,6 +22,26 @@ fs.readdirSync(testDir).filter(function (file) {
   mocha.addFile(path.join(testDir, file));
 });
 
+var server = spawn(process.execPath, [
+  path.join(__dirname, 'test/_server.js')
+], {
+  detached: true
+});
+server.stdout.on('data', function (data) {
+  process.stdout.write(data);
+});
+server.stderr.on('data', function (data) {
+  if (data.toString().trim() === '%%% server ready %%%') {
+    // start mocha
+    mocha.run(function (failures) {
+      process.kill(server.pid);
+      process.exit(failures);
+    });
+    return;
+  }
+  process.stderr.write(data);
+});
+
 // Ctrl-C
 var stdin = process.stdin;
 stdin.setRawMode(true);
@@ -32,23 +52,4 @@ stdin.on('data', function (key) {
     process.kill(server.pid);
     process.exit();
   }
-});
-
-var server = spawn(process.execPath, [
-  path.join(__dirname, 'test/_server.js')
-], {
-  detached: true
-});
-server.stdout.on('data', function (data) {
-  process.stdout.write(data);
-});
-server.stderr.on('data', function (data) {
-  if (data.toString() === '%%% server start %%%') {
-    // start mocha
-    return mocha.run(function (failures) {
-      process.kill(server.pid);
-      process.exit(failures);
-    });
-  }
-  process.stderr.write(data);
 });

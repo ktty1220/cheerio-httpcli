@@ -26,7 +26,6 @@
     "async": "^2.5.0",
     "cheerio": "^0.22.0",
     "colors": "^1.1.2",
-    "constants": "0.0.2",
     "foreach": "^2.0.5",
     "he": "^1.1.1",
     "iconv-lite": "^0.4.19",
@@ -49,6 +48,7 @@
   },
   "devDependencies": {
     "dev-null": "^0.1.1",
+    "constants": "^0.0.2",
     "eslint": "^4.10.0",
     "espower-loader": "^1.2.2",
     "intelli-espower-loader": "^1.0.1",

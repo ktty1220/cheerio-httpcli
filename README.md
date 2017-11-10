@@ -75,6 +75,7 @@ npm install cheerio-httpcli
   * [followMetaRefresh](#followmetarefresh)
   * [maxDataSize](#maxdatasize)
   * [forceHtml](#forcehtml)
+  * [agentOptions](#agentOptions)
   * [debug](#debug)
   * [download](#download-readonly)
 * [cheerioオブジェクトの独自拡張](#cheerio%E3%82%AA%E3%83%96%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E7%8B%AC%E8%87%AA%E6%8B%A1%E5%BC%B5)
@@ -457,6 +458,21 @@ client.fetch('http://big.large.huge/data.html', function (err, $, res, body) {
 cheerio-httpcliは取得したページがXMLであると判別した場合、自動的にcheerioのXMLモードを有効にしてコンテンツをパースします(`Content-Type`とURLの拡張子を見て判別しています)。
 
 `true`にするとこの自動判別を無効にして常にHTMLモードでコンテンツをパースするようになります。デフォルトは`false`(自動判別する)です。
+
+### agentOptions
+
+主にSSL接続などのセキュリティの設定を行うオプションです。cheerio-httpcli内部で使用しているrequestモジュールにそのまま渡されます。デフォルトは空連想配列です。
+
+基本的には何も設定する必要はありませんが、httpsページへのアクセスができない場合にこのオプションを設定することにより解決する可能性があります。設定方法などの詳細は[requestモジュールのドキュメント](https://github.com/request/request#using-optionsagentoptions)を参照してください。
+
+#### 設定例
+
+```js
+// TLS1.2での接続を強制する
+client.set('agentOptions', {
+  secureProtocol: 'TLSv1_2_method'
+});
+```
 
 ### debug
 
@@ -1143,6 +1159,21 @@ process.env.HTTP_PROXY = 'http://proxy.hoge.com:18080/';  // プロキシサー�
 
 var client = require('cheerio-httpcli');
 client.fetch('http://foo.bar.baz/', ...
+```
+
+### 今まで接続できていたhttpsのページに接続できなくなった場合
+
+`0.7.2`からhttps接続方法に関する仕様に若干変更があり、その影響で今まで接続できていたページに接続できないというケースが発生するかもしれません。
+
+`0.7.1`までと同じ挙動にする場合は以下のように設定してください。
+
+```js
+var client = require('cheerio-httpcli');
+var constants = require('constants');  // <- constantsモジュールを別途インストール
+
+client.set('agentOptions', {
+  secureOptions: constants.SSL_OP_NO_TLSv1_2
+});
 ```
 
 ### XMLの名前空間付きタグの指定方法

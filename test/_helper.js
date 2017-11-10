@@ -2,12 +2,14 @@
 /*jshint -W100*/
 var nstatic = require('node-static');
 var http    = require('http');
+var https   = require('https');
 var path    = require('path');
 var strip   = require('strip-ansi');
 var each    = require('foreach');
 var random  = require('random-string');
 var fs      = require('fs');
 var qs      = require('querystring');
+var EventEmitter = require('events').EventEmitter;
 
 /**
  * テスト用のヘルパーモジュール本体
@@ -18,8 +20,14 @@ module.exports = {
    */
 
   // テストサーバー設定
-  port: 5555,
+  httpPort: 55551,
+  httpsPort: 55552,
   root: path.join(__dirname, 'fixtures'),
+  ready: {
+    http: false,
+    https: false
+  },
+  emitter: new EventEmitter(),
 
   /**
    * メソッド
@@ -29,6 +37,9 @@ module.exports = {
    * テストHTMLページのURLを作成
    */
   url: function (dir, file) {
+    if (dir === '%https%') {
+      return 'https://localhost:' + this.httpsPort + '/';
+    }
     if (! file) {
       file = dir;
       dir = '';
@@ -36,7 +47,7 @@ module.exports = {
       dir += '/';
       file += '.html';
     }
-    return 'http://localhost:' + this.port + '/' + dir + file;
+    return 'http://localhost:' + this.httpPort + '/' + dir + file;
   },
 
   /**
@@ -170,7 +181,16 @@ module.exports = {
       }
     };
 
-    return http.createServer(function (req, res) {
+    this.emitter.on('start', (function (protocol) {
+      this.ready[protocol] = true;
+      if (Object.keys(this.ready).every((function (srv) {
+        return this.ready[srv];
+      }).bind(this))) {
+        process.stderr.write('%%% server ready %%%\n');
+      }
+    }).bind(this));
+
+    http.createServer(function (req, res) {
       var pdata = '';
       req.on('data', function (data) {
         pdata += data;
@@ -214,9 +234,29 @@ module.exports = {
         }, parseInt(wait, 10));
         /*eslint-disable consistent-return*/ return; /*eslint-enable consistent-return*/
       }).resume();
-    }).listen(this.port, '0.0.0.0', function () {
-      process.stderr.write('%%% server start %%%');
+    }).listen(this.httpPort, '0.0.0.0', (function () {
+      this.emitter.emit('start', 'http');
+    }).bind(this));
+
+    // httpsサーバーも稼働
+    var httpsOpts = {
+      secureProtocol: 'TLSv1_2_method' // TLS1.2のみ対応
+    };
+    [ 'key', 'cert' ].forEach(function (pem) {
+      httpsOpts[pem] = fs.readFileSync(
+        path.join(__dirname, 'pem/' + pem + '.pem'),
+        'utf-8'
+      );
     });
+
+    https.createServer(httpsOpts, function (req, res) {
+      res.writeHead(200, {
+        'Content-Type': 'text/plain'
+      });
+      res.end('hello, https');
+    }).listen(this.httpsPort, '0.0.0.0', (function () {
+      this.emitter.emit('start', 'https');
+    }).bind(this));
   },
 
   /**
