@@ -75,7 +75,7 @@ npm install cheerio-httpcli
   * [followMetaRefresh](#followmetarefresh)
   * [maxDataSize](#maxdatasize)
   * [forceHtml](#forcehtml)
-  * [agentOptions](#agentOptions)
+  * [agentOptions](#agentoptions)
   * [debug](#debug)
   * [download](#download-readonly)
 * [cheerioオブジェクトの独自拡張](#cheerio%E3%82%AA%E3%83%96%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E7%8B%AC%E8%87%AA%E6%8B%A1%E5%BC%B5)
