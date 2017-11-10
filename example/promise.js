@@ -11,7 +11,7 @@
 var client = require('../index');
 
 // なんとなくgooglebotのUser-Agentをセット
-client.setBrowser('googlebot');
+client.set('browser', 'googlebot');
 
 // Yahooのトップページを取得
 client.fetch('http://www.yahoo.co.jp/')
