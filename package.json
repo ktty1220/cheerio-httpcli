@@ -39,8 +39,7 @@
     "spawn-sync": "^1.0.15",
     "tough-cookie": "^2.3.3",
     "type-of": "^2.0.1",
-    "valid-url": "^1.0.9",
-    "yargs": "^10.0.3"
+    "valid-url": "^1.0.9"
   },
   "devDependencies": {
     "dev-null": "^0.1.1",
@@ -57,7 +56,8 @@
     "power-assert": "^1.4.4",
     "pre-commit": "^1.2.2",
     "random-string": "^0.2.0",
-    "strip-ansi": "^4.0.0"
+    "strip-ansi": "^4.0.0",
+    "yargs": "^10.0.3"
   },
   "repository": {
     "type": "git",
