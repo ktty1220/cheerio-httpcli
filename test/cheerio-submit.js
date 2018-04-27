@@ -333,6 +333,19 @@ describe('cheerio:submit', function () {
           assert(actual === expected);
         });
       });
+
+      it('accept-chaset属性あり(複数) => accept-charsetで指定された先頭のURLエンコードで送信される(' + expectedEncodings[enc] + ')', function () {
+        var param = { q: 'さしすせそ' };
+        return cli.fetch(helper.url('form', enc))
+        .then(function (result1) {
+          return result1.$('form[name="multi-charset"]').submit(param);
+        })
+        .then(function (result2) {
+          var actual = result2.response.headers['request-url'];
+          var expected = '/~info?q=' + escapes[param.q][expectedEncodings[enc]];
+          assert(actual === expected);
+        });
+      });
     });
   });
 });

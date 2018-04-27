@@ -5,7 +5,7 @@
 'use strict';
 
 /**
- * 2ちゃんねる検索サンプル
+ * 5ちゃんねる検索サンプル
  *
  * 以下のword変数の内容で検索します
  */
@@ -14,7 +14,7 @@ var word = 'ぬるぽ';
 
 var client = require('../index');
 
-client.fetch('http://www.2ch.net/')
+client.fetch('http://www.5ch.net/')
 .then(function (result) {
   return result.$('form').eq(0).submit({
     q: word

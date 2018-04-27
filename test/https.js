@@ -57,7 +57,7 @@ describe('https', function () {
     cli.fetch(url, function (err, $, res, body) {
       assert(err.errno === 'EPROTO');
       assert(err.code === 'EPROTO');
-      assert(err.message.indexOf('handshake failure:') !== -1);
+      assert(err.message.indexOf('SSL routines:') !== -1);
       assert(err.url === url);
       assert(! res);
       assert(! $);
@@ -74,7 +74,7 @@ describe('https', function () {
     cli.fetch(url, function (err, $, res, body) {
       assert(err.errno === 'EPROTO');
       assert(err.code === 'EPROTO');
-      assert(err.message.indexOf('handshake failure:') !== -1);
+      assert(err.message.indexOf('SSL routines:') !== -1);
       assert(err.url === url);
       assert(! res);
       assert(! $);

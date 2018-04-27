@@ -30,7 +30,7 @@ client.fetch('http://d.hatena.ne.jp/keyword/')
   });
 })
 .then(function (result) {
-  console.info(result.$('.keyword-body').text().trim().replace(/[\u0009\u3000]/g, ''));
+  console.info(result.$('.keyword-body').text().trim().replace(/[\t\u3000]/g, ''));
 })
 .catch(function (err) {
   console.error('エラーが発生しました', err);

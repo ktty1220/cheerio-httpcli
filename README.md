@@ -320,6 +320,8 @@ client.setBrowser('googlebot'); // GooglebotのUser-Agentに変更
 * iphone
 * ipod
 * android
+* ps4
+* 3ds
 * googlebot
 
 なお、細かいバージョンの指定まではできないので、そういった指定も行いたい場合は手動で以下のようにUser-Agentを指定してください。
@@ -1174,6 +1176,20 @@ client.set('agentOptions', {
 });
 ```
 
+### httpsページ接続時の「unable to verify the first certificate」エラー
+
+cheerio-httpcliでアクセスしたサーバー側のSSL証明書設定に不備があると発生することがあります。
+
+基本的にはサーバー側で対応してもらわないと接続はできないのですが、スクリプトの最初の方に以下の指定をするとSSL証明書検証でエラーが発生しても無理やり処理を続行してアクセスすることが可能です。
+
+```js
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;  // SSL証明書検証エラーを無視する設定
+
+var client = require('cheerio-httpcli');
+```
+
+ただし、この方法は安全でないサイトにアクセスできるという危険な指定なので、あくまでも緊急時においてのみ自己責任で設定するようにしてください。
+
 ### XMLの名前空間付きタグの指定方法
 
 ```xml
@@ -1223,4 +1239,4 @@ client.fetch('http://foo.bar.baz/', (err, $, res, body) => {
 
 [MIT license](http://www.opensource.org/licenses/mit-license)で配布します。
 
-&copy; 2013-2017 [ktty1220](mailto:ktty1220@gmail.com)
+&copy; 2013-2018 [ktty1220](mailto:ktty1220@gmail.com)

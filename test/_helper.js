@@ -279,7 +279,8 @@ module.exports = {
    * 指定したファイルの内容をBufferで返す
    */
   readBuffer: function (file) {
-    return new Buffer(fs.readFileSync(path.join(__dirname, file)));
+    var contents = fs.readFileSync(path.join(__dirname, file));
+    return (Buffer.from) ? Buffer.from(contents) : new Buffer(contents);
   },
 
   /**

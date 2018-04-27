@@ -282,6 +282,15 @@ describe('submitSync', function () {
         var expected = '/~info?q=' + escapes[param.q][expectedEncodings[enc]];
         assert(actual === expected);
       });
+
+      it('accept-chaset属性あり(複数) => accept-charsetで指定された先頭のURLエンコードで送信される(' + expectedEncodings[enc] + ')', function () {
+        var param = { q: 'さしすせそ' };
+        var result1 = cli.fetchSync(helper.url('form', enc));
+        var result2 = result1.$('form[name="multi-charset"]').submitSync(param);
+        var actual = result2.response.headers['request-url'];
+        var expected = '/~info?q=' + escapes[param.q][expectedEncodings[enc]];
+        assert(actual === expected);
+      });
     });
   });
 
