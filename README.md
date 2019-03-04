@@ -1212,11 +1212,27 @@ $('dc\\:title').text();
 
 ### Electronに組み込む
 
-いろいろと工夫するとwebpackで固められますが、それでも`Sync`系メソッドは正常に動作しません(利用不可)。また、webpackの際に大量のwarningが発生するので、その他の機能に関しても正常に動作するかは分かりません。詳細は[こちら](https://github.com/ktty1220/cheerio-httpcli/issues/14#issuecomment-230733142)をご覧ください。
+いろいろと工夫するとWebpackで固められますが、それでも`Sync`系メソッドは正常に動作しません(利用不可)。また、Webpackの際に大量のwarningが発生するので、その他の機能に関しても正常に動作するかは分かりません。詳細は[こちら](https://github.com/ktty1220/cheerio-httpcli/issues/14#issuecomment-230733142)をご覧ください。
 
 ご利用の際は自己責任でお願いします。
 
 また、Electronという環境に起因する動作不良に関しては、ちょっとした修正で解決するものは対応しますが、現行の仕組みを大きく変える必要がある場合は対応しない事もあります。ご了承ください。
+
+### Webpack環境下での制限
+
+Node.js用にWebpackで固めた場合、一部動作に制限が生じます。該当する処理が発生した場合はwarningメッセージが表示されます。
+
+* Accept-Languageリクエストヘッダが自動で付加されません。必要であれば以下のように手動で設定してください。
+
+   ```js
+   var client = require('cheerio-httpcli');
+
+   client.set('headers', { 'Accept-Language': 'ja,en-US' });
+   ```
+
+* Iconvモジュールの動的変更はできません。`iconv-lite`固定となります。
+* `fetchSync()`、`clickSync()`などの非同期メソッドは使用できません(実行してもエラーになります)。
+
 
 ### TypeScriptからの利用
 
