@@ -24,10 +24,10 @@ client.fetch('http://www.google.co.jp/search', { q: word }, function (err, $, re
 
   var results = [];
   // 検索結果が個別に格納されている要素をループ
-  $('#rso .g').each(function () {
+  $('#rso .srg .g').each(function () {
     // 各検索結果のタイトル部分とURL、概要を取得
     var $h3 = $(this).find('h3');
-    var url = $h3.find('a').attr('href');
+    var url = $(this).find('.r a').attr('href');
     if (url) {
       results.push({
         title: $h3.text(),

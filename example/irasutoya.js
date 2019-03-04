@@ -6,7 +6,7 @@
 var C = require('colors/safe');
 
 /**
- * tiqav画像取得サンプル
+ * いらすとやTOPの人気イラスト画像取得サンプル
  */
 
 var fs     = require('fs');
@@ -41,13 +41,17 @@ client.download
 
 
 // fetch start
-console.info(C.cyan('INFO'), 'tiqavにアクセスします');
-client.fetch('http://tiqav.com/')
+console.info(C.cyan('INFO'), 'いらすとやにアクセスします');
+client.fetch('https://www.irasutoya.com/')
 .then(function (result) {
-  // 画像を根こそぎダウンロード
-  var $imgs = result.$('.box img');
-  console.info(C.cyan('INFO'), $imgs.length + '個の画像があります');
-  $imgs.download();
+  console.info(C.cyan('INFO'), '人気のイラストをダウンロードします');
+  var $imgs = result.$('.popular-posts .item-thumbnail img');
+  // png画像のみダウンロード
+  $imgs.each(function () {
+    if (/\.png$/.test(result.$(this).attr('src'))) {
+      result.$(this).download();
+    }
+  });
 })
 .catch(function (err) {
   console.error(C.red('ERROR'), err);
