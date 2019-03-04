@@ -1,5 +1,4 @@
 /*eslint-env mocha*/
-/*jshint -W100*/
 var assert = require('power-assert');
 var each   = require('foreach');
 var helper = require('./_helper');

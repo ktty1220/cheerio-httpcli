@@ -1,5 +1,4 @@
 /*eslint-env mocha*/
-/*jshint -W100*/
 var assert = require('power-assert');
 var typeOf = require('type-of');
 var helper = require('./_helper');
@@ -22,7 +21,7 @@ describe('reset', function () {
     assert(cli.gzip === true);
     assert(cli.referer === true);
     assert(cli.followMetaRefresh === false);
-    assert(cli.maxDataSize === null);
+    assert(cli.maxDataSize == null);
     assert(cli.debug === false);
   });
 

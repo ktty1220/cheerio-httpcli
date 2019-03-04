@@ -1,7 +1,5 @@
 /*eslint-env mocha*/
 /*eslint no-invalid-this:0*/
-/*jscs:disable requireDotNotation*/
-/*jshint -W100*/
 var assert = require('power-assert');
 var typeOf = require('type-of');
 var each   = require('foreach');
@@ -265,14 +263,12 @@ describe('submitSync', function () {
         assert(qp.textarea === '');
       });
 
-      /*jscs:disable disallowQuotedKeysInObjects*/
       /*eslint-disable quote-props*/
       var expectedEncodings = {
         'shift_jis': 'utf-8',
         'euc-jp': 'shift_jis',
         'utf-8': 'euc-jp'
       };
-      /*jscs:enable disallowQuotedKeysInObjects*/
       /*eslint-enable quote-props*/
       it('accept-chaset属性あり => accept-charsetで指定されたURLエンコードで送信される(' + expectedEncodings[enc] + ')', function () {
         var param = { q: 'かきくけこ' };

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*jshint -W100*/
 
 'use strict';
 

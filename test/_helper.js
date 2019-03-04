@@ -1,5 +1,4 @@
 /*eslint max-statements:[1, 100]*/
-/*jshint -W100*/
 var nstatic = require('node-static');
 var http    = require('http');
 var https   = require('https');
@@ -202,7 +201,7 @@ module.exports = {
         if (req.url.indexOf('?stop_trace_route') !== -1) {
           _traceRoute = null;
         }
-        if (_traceRoute !== null) {
+        if (_traceRoute != null) {
           if (req.url.indexOf('?reset_trace_route') !== -1) {
             _traceRoute.length = 0;
           }
@@ -222,7 +221,7 @@ module.exports = {
         // 通常ファイル
         var wait = (req.url.match(/[\?&]wait=(\d+)/i) || [])[1] || 5;
         setTimeout(function () {
-          if (_traceRoute !== null) {
+          if (_traceRoute != null) {
             res.setHeader('trace-route', JSON.stringify(_traceRoute));
           }
           file.serve(req, res, function (err) {
@@ -287,7 +286,6 @@ module.exports = {
    * 指定したファイルの内容をBase64エンコードした文字列を返す
    */
   escapedParam: function () {
-    /*jscs:disable disallowQuotedKeysInObjects*/
     /*eslint-disable quote-props*/
     return {
       'あいうえお': {
@@ -346,7 +344,6 @@ module.exports = {
         'euc-jp': '%A4%DE%A4%DF%A4%E0%A4%E1%A4%E2'
       }
     };
-    /*jscs:enable disallowQuotedKeysInObjects*/
     /*eslint-enable quote-props*/
   },
 

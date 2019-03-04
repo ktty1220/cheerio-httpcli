@@ -7,13 +7,10 @@
     "node": ">=4"
   },
   "scripts": {
-    "prepublish": "pkg-ok",
+    "prepublishOnly": "pkg-ok",
     "test": "node testrunner.js || true",
     "cov": "istanbul cover -x index.js -x testrunner.js testrunner.js -- -R nyan || true",
     "lint": "eslint lib test example --ext .js",
-    "cs": "jscs lib test example || true",
-    "dep": "depcheck --parsers=*.js:es6,*.json:json --ignores=iconv-lite,os-locale,constants,pre-commit,@types/*,espower-loader || true",
-    "todo": "leasot -S lib/**/**/* test/** example/** || true",
     "dts": "tsc -p dts"
   },
   "pre-commit": [

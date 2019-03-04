@@ -1,6 +1,5 @@
 /*eslint-env mocha*/
 /*eslint max-len:[1, 200, 2], no-invalid-this:0*/
-/*jshint -W100*/
 var assert = require('power-assert');
 var fs     = require('fs');
 var path   = require('path');
