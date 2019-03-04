@@ -4,4 +4,6 @@ example/
 test/
 .codeclimate.yml
 codeclimate.sh
+.eslintrc
+testrunner.js
 *~
