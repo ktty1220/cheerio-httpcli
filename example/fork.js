@@ -15,7 +15,7 @@ const child = client.fork();
 client.set('browser', 'edge');
 
 const checkUserAgent = (instance) => {
-  console.lgo(`### ${instance.constructor.name} ###`);
+  console.log(`### ${instance.constructor.name} ###`);
   return instance
     .fetch('http://www.useragentstring.com/')
     .then(function ({ $ }) {
