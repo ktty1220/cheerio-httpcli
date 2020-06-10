@@ -1,165 +1,185 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0, max-nested-callbacks:[1, 6]*/
-var assert = require('power-assert');
-var typeOf = require('type-of');
-var helper = require('./_helper');
-var cli    = require('../index');
+const typeOf = require('type-of');
+const uuid = require('uuid-random');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('redirect', function () {
-  before(function (done) {
-    cli.fetch(helper.url() + '?start_trace_route').finally(done);
+describe('redirect', () => {
+  beforeEach(() => {
+    cli.set(
+      'headers',
+      {
+        'redirect-id': uuid()
+      },
+      true
+    );
   });
-  after(function (done) {
-    cli.fetch(helper.url() + '?stop_trace_route').finally(done);
+  afterEach(() => {
+    cli.set('headers', {}, true);
   });
 
-  describe('async', function () {
-    describe('30x', function () {
-      it('documentInfoにリダイレクト先のURLが登録される', function (done) {
-        var url = helper.url('manual', 'euc-jp');
-        cli.fetch(helper.url('~redirect'), function (err, $, res, body) {
-          assert($.documentInfo().url === url);
-          done();
+  describe('async', () => {
+    describe('30x', () => {
+      test('documentInfoにリダイレクト先のURLが登録される', () => {
+        return new Promise((resolve) => {
+          const url = `${endpoint}/manual/euc-jp.html`;
+          cli.fetch(`${endpoint}/~redirect`, (err, $, res, body) => {
+            expect($.documentInfo().url).toStrictEqual(url);
+            resolve();
+          });
         });
       });
 
-      it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ(絶対パス)', function (done) {
-        var url = helper.url('manual', 'euc-jp');
-        cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
-          $('form[name=login]')
-          .submit(function (err, $, res, body) {
-            assert(typeOf(res.cookies) === 'object');
-            assert(res.cookies.user === 'guest');
-            assert($.documentInfo().url === url);
-            assert.deepEqual(JSON.parse(res.headers['trace-route']), [
-              '/form/utf-8.html?reset_trace_route',
+      test('POST送信後にクッキーがセットされリダイレクト先に飛ぶ(絶対パス)', () => {
+        return new Promise((resolve) => {
+          const url = `${endpoint}/manual/euc-jp.html`;
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            $('form[name=login]').submit((err, $, res, body) => {
+              expect(typeOf(res.cookies)).toStrictEqual('object');
+              expect(res.cookies.user).toStrictEqual('guest');
+              expect($.documentInfo().url).toStrictEqual(url);
+              expect(JSON.parse(res.headers['redirect-history'])).toStrictEqual([
+                '/form/utf-8.html',
+                '/~redirect',
+                '/manual/euc-jp.html'
+              ]);
+              resolve();
+            });
+          });
+        });
+      });
+
+      test('POST送信後にクッキーがセットされリダイレクト先に飛ぶ(相対パス)', () => {
+        return new Promise((resolve) => {
+          const url = `${endpoint}/manual/euc-jp.html`;
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            $('form[name=login]')
+              .attr('action', '/~redirect_relative')
+              .submit((err, $, res, body) => {
+                expect(typeOf(res.cookies)).toStrictEqual('object');
+                expect(res.cookies.user).toStrictEqual('guest');
+                expect($.documentInfo().url).toStrictEqual(url);
+                expect(JSON.parse(res.headers['redirect-history'])).toStrictEqual([
+                  '/form/utf-8.html',
+                  '/~redirect_relative',
+                  '/manual/euc-jp.html'
+                ]);
+                resolve();
+              });
+          });
+        });
+      });
+    });
+
+    describe('meta refresh', () => {
+      beforeEach(() => {
+        cli.set('followMetaRefresh', true);
+      });
+
+      test('meta[refresh]タグを検知してリダイレクト先に飛ぶ(絶対URL)', () => {
+        return new Promise((resolve) => {
+          const url = `${endpoint}/refresh/absolute.html`;
+          cli.fetch(url, (err, $, res, body) => {
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            expect(res.headers.referer).toStrictEqual(url);
+            resolve();
+          });
+        });
+      });
+
+      test('meta[refresh]タグを検知してリダイレクト先に飛ぶ(相対URL)', () => {
+        return new Promise((resolve) => {
+          const url = `${endpoint}/refresh/relative.html`;
+          cli.fetch(url, (err, $, res, body) => {
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            expect(res.headers.referer).toStrictEqual(url);
+            resolve();
+          });
+        });
+      });
+
+      test('followMetaRefresh:false => meta[refresh]タグがあってもリダイレクトしない', () => {
+        return new Promise((resolve) => {
+          cli.set('followMetaRefresh', false);
+          const url = `${endpoint}/refresh/absolute.html`;
+          cli.fetch(url, (err, $, res, body) => {
+            expect($.documentInfo().url).toStrictEqual(url);
+            resolve();
+          });
+        });
+      });
+
+      test('IE条件コメント内のmeta[refresh]タグはリダイレクト対象外', () => {
+        return new Promise((resolve) => {
+          const url = `${endpoint}/refresh/ie-only.html`;
+          cli.fetch(url, (err, $, res, body) => {
+            expect($.documentInfo().url).toStrictEqual(url);
+            expect($('title').text()).toStrictEqual('Refresh IE only');
+            resolve();
+          });
+        });
+      });
+    });
+  });
+
+  describe('sync', () => {
+    describe('30x', () => {
+      test('documentInfoにリダイレクト先のURLが登録される', () => {
+        const url = `${endpoint}/manual/euc-jp.html`;
+        const result = cli.fetchSync(`${endpoint}/~redirect`);
+        expect(result.$.documentInfo().url).toStrictEqual(url);
+      });
+
+      test('POST送信後にクッキーがセットされリダイレクト先に飛ぶ', () => {
+        return new Promise((resolve) => {
+          const url = `${endpoint}/manual/euc-jp.html`;
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const result = $('form[name=login]').submitSync();
+            expect(typeOf(result.response.cookies)).toStrictEqual('object');
+            expect(result.response.cookies.user).toStrictEqual('guest');
+            expect(result.$.documentInfo().url).toStrictEqual(url);
+            expect(JSON.parse(result.response.headers['redirect-history'])).toStrictEqual([
+              '/form/utf-8.html',
               '/~redirect',
               '/manual/euc-jp.html'
             ]);
-            done();
-          });
-        });
-      });
-
-      it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ(相対パス)', function (done) {
-        var url = helper.url('manual', 'euc-jp');
-        cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
-          $('form[name=login]')
-          .attr('action', '/~redirect_relative')
-          .submit(function (err, $, res, body) {
-            assert(typeOf(res.cookies) === 'object');
-            assert(res.cookies.user === 'guest');
-            assert($.documentInfo().url === url);
-            assert.deepEqual(JSON.parse(res.headers['trace-route']), [
-              '/form/utf-8.html?reset_trace_route',
-              '/~redirect_relative',
-              '/manual/euc-jp.html'
-            ]);
-            done();
+            resolve();
           });
         });
       });
     });
 
-    describe('meta refresh', function () {
-      beforeEach(function () {
+    describe('meta refresh', () => {
+      beforeEach(() => {
         cli.set('followMetaRefresh', true);
       });
 
-      it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(絶対URL)', function (done) {
-        var url = helper.url('refresh', 'absolute');
-        cli.fetch(url, function (err, $, res, body) {
-          assert($.documentInfo().url === helper.url('~info'));
-          assert(res.headers.referer === url);
-          done();
-        });
+      test('meta[refresh]タグを検知してリダイレクト先に飛ぶ(絶対URL)', () => {
+        const url = `${endpoint}/refresh/absolute.html`;
+        const result = cli.fetchSync(url);
+        expect(result.$.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+        expect(result.response.headers.referer).toStrictEqual(url);
       });
 
-      it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(相対URL)', function (done) {
-        var url = helper.url('refresh', 'relative');
-        cli.fetch(url, function (err, $, res, body) {
-          assert($.documentInfo().url === helper.url('~info'));
-          assert(res.headers.referer === url);
-          done();
-        });
+      test('meta[refresh]タグを検知してリダイレクト先に飛ぶ(相対URL)', () => {
+        const url = `${endpoint}/refresh/relative.html`;
+        const result = cli.fetchSync(url);
+        expect(result.$.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+        expect(result.response.headers.referer).toStrictEqual(url);
       });
 
-      it('followMetaRefresh:false => meta[refresh]タグがあってもリダイレクトしない', function (done) {
+      test('followMetaRefresh:false => meta[refresh]タグがあってもリダイレクトしない', () => {
         cli.set('followMetaRefresh', false);
-        var url = helper.url('refresh', 'absolute');
-        cli.fetch(url, function (err, $, res, body) {
-          assert($.documentInfo().url === url);
-          done();
-        });
+        const url = `${endpoint}/refresh/absolute.html`;
+        const result = cli.fetchSync(url);
+        expect(result.$.documentInfo().url).toStrictEqual(url);
       });
 
-      it('IE条件コメント内のmeta[refresh]タグはリダイレクト対象外', function (done) {
-        var url = helper.url('refresh', 'ie-only');
-        cli.fetch(url, function (err, $, res, body) {
-          assert($.documentInfo().url === url);
-          assert($('title').text() === 'Refresh IE only');
-          done();
-        });
-      });
-    });
-  });
-
-  describe('sync', function () {
-    describe('30x', function () {
-      it('documentInfoにリダイレクト先のURLが登録される', function () {
-        var url = helper.url('manual', 'euc-jp');
-        var result = cli.fetchSync(helper.url('~redirect'));
-        assert(result.$.documentInfo().url === url);
-      });
-
-      it('POST送信後にクッキーがセットされリダイレクト先に飛ぶ', function (done) {
-        var url = helper.url('manual', 'euc-jp');
-        cli.fetch(helper.url('form', 'utf-8') + '?reset_trace_route', function (err, $, res, body) {
-          var result = $('form[name=login]').submitSync();
-          assert(typeOf(result.response.cookies) === 'object');
-          assert(result.response.cookies.user === 'guest');
-          assert(result.$.documentInfo().url === url);
-          assert.deepEqual(JSON.parse(result.response.headers['trace-route']), [
-            '/form/utf-8.html?reset_trace_route',
-            '/~redirect',
-            '/manual/euc-jp.html'
-          ]);
-          done();
-        });
-      });
-    });
-
-    describe('meta refresh', function () {
-      beforeEach(function () {
-        cli.set('followMetaRefresh', true);
-      });
-
-      it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(絶対URL)', function () {
-        var url = helper.url('refresh', 'absolute');
-        var result = cli.fetchSync(url);
-        assert(result.$.documentInfo().url === helper.url('~info'));
-        assert(result.response.headers.referer === url);
-      });
-
-      it('meta[refresh]タグを検知してリダイレクト先に飛ぶ(相対URL)', function () {
-        var url = helper.url('refresh', 'relative');
-        var result = cli.fetchSync(url);
-        assert(result.$.documentInfo().url === helper.url('~info'));
-        assert(result.response.headers.referer === url);
-      });
-
-      it('followMetaRefresh:false => meta[refresh]タグがあってもリダイレクトしない', function () {
-        cli.set('followMetaRefresh', false);
-        var url = helper.url('refresh', 'absolute');
-        var result = cli.fetchSync(url);
-        assert(result.$.documentInfo().url === url);
-      });
-
-      it('IE条件コメント内のmeta[refresh]タグはリダイレクト対象外', function () {
-        var url = helper.url('refresh', 'ie-only');
-        var result = cli.fetchSync(url);
-        assert(result.$.documentInfo().url === url);
-        assert(result.$('title').text() === 'Refresh IE only');
+      test('IE条件コメント内のmeta[refresh]タグはリダイレクト対象外', () => {
+        const url = `${endpoint}/refresh/ie-only.html`;
+        const result = cli.fetchSync(url);
+        expect(result.$.documentInfo().url).toStrictEqual(url);
+        expect(result.$('title').text()).toStrictEqual('Refresh IE only');
       });
     });
   });

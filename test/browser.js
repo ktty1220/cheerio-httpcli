@@ -1,57 +1,63 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0*/
-var assert   = require('power-assert');
-var each     = require('foreach');
-var helper   = require('./_helper');
-var cli      = require('../index');
-var browsers = require('../lib/browsers.json');
+const each = require('foreach');
+const helper = require('./_helper');
+const cli = require('../index');
+const browsers = require('../lib/browsers.json');
+const endpoint = helper.endpoint();
 
-describe('browser', function () {
-  it('デフォルトはChromeのUser-Agentがセットされる', function (done) {
-    cli.fetch(helper.url('~info'), function (err, $, res, body) {
-      assert(browsers.chrome === res.headers['user-agent']);
-      done();
-    });
-  });
-
-  each(browsers, function (ua, browser) {
-    it('指定したブラウザのUAが反映されている(' + browser + ')', function (done) {
-      cli.set('browser', browser);
-      cli.fetch(helper.url('~info'), function (err, $, res, body) {
-        assert(ua === res.headers['user-agent']);
-        assert(cli.browser === browser);
-        done();
+describe('browser', () => {
+  test('デフォルトはChromeのUser-Agentがセットされる', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/~info`, (err, $, res, body) => {
+        expect(res.headers['user-agent']).toStrictEqual(browsers.chrome);
+        resolve();
       });
     });
   });
 
-  it('対応していないブラウザ => User-Agentは変更されない', function (done) {
-    cli.set('browser', 'ie');
-    var now = cli.headers['user-agent'];
-    helper.hookStderr(function (unhook) {
+  each(browsers, (ua, browser) => {
+    test(`指定したブラウザのUAが反映されている(${browser})`, () => {
+      return new Promise((resolve) => {
+        cli.set('browser', browser);
+        cli.fetch(`${endpoint}/~info`, (err, $, res, body) => {
+          expect(res.headers['user-agent']).toStrictEqual(ua);
+          expect(cli.browser).toStrictEqual(browser);
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('対応していないブラウザ => User-Agentは変更されない', () => {
+    return new Promise((resolve) => {
+      cli.set('browser', 'ie');
+      const now = cli.headers['user-agent'];
+      const spy = jest.spyOn(console, 'warn');
+      spy.mockImplementation((x) => x);
       cli.set('browser', 'w3m');
-      var expected = '[WARNING] unknown browser: w3m';
-      var actual = helper.stripMessageDetail(unhook());
-      assert(actual === expected);
-      cli.fetch(helper.url('~info'), function (err, $, res, body) {
-        assert(now === res.headers['user-agent']);
-        assert(cli.browser === 'ie');
-        done();
+      expect(spy).toHaveBeenCalledTimes(1);
+      const actual = helper.stripMessageDetail(spy.mock.calls[0][0]);
+      expect(actual).toStrictEqual('[WARNING] unknown browser: w3m');
+      cli.fetch(`${endpoint}/~info`, (err, $, res, body) => {
+        expect(res.headers['user-agent']).toStrictEqual(now);
+        expect(cli.browser).toStrictEqual('ie');
+        spy.mockReset();
+        spy.mockRestore();
+        resolve();
       });
     });
   });
 
-  it('手動でUser-Agentを設定 => ブラウザ種類: custom', function () {
+  test('手動でUser-Agentを設定 => ブラウザ種類: custom', () => {
     cli.set('headers', {
       'User-Agent': 'Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)'
     });
-    assert(cli.browser === 'custom');
+    expect(cli.browser).toStrictEqual('custom');
   });
 
-  it('User-Agent未設定 => ブラウザ種類: null', function () {
+  test('User-Agent未設定 => ブラウザ種類: null', () => {
     cli.set('headers', {
       'User-Agent': null
     });
-    assert(cli.browser == null);
+    expect(cli.browser).toBeNull();
   });
 });

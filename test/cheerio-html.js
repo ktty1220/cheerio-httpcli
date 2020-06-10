@@ -1,30 +1,38 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0*/
-var assert = require('power-assert');
-var helper = require('./_helper');
-var cli    = require('../index');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('cheerio:html', function () {
-  it('_html => DEPRECATEDメッセージが表示される', function (done) {
-    cli.fetch(helper.url('entities', 'hex'), function (err, $, res, body) {
-      helper.hookStderr(function (unhook) {
+describe('cheerio:html', () => {
+  let spy = null;
+  beforeEach(() => {
+    spy = jest.spyOn(console, 'warn');
+    spy.mockImplementation((x) => x);
+  });
+  afterEach(() => {
+    spy.mockReset();
+    spy.mockRestore();
+  });
+
+  test('_html => DEPRECATEDメッセージが表示される', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/hex.html`, (err, $, res, body) => {
         $('h1')._html();
-        var expected = '[DEPRECATED] _html() will be removed in the future)';
-        var actual = helper.stripMessageDetail(unhook());
-        assert(actual === expected);
-        done();
+        expect(spy).toHaveBeenCalledTimes(1);
+        const actual = helper.stripMessageDetail(spy.mock.calls[0][0]);
+        expect(actual).toStrictEqual('[DEPRECATED] _html() will be removed in the future)');
+        resolve();
       });
     });
   });
 
-  it('_text => DEPRECATEDメッセージが表示される', function (done) {
-    cli.fetch(helper.url('entities', 'hex'), function (err, $, res, body) {
-      helper.hookStderr(function (unhook) {
+  test('_text => DEPRECATEDメッセージが表示される', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/hex.html`, (err, $, res, body) => {
         $('h1')._text();
-        var expected = '[DEPRECATED] _text() will be removed in the future)';
-        var actual = helper.stripMessageDetail(unhook());
-        assert(actual === expected);
-        done();
+        expect(spy).toHaveBeenCalledTimes(1);
+        const actual = helper.stripMessageDetail(spy.mock.calls[0][0]);
+        expect(actual).toStrictEqual('[DEPRECATED] _text() will be removed in the future)');
+        resolve();
       });
     });
   });

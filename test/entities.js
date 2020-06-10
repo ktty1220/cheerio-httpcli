@@ -1,106 +1,136 @@
-/*eslint-env mocha*/
-/*eslint max-len:[1, 200, 2], no-invalid-this:0*/
-var assert = require('power-assert');
-var fs     = require('fs');
-var path   = require('path');
-var he     = require('he');
-var helper = require('./_helper');
-var cli    = require('../index');
+const fs = require('fs');
+const path = require('path');
+const he = require('he');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('entities:decode', function () {
-  var expected = {
+describe('entities:decode', () => {
+  const expected = {
     text: '夏目漱石「私の個人主義」',
     html: '夏目漱石「<strong>私の個人主義</strong>」',
     sign: '<"私の個人主義"&\'吾輩は猫である\'>'
   };
 
-  it('16進数エンティティが文字列に変換されている', function (done) {
-    cli.fetch(helper.url('entities', 'hex'), function (err, $, res, body) {
-      assert($('h1').text() === expected.text);
-      assert($('h1').html() === expected.html);
-      assert($('h1').entityHtml() === he.encode(expected.html, {
-        allowUnsafeSymbols: true
-      }));
-      done();
-    });
-  });
-
-  it('10進数エンティティが文字列に変換されている', function (done) {
-    cli.fetch(helper.url('entities', 'num'), function (err, $, res, body) {
-      assert($('h1').text() === expected.text);
-      assert($('h1').html() === expected.html);
-      assert($('h1').entityHtml() === he.encode(expected.html, {
-        allowUnsafeSymbols: true
-      }));
-      done();
-    });
-  });
-
-  it('16進数と10進数混在エンティティが文字列に変換されている', function (done) {
-    cli.fetch(helper.url('entities', 'hex&num'), function (err, $, res, body) {
-      assert($('h1').text() === expected.text);
-      assert($('h1').html() === expected.html);
-      assert($('h1').entityHtml() === he.encode(expected.html, {
-        allowUnsafeSymbols: true
-      }));
-      done();
-    });
-  });
-
-  it('文字参照エンティティが文字列に変換されている', function (done) {
-    cli.fetch(helper.url('entities', 'sign'), function (err, $, res, body) {
-      for (var i = 1; i <= 3; i++) {
-        assert($('h' + i).text() === expected.sign);
-        assert($('h' + i).html() === expected.sign);
-        assert($('h1').entityHtml() === he.encode(expected.sign, {
-          allowUnsafeSymbols: false,
-          useNamedReferences: true
-        }));
-      }
-      done();
-    });
-  });
-
-  it('無から作成したHTMLのエンティティが文字列に変換されている', function (done) {
-    cli.fetch(helper.url('entities', 'sign'), function (err, $, res, body) {
-      var $html = $('<div/>').html('<footer>&copy; 2015 hoge</footer>');
-      assert($html.text() === '© 2015 hoge');
-      var expectedHtml = '<footer>© 2015 hoge</footer>';
-      assert($html.html() === expectedHtml);
-      assert($html.entityHtml() === he.encode(expectedHtml, {
-        allowUnsafeSymbols: true,
-        useNamedReferences: false
-      }));
-      done();
-    });
-  });
-
-  it('エンティティで書かれたattrが文字列に変換されている', function (done) {
-    cli.fetch(helper.url('entities', 'etc'), function (err, $, res, body) {
-      assert($('img').attr('alt') === expected.text);
-      done();
-    });
-  });
-
-  it('エンティティで書かれたdataが文字列に変換されている', function (done) {
-    cli.fetch(helper.url('entities', 'etc'), function (err, $, res, body) {
-      assert($('p').data('tips') === expected.sign);
-      done();
-    });
-  });
-
-  describe('$.html', function () {
-    it('元htmlにエンティティなし => そのまま取得', function (done) {
-      cli.fetch(helper.url('auto', 'utf-8'), function (err, $, res, body) {
-        assert($.html() === fs.readFileSync(path.join(__dirname, 'fixtures/auto/utf-8.html'), 'utf-8'));
-        done();
+  test('16進数エンティティが文字列に変換されている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/hex.html`, (err, $, res, body) => {
+        expect($('h1').text()).toStrictEqual(expected.text);
+        expect($('h1').html()).toStrictEqual(expected.html);
+        expect($('h1').entityHtml()).toStrictEqual(
+          he.encode(expected.html, {
+            allowUnsafeSymbols: true
+          })
+        );
+        resolve();
       });
     });
-    it('元htmlにエンティティあり => 文字列に変換されている', function (done) {
-      cli.fetch(helper.url('entities', 'sign'), function (err, $, res, body) {
-        var html = he.decode(fs.readFileSync(path.join(__dirname, 'fixtures/entities/sign.html'), 'utf-8'));
-        assert($.html() === html);
-        done();
+  });
+
+  test('10進数エンティティが文字列に変換されている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/num.html`, (err, $, res, body) => {
+        expect($('h1').text()).toStrictEqual(expected.text);
+        expect($('h1').html()).toStrictEqual(expected.html);
+        expect($('h1').entityHtml()).toStrictEqual(
+          he.encode(expected.html, {
+            allowUnsafeSymbols: true
+          })
+        );
+        resolve();
+      });
+    });
+  });
+
+  test('16進数と10進数混在エンティティが文字列に変換されている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/hex&num.html`, (err, $, res, body) => {
+        expect($('h1').text()).toStrictEqual(expected.text);
+        expect($('h1').html()).toStrictEqual(expected.html);
+        expect($('h1').entityHtml()).toStrictEqual(
+          he.encode(expected.html, {
+            allowUnsafeSymbols: true
+          })
+        );
+        resolve();
+      });
+    });
+  });
+
+  test('文字参照エンティティが文字列に変換されている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/sign.html`, (err, $, res, body) => {
+        for (let i = 1; i <= 3; i++) {
+          expect($(`h${i}`).text()).toStrictEqual(expected.sign);
+          expect($(`h${i}`).html()).toStrictEqual(expected.sign);
+          expect($('h1').entityHtml()).toStrictEqual(
+            he.encode(expected.sign, {
+              allowUnsafeSymbols: false,
+              useNamedReferences: true
+            })
+          );
+        }
+        resolve();
+      });
+    });
+  });
+
+  test('無から作成したHTMLのエンティティが文字列に変換されている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/sign.html`, (err, $, res, body) => {
+        const $html = $('<div/>').html('<footer>&copy; 2015 hoge</footer>');
+        expect($html.text()).toStrictEqual('© 2015 hoge');
+        const expectedHtml = '<footer>© 2015 hoge</footer>';
+        expect($html.html()).toStrictEqual(expectedHtml);
+        expect($html.entityHtml()).toStrictEqual(
+          he.encode(expectedHtml, {
+            allowUnsafeSymbols: true,
+            useNamedReferences: false
+          })
+        );
+        resolve();
+      });
+    });
+  });
+
+  test('エンティティで書かれたattrが文字列に変換されている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/etc.html`, (err, $, res, body) => {
+        expect($('img').attr('alt')).toStrictEqual(expected.text);
+        resolve();
+      });
+    });
+  });
+
+  test('エンティティで書かれたdataが文字列に変換されている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/entities/etc.html`, (err, $, res, body) => {
+        expect($('p').data('tips')).toStrictEqual(expected.sign);
+        resolve();
+      });
+    });
+  });
+
+  describe('$.html', () => {
+    test('元htmlにエンティティなし => そのまま取得', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/auto/utf-8.html`, (err, $, res, body) => {
+          expect($.html()).toStrictEqual(
+            fs.readFileSync(path.join(__dirname, 'fixtures/auto/utf-8.html'), 'utf-8')
+          );
+          resolve();
+        });
+      });
+    });
+    test('元htmlにエンティティあり => 文字列に変換されている', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/entities/sign.html`, (err, $, res, body) => {
+          const html = he.decode(
+            fs.readFileSync(path.join(__dirname, 'fixtures/entities/sign.html'), 'utf-8')
+          );
+          expect($.html()).toStrictEqual(html);
+          resolve();
+        });
       });
     });
   });

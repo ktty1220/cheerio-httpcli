@@ -4,4 +4,3 @@ module.exports = function () {
   var food = 'food';
   return food;
 };
-

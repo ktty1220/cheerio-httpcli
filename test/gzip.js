@@ -1,11 +1,9 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0*/
-var assert = require('power-assert');
-var helper = require('./_helper');
-var cli    = require('../index');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('gzip', function () {
-  before(function () {
+describe('gzip', () => {
+  beforeAll(() => {
     // - Windows10 + Node.js6の環境においてUser-AgentをGUIブラウザにすると
     //   "content-encoding: gzip"ではなく"transfer-encoding: chunked"になる
     //   (なぜかoperaは対象外)
@@ -17,32 +15,38 @@ describe('gzip', function () {
     // - 上記の状況を見るにNode.js本体のhttpが何かしているような予感
     cli.set('browser', 'googlebot');
   });
-  after(function () {
+  afterAll(() => {
     cli.set('headers', {
       'user-agent': null
     });
   });
 
-  it('enable => gzipヘッダを送信して返ってきた圧縮HTMLが解凍されてからUTF-8に変換される', function (done) {
-    cli.set('gzip', true);
-    cli.fetch(helper.url('gzip', 'utf-8'), function (err, $, res, body) {
-      assert(res.headers['content-encoding'] === 'gzip');
-      //assert(res.headers.vary === 'Accept-Encoding');
-      //assert(res.headers['transfer-encoding'] === 'chunked');
-      assert($('title').text() === '夏目漱石「私の個人主義」');
-      done();
+  test('enable => gzipヘッダを送信して返ってきた圧縮HTMLが解凍されてからUTF-8に変換される', () => {
+    return new Promise((resolve) => {
+      cli.set('gzip', true);
+      cli.fetch(`${endpoint}/gzip/utf-8.html`, (err, $, res, body) => {
+        expect(res.headers['content-encoding']).toStrictEqual('gzip');
+        // expect(res.headers.vary).toStrictEqual('Accept-Encoding');
+        // expect(res.headers['transfer-encoding']).toStrictEqual('chunked');
+        expect($('title').text()).toStrictEqual('夏目漱石「私の個人主義」');
+        resolve();
+      });
     });
   });
 
-  it('disable => gzipヘッダを送信しないで返ってきた生のHTMLがそのままUTF-8に変換される', function (done) {
-    cli.set('gzip', false);
-    cli.fetch(helper.url('gzip', 'utf-8'), function (err, $, res, body) {
-      assert(! ('content-encoding' in res.headers));
-      assert(! ('transfer-encoding' in res.headers));
-      assert(! ('vary' in res.headers));
-      assert(res.headers['content-length'] > 0);
-      assert($('title').text() === '夏目漱石「私の個人主義」');
-      done();
+  test('disable => gzipヘッダを送信しないで返ってきた生のHTMLがそのままUTF-8に変換される', () => {
+    return new Promise((resolve) => {
+      cli.set('gzip', false);
+      cli.fetch(`${endpoint}/gzip/utf-8.html`, (err, $, res, body) => {
+        expect('content-encoding' in res.headers).toStrictEqual(false);
+        expect('transfer-encoding' in res.headers).toStrictEqual(false);
+        expect('vary' in res.headers).toStrictEqual(false);
+        const contentLength = res.headers['content-length'];
+        expect(contentLength).toMatch(/^\d+$/);
+        expect(parseInt(contentLength, 10)).toBeGreaterThan(0);
+        expect($('title').text()).toStrictEqual('夏目漱石「私の個人主義」');
+        resolve();
+      });
     });
   });
 });

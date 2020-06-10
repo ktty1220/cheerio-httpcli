@@ -153,5 +153,21 @@
       <input type="text" name="q" value="かきくけこ">
       <input type="submit" value="検索">
     </form>
+
+    <form name="upload-single" action="/~upload" enctype="multipart/form-data" method="post">
+      <input type="text" name="title" />
+      <input type="file" name="upload_file" />
+      <textarea name="comment"></textarea>
+      <input type="submit" value="Upload">
+    </form>
+
+    <form name="upload-multi" action="/~upload" enctype="multipart/form-data" method="post">
+      <input type="text" name="title" />
+      <input type="file" name="upload_file" multiple="multiple" />
+      <input type="checkbox" name="choice[]" value="あいうえお">
+      <input type="checkbox" name="choice[]" value="かきくけこ">
+      <input type="checkbox" name="choice[]" value="さしすせそ">
+      <input type="submit" value="Upload">
+    </form>
   </body>
 </html>

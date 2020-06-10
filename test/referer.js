@@ -1,53 +1,44 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0, max-nested-callbacks:[1, 8]*/
-var assert = require('power-assert');
-var helper = require('./_helper');
-var cli    = require('../index');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('referer:enable', function () {
-  it('Referer自動設定を有効 => リクエストの度にRefererがセットされる', function (done) {
+describe('referer:enable', () => {
+  test('Referer自動設定を有効 => リクエストの度にRefererがセットされる', async () => {
     cli.set('referer', true);
-    var url = helper.url('auto', 'euc-jp');
-    cli.fetch(url, function (err, $, res, body) {
-      cli.fetch(helper.url('~info'), function (err, $, res, body) {
-        assert(res.headers.referer === url);
-        url = helper.url('manual', 'utf-8(html5)');
-        cli.fetch(url, function (err, $, res, body) {
-          cli.fetch(helper.url('~info'), function (err, $, res, body) {
-            assert(res.headers.referer === url);
-            url = helper.url('~info');
-            // エラーページはRefererにセットされない
-            cli.fetch(helper.url('error', '~404'), function (err, $, res, body) {
-              cli.fetch(helper.url('~info'), function (err, $, res, body) {
-                assert(res.headers.referer === url);
-                done();
-              });
-            });
-          });
-        });
-      });
-    });
+
+    let url = `${endpoint}/auto/euc-jp.html`;
+    await cli.fetch(url);
+    const r1 = await cli.fetch(`${endpoint}/~info`);
+    expect(r1.response.headers.referer).toStrictEqual(url);
+
+    url = `${endpoint}/manual/utf-8(html5).html`;
+    await cli.fetch(url);
+    const r2 = await cli.fetch(`${endpoint}/~info`);
+    expect(r2.response.headers.referer).toStrictEqual(url);
+
+    // エラーページはRefererにセットされない
+    url = `${endpoint}/~info`;
+    await expect(cli.fetch(`${endpoint}/~e404`)).rejects.toThrow('server status');
+    const r3 = await cli.fetch(`${endpoint}/~info`);
+    expect(r3.response.headers.referer).toStrictEqual(url);
   });
 });
 
-describe('referer:disable', function () {
-  it('Referer自動設定を無効 => Refererはセットされない', function (done) {
+describe('referer:disable', () => {
+  test('Referer自動設定を無効 => Refererはセットされない', async () => {
     cli.set('referer', false);
     cli.set('headers', {
       Referer: null
     });
-    var url = helper.url('auto', 'euc-jp');
-    cli.fetch(url, function (err, $, res, body) {
-      cli.fetch(helper.url('~info'), function (err, $, res, body) {
-        assert(! res.headers.referer);
-        url = helper.url('manual', 'utf-8(html5)');
-        cli.fetch(url, function (err, $, res, body) {
-          cli.fetch(helper.url('~info'), function (err, $, res, body) {
-            assert(! res.headers.referer);
-            done();
-          });
-        });
-      });
-    });
+
+    let url = `${endpoint}/auto/euc-jp.html`;
+    await cli.fetch(url);
+    const r1 = await cli.fetch(`${endpoint}/~info`);
+    expect(r1.response.headers.referer).toBeUndefined();
+
+    url = `${endpoint}/manual/utf-8(html5).html`;
+    await cli.fetch(url);
+    const r2 = await cli.fetch(`${endpoint}/~info`);
+    expect(r2.response.headers.referer).toBeUndefined();
   });
 });

@@ -1,32 +1,35 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0*/
+const helper = require('./_helper');
+const cli = require('../index');
 
-var assert = require('power-assert');
-var helper = require('./_helper');
-var cli    = require('../index');
-
-describe('webpack', function () {
-  before(function () {
+describe('webpack', () => {
+  beforeAll(() => {
+    cli.set('iconv', 'iconv-lite');
     // Webpackでバンドルされている状態をエミュレート
-    /*eslint-disable-next-line no-underscore-dangle*/
-    global.__webpack_require__ = function () {};
+    global.__webpack_require__ = () => {};
   });
-  after(function () {
+  afterAll(() => {
     // Webpackエミュレートを解除
-    /*eslint-disable-next-line no-underscore-dangle*/
     delete global.__webpack_require__;
   });
 
-  it('iconvモジュールを変更しようとするとWARNINGメッセージが表示される', function (done) {
-    helper.hookStderr(function (unhook) {
-      assert(cli.iconv === 'iconv-lite');
-      cli.set('iconv', 'iconv');
-      var expected = '[WARNING] changing Iconv module have been disabled in this environment (eg Webpacked)';
-      var actual = helper.stripMessageDetail(unhook());
-      assert(actual === expected);
-      assert(cli.iconv === 'iconv-lite');
-      done();
-    });
+  let spy = null;
+  beforeEach(() => {
+    spy = jest.spyOn(console, 'warn');
+    spy.mockImplementation((x) => x);
+  });
+  afterEach(() => {
+    spy.mockReset();
+    spy.mockRestore();
+  });
+
+  test('iconvモジュールを変更しようとするとWARNINGメッセージが表示される', () => {
+    cli.set('iconv', 'iconv');
+    expect(spy).toHaveBeenCalledTimes(1);
+    const actual = helper.stripMessageDetail(spy.mock.calls[0][0]);
+    expect(actual).toStrictEqual(
+      '[WARNING] changing Iconv module have been disabled in this environment (eg Webpacked)'
+    );
+    expect(cli.iconv).toStrictEqual('iconv-lite');
   });
   // xxxSync, os-localeについてはWebpackエミュレートだけでは再現できないので省略
 });

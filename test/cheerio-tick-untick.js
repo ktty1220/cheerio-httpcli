@@ -1,453 +1,485 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0, max-len:[1, 150, 2], max-nested-callbacks:[1, 6]*/
-var assert = require('power-assert');
-var typeOf = require('type-of');
-var helper = require('./_helper');
-var cli    = require('../index');
+const typeOf = require('type-of');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('cheerio:tick', function () {
-  describe('input[type=checkbox]要素', function () {
-    it('input[type=checkbox]要素以外 => 例外発生', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        try {
-          $('input[type=text]').eq(0).tick();
-          throw new Error('not thrown');
-        } catch (e) {
-          assert(e.message === 'element is not checkbox or radio');
-        }
-        done();
-      });
-    });
-
-    it('要素数0 => 例外発生', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        try {
-          $('input[name=not_found]').tick();
-          throw new Error('not thrown');
-        } catch (e) {
-          assert(e.message === 'no elements');
-        }
-        done();
-      });
-    });
-
-    it('すでに選択済みのcheckbox => 変化なし', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=checkbox]');
-        var $checkbox = $form.find('input[name=check1]');
-        var state = $checkbox.attr('checked');
-        assert(state === 'checked');
-        $checkbox.tick();
-        assert($checkbox.attr('checked') === state);
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = '?check1=1&check2=&check3=&check4%5B%5D=';
-          assert($.documentInfo().url === helper.url('~info') + param);
-          var h = res.headers;
-          assert(h['request-url'] === '/~info' + param);
-          assert(h['request-method'] === 'GET');
-          assert(! h['post-data']);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+describe('cheerio:tick', () => {
+  describe('input[type=checkbox]要素', () => {
+    test('input[type=checkbox]要素以外 => 例外発生', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          expect(() => $('input[type=text]').eq(0).tick()).toThrow(
+            'element is not checkbox or radio'
+          );
+          resolve();
         });
       });
     });
 
-    it('未選択のcheckbox => 選択状態になる', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=checkbox]');
-        var $checkbox = $form.find('input[name=check2]');
-        var state = $checkbox.attr('checked');
-        assert(typeOf(state) === 'undefined');
-        $checkbox.tick();
-        assert($checkbox.attr('checked') === 'checked');
-        $form.submit(function (err, $, res, body) {
-          var param = '?check1=1&check2=2&check3=&check4%5B%5D=';
-          assert($.documentInfo().url === helper.url('~info') + param);
-          var h = res.headers;
-          assert(h['request-url'] === '/~info' + param);
-          assert(h['request-method'] === 'GET');
-          assert(! h['post-data']);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('要素数0 => 例外発生', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          expect(() => $('input[name=not_found]').tick()).toThrow('no elements');
+          resolve();
         });
       });
     });
 
-    it('複数要素 => 要素すべてが選択状態になる', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=checkbox]');
-        var $checkboxes = $form.find('input[type=checkbox]');
-        $checkboxes.tick().each(function (i) {
-          assert($(this).attr('checked') === 'checked');
-        });
-        $form.submit(function (err, $, res, body) {
-          var param = '?' + [
-            [ 'check1', 1 ],
-            [ 'check2', 2 ],
-            [ 'check3', 3 ],
-            [ 'check3', 4 ],
-            [ 'check3', 5 ],
-            [ 'check4[]', 'あいうえお' ],
-            [ 'check4[]', 'かきくけこ' ],
-            [ 'check4[]', 'さしすせそ' ]
-          ].map(function (v, i, a) {
-            return encodeURIComponent(v[0]) + '=' + encodeURIComponent(v[1]);
-          }).join('&');
-          assert($.documentInfo().url === helper.url('~info') + param);
-          var h = res.headers;
-          assert(h['request-url'] === '/~info' + param);
-          assert(h['request-method'] === 'GET');
-          assert(! h['post-data']);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
-        });
-      });
-    });
-  });
-
-  describe('input[type=radio]要素', function () {
-    it('グループが未選択 => radioを選択状態にする', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio2]:checked');
-        assert($before.length === 0);
-        assert(typeOf($before.val()) === 'undefined');
-        $form.find('input[name=radio2]').eq(0).tick();
-        var $after = $form.find('input[name=radio2]:checked');
-        assert($after.length === 1);
-        assert($after.val() === 'あいうえお');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=yyy&radio2=' + encodeURIComponent('あいうえお');
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('すでに選択済みのcheckbox => 変化なし', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=checkbox]');
+          const $checkbox = $form.find('input[name=check1]');
+          const state = $checkbox.attr('checked');
+          expect(state).toStrictEqual('checked');
+          $checkbox.tick();
+          expect($checkbox.attr('checked')).toStrictEqual(state);
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = '?check1=1&check2=&check3=&check4%5B%5D=';
+            expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}${param}`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual(`/~info${param}`);
+            expect(h['request-method']).toStrictEqual('GET');
+            expect(h['post-data']).toBeUndefined();
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
         });
       });
     });
 
-    it('すでに選択されているradio => 変化なし', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio1]:checked');
-        assert($before.length === 1);
-        assert($before.val() === 'yyy');
-        $before.tick();
-        var $after = $form.find('input[name=radio1]:checked');
-        assert($after.length === 1);
-        assert($after.val() === 'yyy');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=yyy&radio2=';
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('未選択のcheckbox => 選択状態になる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=checkbox]');
+          const $checkbox = $form.find('input[name=check2]');
+          const state = $checkbox.attr('checked');
+          expect(typeOf(state)).toStrictEqual('undefined');
+          $checkbox.tick();
+          expect($checkbox.attr('checked')).toStrictEqual('checked');
+          $form.submit((err, $, res, body) => {
+            const param = '?check1=1&check2=2&check3=&check4%5B%5D=';
+            expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}${param}`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual(`/~info${param}`);
+            expect(h['request-method']).toStrictEqual('GET');
+            expect(h['post-data']).toBeUndefined();
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
         });
       });
     });
 
-    it('グループ内ですでに選択されている別のradioがある => その選択状態を解除して指定されたradioを選択状態にする', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio1]:checked');
-        assert($before.length === 1);
-        assert($before.val() === 'yyy');
-        $before.next().tick();
-        var $after = $form.find('input[name=radio1]:checked');
-        assert($after.length === 1);
-        assert($after.val() === 'zzz');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=zzz&radio2=';
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
-        });
-      });
-    });
-
-    it('複数要素 => 先頭の要素のみが選択状態になる', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio1]:checked');
-        assert($before.length === 1);
-        assert($before.val() === 'yyy');
-        $form.find('input[name=radio1]').tick();
-        var $after = $form.find('input[name=radio1]:checked');
-        assert($after.length === 1);
-        assert($after.val() === 'xxx');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=xxx&radio2=';
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('複数要素 => 要素すべてが選択状態になる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=checkbox]');
+          const $checkboxes = $form.find('input[type=checkbox]');
+          $checkboxes.tick().each((i, el) => {
+            expect($(el).attr('checked')).toStrictEqual('checked');
+          });
+          $form.submit((err, $, res, body) => {
+            const param = `?${[
+              ['check1', 1],
+              ['check2', 2],
+              ['check3', 3],
+              ['check3', 4],
+              ['check3', 5],
+              ['check4[]', 'あいうえお'],
+              ['check4[]', 'かきくけこ'],
+              ['check4[]', 'さしすせそ']
+            ]
+              .map((v) => `${encodeURIComponent(v[0])}=${encodeURIComponent(v[1])}`)
+              .join('&')}`;
+            expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}${param}`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual(`/~info${param}`);
+            expect(h['request-method']).toStrictEqual('GET');
+            expect(h['post-data']).toBeUndefined();
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
         });
       });
     });
   });
 
-  describe('input[type=checkbox]要素とinput[type=radio]要素の複合', function () {
-    it('checkboxとradioが混在した複数要素 => checkboxは指定した全要素を選択、radioは先頭の要素のみが選択状態になる', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=default-jp]');
-        $form.find('input[type=checkbox],input[type=radio]').tick();
-        assert($form.find('input[type=checkbox]:checked').length === $form.find('input[type=checkbox]').length);
-        var $radio = $form.find('input[type=radio]:checked');
-        assert($radio.length === 1);
-        assert($radio.val() === 'たちつてと');
-        $form.find('textarea').val('やゆよ');
-        $form.submit(function (err, $, res, body) {
-          var qp = helper.qsparse(res.headers['post-data']);
-          assert.deepEqual(Object.keys(qp).sort(), [
-            'checkbox', 'radio', 'select', 'text', 'textarea'
-          ]);
-          assert(qp.text === encodeURIComponent('あいうえお'));
-          assert.deepEqual(qp.checkbox, [
-            encodeURIComponent('かきくけこ'),
-            encodeURIComponent('さしすせそ')
-          ]);
-          assert(qp.radio === encodeURIComponent('たちつてと'));
-          assert.deepEqual(qp.select, [
-            encodeURIComponent('ふふふふふ'),
-            encodeURIComponent('ほほほほほ')
-          ]);
-          assert(qp.textarea === encodeURIComponent('やゆよ'));
-          done();
+  describe('input[type=radio]要素', () => {
+    test('グループが未選択 => radioを選択状態にする', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio2]:checked');
+          expect($before.length).toStrictEqual(0);
+          expect(typeOf($before.val())).toStrictEqual('undefined');
+          $form.find('input[name=radio2]').eq(0).tick();
+          const $after = $form.find('input[name=radio2]:checked');
+          expect($after.length).toStrictEqual(1);
+          expect($after.val()).toStrictEqual('あいうえお');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = `radio1=yyy&radio2=${encodeURIComponent('あいうえお')}`;
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+
+    test('すでに選択されているradio => 変化なし', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio1]:checked');
+          expect($before.length).toStrictEqual(1);
+          expect($before.val()).toStrictEqual('yyy');
+          $before.tick();
+          const $after = $form.find('input[name=radio1]:checked');
+          expect($after.length).toStrictEqual(1);
+          expect($after.val()).toStrictEqual('yyy');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = 'radio1=yyy&radio2=';
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+
+    test('グループ内ですでに選択されている別のradioがある => その選択状態を解除して指定されたradioを選択状態にする', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio1]:checked');
+          expect($before.length).toStrictEqual(1);
+          expect($before.val()).toStrictEqual('yyy');
+          $before.next().tick();
+          const $after = $form.find('input[name=radio1]:checked');
+          expect($after.length).toStrictEqual(1);
+          expect($after.val()).toStrictEqual('zzz');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = 'radio1=zzz&radio2=';
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+
+    test('複数要素 => 先頭の要素のみが選択状態になる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio1]:checked');
+          expect($before.length).toStrictEqual(1);
+          expect($before.val()).toStrictEqual('yyy');
+          $form.find('input[name=radio1]').tick();
+          const $after = $form.find('input[name=radio1]:checked');
+          expect($after.length).toStrictEqual(1);
+          expect($after.val()).toStrictEqual('xxx');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = 'radio1=xxx&radio2=';
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+  });
+
+  describe('input[type=checkbox]要素とinput[type=radio]要素の複合', () => {
+    test('checkboxとradioが混在した複数要素 => checkboxは指定した全要素を選択、radioは先頭の要素のみが選択状態になる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=default-jp]');
+          $form.find('input[type=checkbox],input[type=radio]').tick();
+          expect($form.find('input[type=checkbox]:checked').length).toStrictEqual(
+            $form.find('input[type=checkbox]').length
+          );
+          const $radio = $form.find('input[type=radio]:checked');
+          expect($radio.length).toStrictEqual(1);
+          expect($radio.val()).toStrictEqual('たちつてと');
+          $form.find('textarea').val('やゆよ');
+          $form.submit((err, $, res, body) => {
+            const qp = helper.qsparse(res.headers['post-data']);
+            expect(Object.keys(qp).sort()).toStrictEqual([
+              'checkbox',
+              'radio',
+              'select',
+              'text',
+              'textarea'
+            ]);
+            expect(qp.text).toStrictEqual(encodeURIComponent('あいうえお'));
+            expect(qp.checkbox).toStrictEqual([
+              encodeURIComponent('かきくけこ'),
+              encodeURIComponent('さしすせそ')
+            ]);
+            expect(qp.radio).toStrictEqual(encodeURIComponent('たちつてと'));
+            expect(qp.select).toStrictEqual([
+              encodeURIComponent('ふふふふふ'),
+              encodeURIComponent('ほほほほほ')
+            ]);
+            expect(qp.textarea).toStrictEqual(encodeURIComponent('やゆよ'));
+            resolve();
+          });
         });
       });
     });
   });
 });
 
-describe('cheerio:untick', function () {
-  describe('input[type=checkbox]要素', function () {
-    it('input[type=checkbox]要素以外 => 例外発生', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        try {
-          $('input[type=text]').eq(0).untick();
-          throw new Error('not thrown');
-        } catch (e) {
-          assert(e.message === 'element is not checkbox or radio');
-        }
-        done();
-      });
-    });
-
-    it('要素数0 => 例外発生', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        try {
-          $('input[name=not_found]').untick();
-          throw new Error('not thrown');
-        } catch (e) {
-          assert(e.message === 'no elements');
-        }
-        done();
-      });
-    });
-
-    it('未選択状態のcheckbox => 変化なし', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=checkbox]');
-        var $checkbox = $form.find('input[name=check2]');
-        var state = $checkbox.attr('checked');
-        assert(typeOf(state) === 'undefined');
-        $checkbox.untick();
-        assert($checkbox.attr('checked') === state);
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = '?check1=1&check2=&check3=&check4%5B%5D=';
-          assert($.documentInfo().url === helper.url('~info') + param);
-          var h = res.headers;
-          assert(h['request-url'] === '/~info' + param);
-          assert(h['request-method'] === 'GET');
-          assert(! h['post-data']);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+describe('cheerio:untick', () => {
+  describe('input[type=checkbox]要素', () => {
+    test('input[type=checkbox]要素以外 => 例外発生', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          expect(() => $('input[type=text]').eq(0).untick()).toThrow(
+            'element is not checkbox or radio'
+          );
+          resolve();
         });
       });
     });
 
-    it('選択状態のcheckbox => 未選択状態になる', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=checkbox]');
-        var $checkbox = $form.find('input[name=check1]');
-        var state = $checkbox.attr('checked');
-        assert(state === 'checked');
-        $checkbox.untick();
-        assert(typeOf($checkbox.attr('checked')) === 'undefined');
-        $form.submit(function (err, $, res, body) {
-          var param = '?check1=&check2=&check3=&check4%5B%5D=';
-          assert($.documentInfo().url === helper.url('~info') + param);
-          var h = res.headers;
-          assert(h['request-url'] === '/~info' + param);
-          assert(h['request-method'] === 'GET');
-          assert(! h['post-data']);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('要素数0 => 例外発生', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          expect(() => $('input[name=not_found]').untick()).toThrow('no elements');
+          resolve();
         });
       });
     });
 
-    it('複数要素 => 要素すべてが未選択状態になる', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=checkbox]');
-        var $checkboxes = $form.find('input[type=checkbox]');
-        $checkboxes.untick().each(function (i) {
-          assert(typeOf($(this).attr('checked')) === 'undefined');
-        });
-        $form.submit(function (err, $, res, body) {
-          var param = '?check1=&check2=&check3=&check4%5B%5D=';
-          assert($.documentInfo().url === helper.url('~info') + param);
-          var h = res.headers;
-          assert(h['request-url'] === '/~info' + param);
-          assert(h['request-method'] === 'GET');
-          assert(! h['post-data']);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
-        });
-      });
-    });
-  });
-
-  describe('input[type=radio]要素', function () {
-    it('グループが未選択状態 => 変化なし', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio2]:checked');
-        assert($before.length === 0);
-        assert(typeOf($before.val()) === 'undefined');
-        $form.find('input[name=radio2]').eq(0).untick();
-        var $after = $form.find('input[name=radio2]:checked');
-        assert($after.length === 0);
-        assert(typeOf($after.val()) === 'undefined');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=yyy&radio2=';
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('未選択状態のcheckbox => 変化なし', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=checkbox]');
+          const $checkbox = $form.find('input[name=check2]');
+          const state = $checkbox.attr('checked');
+          expect(typeOf(state)).toStrictEqual('undefined');
+          $checkbox.untick();
+          expect($checkbox.attr('checked')).toStrictEqual(state);
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = '?check1=1&check2=&check3=&check4%5B%5D=';
+            expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}${param}`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual(`/~info${param}`);
+            expect(h['request-method']).toStrictEqual('GET');
+            expect(h['post-data']).toBeUndefined();
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
         });
       });
     });
 
-    it('選択状態のradio => 選択状態を解除する', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio1]:checked');
-        assert($before.length === 1);
-        assert($before.val() === 'yyy');
-        $before.untick();
-        var $after = $form.find('input[name=radio1]:checked');
-        assert($after.length === 0);
-        assert(typeOf($after.val()) === 'undefined');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=&radio2=';
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('選択状態のcheckbox => 未選択状態になる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=checkbox]');
+          const $checkbox = $form.find('input[name=check1]');
+          const state = $checkbox.attr('checked');
+          expect(state).toStrictEqual('checked');
+          $checkbox.untick();
+          expect(typeOf($checkbox.attr('checked'))).toStrictEqual('undefined');
+          $form.submit((err, $, res, body) => {
+            const param = '?check1=&check2=&check3=&check4%5B%5D=';
+            expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}${param}`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual(`/~info${param}`);
+            expect(h['request-method']).toStrictEqual('GET');
+            expect(h['post-data']).toBeUndefined();
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
         });
       });
     });
 
-    it('未選択状態のradio => 変化なし(選択状態のradioもそのまま)', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio1]:checked');
-        assert($before.length === 1);
-        assert($before.val() === 'yyy');
-        $before.prev().untick();
-        var $after = $form.find('input[name=radio1]:checked');
-        assert($after.length === 1);
-        assert($before.val() === 'yyy');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=yyy&radio2=';
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
-        });
-      });
-    });
-
-    it('複数要素 => 要素すべてが未選択状態になる', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=radio]');
-        var $before = $form.find('input[name=radio1]:checked');
-        assert($before.length === 1);
-        assert($before.val() === 'yyy');
-        $form.find('input[name=radio1]').untick();
-        var $after = $form.find('input[name=radio1]:checked');
-        assert($after.length === 0);
-        assert(typeOf($after.val()) === 'undefined');
-        $form.find('input[type=submit]').click(function (err, $, res, body) {
-          var param = 'radio1=&radio2=';
-          assert($.documentInfo().url === helper.url('~info'));
-          var h = res.headers;
-          assert(h['request-url'] === '/~info');
-          assert(h['request-method'] === 'POST');
-          assert(h['post-data'] === param);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+    test('複数要素 => 要素すべてが未選択状態になる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=checkbox]');
+          const $checkboxes = $form.find('input[type=checkbox]');
+          $checkboxes.untick().each((i) => {
+            expect(typeOf($(this).attr('checked'))).toStrictEqual('undefined');
+          });
+          $form.submit((err, $, res, body) => {
+            const param = '?check1=&check2=&check3=&check4%5B%5D=';
+            expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}${param}`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual(`/~info${param}`);
+            expect(h['request-method']).toStrictEqual('GET');
+            expect(h['post-data']).toBeUndefined();
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
         });
       });
     });
   });
 
-  describe('input[type=checkbox]要素とinput[type=radio]要素の複合', function () {
-    it('checkboxとradioが混在した複数要素 => checkboxもradioも指定した全要素の選択状態が解除される', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=default-jp]');
-        $form.find('input[type=checkbox],input[type=radio]').untick();
-        assert($form.find('input[type=checkbox]:checked').length === 0);
-        assert($form.find('input[type=radio]:checked').length === 0);
-        $form.find('select').val('ふふふふふ');
-        $form.submit(function (err, $, res, body) {
-          var qp = helper.qsparse(res.headers['post-data']);
-          assert.deepEqual(Object.keys(qp).sort(), [
-            'checkbox', 'radio', 'select', 'text', 'textarea'
-          ]);
-          assert(qp.text === encodeURIComponent('あいうえお'));
-          assert(qp.checkbox === '');
-          assert(qp.radio === '');
-          assert(qp.select === encodeURIComponent('ふふふふふ'));
-          assert(qp.textarea === encodeURIComponent('まみむめも'));
-          done();
+  describe('input[type=radio]要素', () => {
+    test('グループが未選択状態 => 変化なし', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio2]:checked');
+          expect($before.length).toStrictEqual(0);
+          expect(typeOf($before.val())).toStrictEqual('undefined');
+          $form.find('input[name=radio2]').eq(0).untick();
+          const $after = $form.find('input[name=radio2]:checked');
+          expect($after.length).toStrictEqual(0);
+          expect(typeOf($after.val())).toStrictEqual('undefined');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = 'radio1=yyy&radio2=';
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+
+    test('選択状態のradio => 選択状態を解除する', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio1]:checked');
+          expect($before.length).toStrictEqual(1);
+          expect($before.val()).toStrictEqual('yyy');
+          $before.untick();
+          const $after = $form.find('input[name=radio1]:checked');
+          expect($after.length).toStrictEqual(0);
+          expect(typeOf($after.val())).toStrictEqual('undefined');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = 'radio1=&radio2=';
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+
+    test('未選択状態のradio => 変化なし(選択状態のradioもそのまま)', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio1]:checked');
+          expect($before.length).toStrictEqual(1);
+          expect($before.val()).toStrictEqual('yyy');
+          $before.prev().untick();
+          const $after = $form.find('input[name=radio1]:checked');
+          expect($after.length).toStrictEqual(1);
+          expect($before.val()).toStrictEqual('yyy');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = 'radio1=yyy&radio2=';
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+
+    test('複数要素 => 要素すべてが未選択状態になる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=radio]');
+          const $before = $form.find('input[name=radio1]:checked');
+          expect($before.length).toStrictEqual(1);
+          expect($before.val()).toStrictEqual('yyy');
+          $form.find('input[name=radio1]').untick();
+          const $after = $form.find('input[name=radio1]:checked');
+          expect($after.length).toStrictEqual(0);
+          expect(typeOf($after.val())).toStrictEqual('undefined');
+          $form.find('input[type=submit]').click((err, $, res, body) => {
+            const param = 'radio1=&radio2=';
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual(param);
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+  });
+
+  describe('input[type=checkbox]要素とinput[type=radio]要素の複合', () => {
+    test('checkboxとradioが混在した複数要素 => checkboxもradioも指定した全要素の選択状態が解除される', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=default-jp]');
+          $form.find('input[type=checkbox],input[type=radio]').untick();
+          expect($form.find('input[type=checkbox]:checked').length).toStrictEqual(0);
+          expect($form.find('input[type=radio]:checked').length).toStrictEqual(0);
+          $form.find('select').val('ふふふふふ');
+          $form.submit((err, $, res, body) => {
+            const qp = helper.qsparse(res.headers['post-data']);
+            expect(Object.keys(qp).sort()).toStrictEqual([
+              'checkbox',
+              'radio',
+              'select',
+              'text',
+              'textarea'
+            ]);
+            expect(qp.text).toStrictEqual(encodeURIComponent('あいうえお'));
+            expect(qp.checkbox).toStrictEqual('');
+            expect(qp.radio).toStrictEqual('');
+            expect(qp.select).toStrictEqual(encodeURIComponent('ふふふふふ'));
+            expect(qp.textarea).toStrictEqual(encodeURIComponent('まみむめも'));
+            resolve();
+          });
         });
       });
     });

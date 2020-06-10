@@ -1,0 +1,17 @@
+{
+  "printWidth": 100,
+  "parser": "flow",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "bracketSpacing": true,
+  "jsxBracketSameLine": true,
+  "arrowParens": "always",
+  "overrides": [{
+    "files": "*.ts",
+    "options": {
+      "parser": "typescript"
+    }
+  }]
+}

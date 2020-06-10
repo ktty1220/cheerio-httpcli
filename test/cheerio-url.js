@@ -1,524 +1,574 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0, no-undefined:0*/
-var assert = require('power-assert');
-var typeOf = require('type-of');
-var each   = require('foreach');
-var helper = require('./_helper');
-var cli    = require('../index');
+const typeOf = require('type-of');
+const each = require('foreach');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('cheerio:url', function () {
-  describe('対応していない要素 => エラー', function () {
-    each([
-      'html',
-      'body',
-      'div',
-      'form',
-      'textarea',
-      'input[type=reset]',
-      'input[type=checkbox]',
-      'input[type=radio]',
-      'select'
-    ], function (elem) {
-      it(elem, function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          try {
-            $(elem).eq(0).url();
-            throw new Error('not thrown');
-          } catch (e) {
-            assert(e.message === 'element is not link, img, script or link');
-          }
-          done();
+describe('cheerio:url', () => {
+  describe('対応していない要素 => エラー', () => {
+    each(
+      [
+        'html',
+        'body',
+        'div',
+        'form',
+        'textarea',
+        'input[type=reset]',
+        'input[type=checkbox]',
+        'input[type=radio]',
+        'select'
+      ],
+      (elem) => {
+        test(elem, () => {
+          return new Promise((resolve) => {
+            cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+              expect(() => $(elem).eq(0).url()).toThrow('element is not link, img, script or link');
+              resolve();
+            });
+          });
+        });
+      }
+    );
+  });
+
+  describe('要素数0 => []を返す', () => {
+    each(['header', 'p', 'span', 'input[type=button]'], (elem) => {
+      test(elem, () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const actual = $(elem).eq(0).url();
+            expect(typeOf(actual)).toStrictEqual('array');
+            expect(actual.length).toStrictEqual(0);
+            resolve();
+          });
         });
       });
     });
   });
 
-  describe('要素数0 => []を返す', function () {
-    each([
-      'header',
-      'p',
-      'span',
-      'input[type=button]'
-    ], function (elem) {
-      it(elem, function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var actual = $(elem).eq(0).url();
-          assert(typeOf(actual) === 'array');
-          assert(actual.length === 0);
-          done();
+  test('相対パスリンク => 現在のページを基準にした絶対URLを返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('.rel').eq(0).url();
+        expect(actual).toStrictEqual(`${endpoint}/auto/euc-jp.html`);
+        resolve();
+      });
+    });
+  });
+
+  test('外部URLリンク => URLをそのまま返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('.external').url();
+        expect(actual).toStrictEqual('http://www.yahoo.co.jp/');
+        resolve();
+      });
+    });
+  });
+
+  test('ルートからの絶対パスリンク => ドキュメントルートを基準にした絶対URLを返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('.root').url();
+        expect(actual).toStrictEqual(`${`${endpoint}/~info`}?hoge=fuga&piyo=`);
+        resolve();
+      });
+    });
+  });
+
+  test('javascriptリンク => そのまま返す(javascript:...)', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('.js').url();
+        expect(actual).toStrictEqual('javascript:history.back();');
+        resolve();
+      });
+    });
+  });
+
+  test('ハッシュリンク => 現在のページのURLの末尾にハッシュを追加して返す', () => {
+    return new Promise((resolve) => {
+      const url = `${endpoint}/form/utf-8.html`;
+      cli.fetch(url, (err, $, res, body) => {
+        const actual = $('.hash').url();
+        expect(actual).toStrictEqual(`${url}#hoge`);
+        resolve();
+      });
+    });
+  });
+
+  test('複数のa要素 => 絶対URLの配列を返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const expcted = [
+          `${endpoint}/auto/euc-jp.html`,
+          `${endpoint}/auto/euc-jp.html`,
+          `${endpoint}/auto/euc-jp.html`,
+          undefined,
+          '',
+          `${endpoint}/~info?hoge=fuga&piyo=`,
+          'http://www.yahoo.co.jp/',
+          'javascript:history.back();',
+          `${`${endpoint}/form/utf-8.html`}#hoge`,
+          `${endpoint}/form/xxx.html`
+        ];
+        const actual = $('a').url();
+        expect(actual).toStrictEqual(expcted);
+        resolve();
+      });
+    });
+  });
+
+  test('hrefが指定されていないa要素 => undefinedを返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('.undef').url();
+        expect(typeOf(actual)).toStrictEqual('undefined');
+        resolve();
+      });
+    });
+  });
+
+  test('hrefが空のa要素 => 空文字を返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('.empty').url();
+        expect(actual).toStrictEqual('');
+        resolve();
+      });
+    });
+  });
+
+  each([0, 1, 2], (idx) => {
+    test(`生のa要素 => 絶対URLを取得できる(${idx}番目)`, () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const actual = $($('.rel')[idx]).url();
+          expect(actual).toStrictEqual(`${endpoint}/auto/euc-jp.html`);
+          resolve();
         });
       });
     });
   });
 
-  it('相対パスリンク => 現在のページを基準にした絶対URLを返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('.rel').eq(0).url();
-      assert(actual === helper.url('auto', 'euc-jp'));
-      done();
-    });
-  });
-
-  it('外部URLリンク => URLをそのまま返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('.external').url();
-      assert(actual === 'http://www.yahoo.co.jp/');
-      done();
-    });
-  });
-
-  it('ルートからの絶対パスリンク => ドキュメントルートを基準にした絶対URLを返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('.root').url();
-      assert(actual === helper.url('~info') + '?hoge=fuga&piyo=');
-      done();
-    });
-  });
-
-  it('javascriptリンク => そのまま返す(javascript:...)', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('.js').url();
-      assert(actual === 'javascript:history.back();');
-      done();
-    });
-  });
-
-  it('ハッシュリンク => 現在のページのURLの末尾にハッシュを追加して返す', function (done) {
-    var url = helper.url('form', 'utf-8');
-    cli.fetch(url, function (err, $, res, body) {
-      var actual = $('.hash').url();
-      assert(actual === url + '#hoge');
-      done();
-    });
-  });
-
-  it('複数のa要素 => 絶対URLの配列を返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var expcted = [
-        helper.url('auto', 'euc-jp'),
-        helper.url('auto', 'euc-jp'),
-        helper.url('auto', 'euc-jp'),
-        undefined,
-        '',
-        helper.url('~info?hoge=fuga&piyo='),
-        'http://www.yahoo.co.jp/',
-        'javascript:history.back();',
-        helper.url('form', 'utf-8') + '#hoge',
-        helper.url('form', 'xxx')
-      ];
-      var actual = $('a').url();
-      assert.deepEqual(actual, expcted);
-      done();
-    });
-  });
-
-  it('hrefが指定されていないa要素 => undefinedを返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('.undef').url();
-      assert(typeOf(actual) === 'undefined');
-      done();
-    });
-  });
-
-  it('hrefが空のa要素 => 空文字を返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('.empty').url();
-      assert(actual === '');
-      done();
-    });
-  });
-
-  each([ 0, 1, 2 ], function (idx) {
-    it('生のa要素 => 絶対URLを取得できる(' + idx + '番目)', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var actual = $($('.rel')[idx]).url();
-        assert(actual === helper.url('auto', 'euc-jp'));
-        done();
+  test('無から作成したa要素(jQuery形式) => 絶対URLを取得できる', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('<a/>').attr('href', '../auto/shift_jis.html').url();
+        expect(actual).toStrictEqual(`${endpoint}/auto/shift_jis.html`);
+        resolve();
       });
     });
   });
 
-  it('無から作成したa要素(jQuery形式) => 絶対URLを取得できる', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('<a/>').attr('href', '../auto/shift_jis.html').url();
-      assert(actual === helper.url('auto', 'shift_jis'));
-      done();
+  test('無から作成したa要素(HTML形式) => 絶対URLを取得できる', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const actual = $('<a href="/top.php?login=1">link</a>').url();
+        expect(actual).toStrictEqual(`${endpoint}/top.php?login=1`);
+        resolve();
+      });
     });
   });
 
-  it('無から作成したa要素(HTML形式) => 絶対URLを取得できる', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var actual = $('<a href="/top.php?login=1">link</a>').url();
-      assert(actual === helper.url('top.php?login=1'));
-      done();
-    });
-  });
-
-  describe('filterオプション', function () {
-    describe('absolute: false => 絶対URLリンクは除外される', function () {
-      it('単一要素 => undefined', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var actual = $('.external').url({ absolute: false });
-          assert(typeOf(actual) === 'undefined');
-          done();
+  describe('filterオプション', () => {
+    describe('absolute: false => 絶対URLリンクは除外される', () => {
+      test('単一要素 => undefined', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const actual = $('.external').url({ absolute: false });
+            expect(typeOf(actual)).toStrictEqual('undefined');
+            resolve();
+          });
         });
       });
 
-      it('複数要素 => 絶対URLリンクを除外したURL配列を返す', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var expcted = [
-            helper.url('auto', 'euc-jp'),
-            helper.url('auto', 'euc-jp'),
-            helper.url('auto', 'euc-jp'),
+      test('複数要素 => 絶対URLリンクを除外したURL配列を返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const expcted = [
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/auto/euc-jp.html`,
+              undefined,
+              '',
+              `${endpoint}/~info?hoge=fuga&piyo=`,
+              'javascript:history.back();',
+              `${endpoint}/form/utf-8.html#hoge`,
+              `${endpoint}/form/xxx.html`
+            ];
+            const actual = $('a').url({ absolute: false });
+            expect(actual).toStrictEqual(expcted);
+            resolve();
+          });
+        });
+      });
+    });
+
+    describe('relative: false => 相対URLリンクは除外される', () => {
+      test('単一要素 => undefined', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const actual = $('.rel').eq(0).url({ relative: false });
+            expect(typeOf(actual)).toStrictEqual('undefined');
+            resolve();
+          });
+        });
+      });
+
+      test('複数要素 => 相対URLリンクを除外したURL配列を返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const expcted = [
+              undefined,
+              '',
+              'http://www.yahoo.co.jp/',
+              'javascript:history.back();'
+            ];
+            const actual = $('a').url({ relative: false });
+            expect(actual).toStrictEqual(expcted);
+            resolve();
+          });
+        });
+      });
+    });
+
+    describe('invalid: false => URLでないものは除外される', () => {
+      test('単一要素(hrefなし) => undefined', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const actual = $('.undef').url({ invalid: false });
+            expect(typeOf(actual)).toStrictEqual('undefined');
+            resolve();
+          });
+        });
+      });
+
+      test('単一要素(空) => undefined', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const actual = $('.empty').url({ invalid: false });
+            expect(typeOf(actual)).toStrictEqual('undefined');
+            resolve();
+          });
+        });
+      });
+
+      test('単一要素(javascript) => undefined', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const actual = $('.js').url({ invalid: false });
+            expect(typeOf(actual)).toStrictEqual('undefined');
+            resolve();
+          });
+        });
+      });
+
+      test('複数要素 => URLでないものを除外したURL配列を返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const expcted = [
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/~info?hoge=fuga&piyo=`,
+              'http://www.yahoo.co.jp/',
+              `${`${endpoint}/form/utf-8.html`}#hoge`,
+              `${endpoint}/form/xxx.html`
+            ];
+            const actual = $('a').url({ invalid: false });
+            expect(actual).toStrictEqual(expcted);
+            resolve();
+          });
+        });
+      });
+    });
+
+    describe('複合 => それぞれのfilterが組み合わせる', () => {
+      test('absolute: false & relative: false => URLでないもののみ返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const expcted = [undefined, '', 'javascript:history.back();'];
+            const actual = $('a').url({
+              absolute: false,
+              relative: false
+            });
+            expect(actual).toStrictEqual(expcted);
+            resolve();
+          });
+        });
+      });
+
+      test('absolute: false & invalid: false => 相対URLのみ返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const expcted = [
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/auto/euc-jp.html`,
+              `${endpoint}/~info?hoge=fuga&piyo=`,
+              `${endpoint}/form/utf-8.html#hoge`,
+              `${endpoint}/form/xxx.html`
+            ];
+            const actual = $('a').url({
+              absolute: false,
+              invalid: false
+            });
+            expect(actual).toStrictEqual(expcted);
+            resolve();
+          });
+        });
+      });
+
+      test('relative: false & invalid: false => 絶対URLのみ返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+            const expcted = ['http://www.yahoo.co.jp/'];
+            const actual = $('a').url({
+              relative: false,
+              invalid: false
+            });
+            expect(actual).toStrictEqual(expcted);
+            resolve();
+          });
+        });
+      });
+    });
+  });
+
+  describe('img要素', () => {
+    const base64img = helper.toBase64('img/img/sports.jpg');
+
+    test('単一要素 => srcに指定したURLを絶対URLにして返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+          const expected = `${endpoint}/img/img/cat.html`.replace(/\.html/, '.png');
+          const actual = $('.rel').url();
+          expect(actual).toStrictEqual(expected);
+          resolve();
+        });
+      });
+    });
+
+    test('複数要素 => 各要素のsrcのURLを絶対URLにした配列を返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+          const base = `${endpoint}/img`;
+          const expected = [
+            `${base}/img/cat.png`,
+            `${base}/~mega`,
+            `${base}/img/1x1.gif`,
+            `${base}/img/1x1.gif`,
+            `${base}/img/1x1.gif`,
             undefined,
             '',
-            helper.url('~info?hoge=fuga&piyo='),
-            'javascript:history.back();',
-            helper.url('form', 'utf-8') + '#hoge',
-            helper.url('form', 'xxx')
+            `${base}/img/food.jpg?hoge=fuga&piyo=`,
+            'http://www.yahoo.co.jp/favicon.ico',
+            'javascript:getPicture();',
+            `${base}/not-found.gif`,
+            `data:image/jpg;base64,${base64img}`
           ];
-          var actual = $('a').url({ absolute: false });
-          assert.deepEqual(actual, expcted);
-          done();
+          const actual = $('img').url([]);
+          expect(actual).toStrictEqual(expected);
+          resolve();
         });
       });
     });
 
-    describe('relative: false => 相対URLリンクは除外される', function () {
-      it('単一要素 => undefined', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var actual = $('.rel').eq(0).url({ relative: false });
-          assert(typeOf(actual) === 'undefined');
-          done();
+    test('Base64はURLでないものとして扱われる', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+          const actual = $('.base64').url({ invalid: false });
+          expect(typeOf(actual)).toStrictEqual('undefined');
+          resolve();
+        });
+      });
+    });
+
+    describe('srcAttrs', () => {
+      test('無指定 => デフォルトの優先順で属性を検索する', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+            const base = `${endpoint}/img`;
+            expect($('.lazy1').url()).toStrictEqual(`${base}/img/cat.png`);
+            expect($('.lazy2').url()).toStrictEqual(`${base}/img/food.jpg`);
+            expect($('.lazy3').url()).toStrictEqual(`${base}/img/1x1.gif`);
+            resolve();
+          });
         });
       });
 
-      it('複数要素 => 相対URLリンクを除外したURL配列を返す', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var expcted = [
+      test('文字列 => 指定した文字列属性をsrcよりも優先して検索する', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+            const base = `${endpoint}/img`;
+            const attr = 'data-original-src';
+            expect($('.lazy1').url(attr)).toStrictEqual(`${base}/img/1x1.gif`);
+            expect($('.lazy2').url(attr)).toStrictEqual(`${base}/img/1x1.gif`);
+            expect($('.lazy3').url(attr)).toStrictEqual(`${base}/img/sports.jpg`);
+            resolve();
+          });
+        });
+      });
+
+      test('配列 => 指定した配列順で検索する', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+            const base = `${endpoint}/img`;
+            const attr = ['data-original-src', 'data-original', 'data-lazy-src'];
+            expect($('.lazy1').url(attr)).toStrictEqual(`${base}/img/cat.png`);
+            expect($('.lazy2').url(attr)).toStrictEqual(`${base}/img/food.jpg`);
+            expect($('.lazy3').url(attr)).toStrictEqual(`${base}/img/sports.jpg`);
+            resolve();
+          });
+        });
+      });
+
+      test('存在しない属性 => srcのURLを絶対URLにして返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+            const base = `${endpoint}/img`;
+            const attr = ['data-foo-bar'];
+            expect($('.lazy1').url(attr)).toStrictEqual(`${base}/img/1x1.gif`);
+            expect($('.lazy2').url(attr)).toStrictEqual(`${base}/img/1x1.gif`);
+            expect($('.lazy3').url(attr)).toStrictEqual(`${base}/img/1x1.gif`);
+            resolve();
+          });
+        });
+      });
+
+      test('空配列 => srcのURLを絶対URLにして返す', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+            const base = `${endpoint}/img`;
+            expect($('.lazy1').url([])).toStrictEqual(`${base}/img/1x1.gif`);
+            expect($('.lazy2').url([])).toStrictEqual(`${base}/img/1x1.gif`);
+            expect($('.lazy3').url([])).toStrictEqual(`${base}/img/1x1.gif`);
+            resolve();
+          });
+        });
+      });
+    });
+  });
+
+  describe('a要素とimg要素の複合', () => {
+    const base64img = helper.toBase64('img/img/sports.jpg');
+
+    test('各要素のhref/srcのURLを絶対URLにした配列を返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+          const base = `${endpoint}/img`;
+          const expected = [
+            `${base}/img/cat.png`,
+            `${base}/~mega`,
+            `${base}/img/1x1.gif`,
+            `${base}/img/1x1.gif`,
+            `${base}/img/1x1.gif`,
             undefined,
             '',
-            'http://www.yahoo.co.jp/',
-            'javascript:history.back();'
+            `${base}/img/food.jpg?hoge=fuga&piyo=`,
+            'http://www.yahoo.co.jp/favicon.ico',
+            'javascript:getPicture();',
+            `${base}/not-found.gif`,
+            `data:image/jpg;base64,${base64img}`,
+            'http://www.google.co.jp/',
+            `${endpoint}/~info?foo=1&bar=2&baz=3`,
+            `${endpoint}/img/file/foobarbaz.zip`,
+            `${endpoint}/img/file/foobarbaz.txt`
           ];
-          var actual = $('a').url({ relative: false });
-          assert.deepEqual(actual, expcted);
-          done();
+          const actual = $('img, a').url([]);
+          expect(actual).toStrictEqual(expected);
+          resolve();
         });
       });
     });
 
-    describe('invalid: false => URLでないものは除外される', function () {
-      it('単一要素(hrefなし) => undefined', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var actual = $('.undef').url({ invalid: false });
-          assert(typeOf(actual) === 'undefined');
-          done();
+    test('filterオプション(外部リンクのみ取得)', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/img/index.html`, (err, $, res, body) => {
+          const expected = ['http://www.yahoo.co.jp/favicon.ico', 'http://www.google.co.jp/'];
+          const actual = $('img, a').url({ relative: false, invalid: false });
+          expect(actual).toStrictEqual(expected);
+          resolve();
         });
       });
+    });
+  });
 
-      it('単一要素(空) => undefined', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var actual = $('.empty').url({ invalid: false });
-          assert(typeOf(actual) === 'undefined');
-          done();
-        });
-      });
-
-      it('単一要素(javascript) => undefined', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var actual = $('.js').url({ invalid: false });
-          assert(typeOf(actual) === 'undefined');
-          done();
-        });
-      });
-
-      it('複数要素 => URLでないものを除外したURL配列を返す', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var expcted = [
-            helper.url('auto', 'euc-jp'),
-            helper.url('auto', 'euc-jp'),
-            helper.url('auto', 'euc-jp'),
-            helper.url('~info?hoge=fuga&piyo='),
-            'http://www.yahoo.co.jp/',
-            helper.url('form', 'utf-8') + '#hoge',
-            helper.url('form', 'xxx')
-          ];
-          var actual = $('a').url({ invalid: false });
-          assert.deepEqual(actual, expcted);
-          done();
+  describe('script要素', () => {
+    test('単一要素 => srcに指定したURLを絶対URLにして返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/script/index.html`, (err, $, res, body) => {
+          const expected = `${endpoint}/script/js/cat.html`.replace(/\.html/, '.js');
+          const actual = $('.rel').url();
+          expect(actual).toStrictEqual(expected);
+          resolve();
         });
       });
     });
 
-    describe('複合 => それぞれのfilterが組み合わせる', function () {
-      it('absolute: false & relative: false => URLでないもののみ返す', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var expcted = [
+    test('単一のインラインでJavaScriptが書かれているscript要素 => srcには何も指定がないのでundefinedで返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/script/index.html`, (err, $, res, body) => {
+          const actual = $('.inline').url();
+          expect(typeOf(actual)).toStrictEqual('undefined');
+          resolve();
+        });
+      });
+    });
+
+    test('複数要素 => 各要素のsrcのURLを絶対URLにした配列を返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/script/index.html`, (err, $, res, body) => {
+          const base = `${endpoint}/script`;
+          const expected = [
+            `${base}/js/cat.js`,
             undefined,
             '',
-            'javascript:history.back();'
+            `${base}/js/food.js?hoge=fuga&piyo=`,
+            'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js',
+            `${base}/not-found.js`,
+            undefined,
+            `${base}/js/dog.js`
           ];
-          var actual = $('a').url({
-            absolute: false,
-            relative: false
-          });
-          assert.deepEqual(actual, expcted);
-          done();
-        });
-      });
-
-      it('absolute: false & invalid: false => 相対URLのみ返す', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var expcted = [
-            helper.url('auto', 'euc-jp'),
-            helper.url('auto', 'euc-jp'),
-            helper.url('auto', 'euc-jp'),
-            helper.url('~info?hoge=fuga&piyo='),
-            helper.url('form', 'utf-8') + '#hoge',
-            helper.url('form', 'xxx')
-          ];
-          var actual = $('a').url({
-            absolute: false,
-            invalid: false
-          });
-          assert.deepEqual(actual, expcted);
-          done();
-        });
-      });
-
-      it('relative: false & invalid: false => 絶対URLのみ返す', function (done) {
-        cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-          var expcted = [
-            'http://www.yahoo.co.jp/'
-          ];
-          var actual = $('a').url({
-            relative: false,
-            invalid: false
-          });
-          assert.deepEqual(actual, expcted);
-          done();
+          const actual = $('script').url([]);
+          expect(actual).toStrictEqual(expected);
+          resolve();
         });
       });
     });
   });
 
-  describe('img要素', function () {
-    before(function () {
-      this.base64img = helper.toBase64('fixtures/img/img/sports.jpg');
-    });
-
-    it('単一要素 => srcに指定したURLを絶対URLにして返す', function (done) {
-      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-        var expected = helper.url('img', 'img/cat').replace(/\.html/, '.png');
-        var actual = $('.rel').url();
-        assert(actual === expected);
-        done();
-      });
-    });
-
-    it('複数要素 => 各要素のsrcのURLを絶対URLにした配列を返す', function (done) {
-      var _this = this;
-      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-        var base = helper.url('img');
-        var expected = [
-          base + '/img/cat.png',
-          base + '/~mega',
-          base + '/img/1x1.gif',
-          base + '/img/1x1.gif',
-          base + '/img/1x1.gif',
-          undefined,
-          '',
-          base + '/img/food.jpg?hoge=fuga&piyo=',
-          'http://www.yahoo.co.jp/favicon.ico',
-          'javascript:getPicture();',
-          base + '/not-found.gif',
-          'data:image/jpg;base64,' + _this.base64img
-        ];
-        var actual = $('img').url([]);
-        assert.deepEqual(actual, expected);
-        done();
-      });
-    });
-
-    it('Base64はURLでないものとして扱われる', function (done) {
-      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-        var actual = $('.base64').url({ invalid: false });
-        assert(typeOf(actual) === 'undefined');
-        done();
-      });
-    });
-
-    describe('srcAttrs', function () {
-      it('無指定 => デフォルトの優先順で属性を検索する', function (done) {
-        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-          var base = helper.url('img');
-          assert($('.lazy1').url() === base + '/img/cat.png');
-          assert($('.lazy2').url() === base + '/img/food.jpg');
-          assert($('.lazy3').url() === base + '/img/1x1.gif');
-          done();
+  describe('link要素', () => {
+    test('単一要素 => hrefに指定したURLを絶対URLにして返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/link/index.html`, (err, $, res, body) => {
+          const expected = `${endpoint}/link/css/cat.html`.replace(/\.html/, '.css');
+          const actual = $('.rel').url();
+          expect(actual).toStrictEqual(expected);
+          resolve();
         });
       });
+    });
 
-      it('文字列 => 指定した文字列属性をsrcよりも優先して検索する', function (done) {
-        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-          var base = helper.url('img');
-          var attr = 'data-original-src';
-          assert($('.lazy1').url(attr) === base + '/img/1x1.gif');
-          assert($('.lazy2').url(attr) === base + '/img/1x1.gif');
-          assert($('.lazy3').url(attr) === base + '/img/sports.jpg');
-          done();
-        });
-      });
-
-      it('配列 => 指定した配列順で検索する', function (done) {
-        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-          var base = helper.url('img');
-          var attr = [
-            'data-original-src',
-            'data-original',
-            'data-lazy-src'
+    test('複数要素 => 各要素のhrefのURLを絶対URLにした配列を返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/link/index.html`, (err, $, res, body) => {
+          const base = `${endpoint}/link`;
+          const expected = [
+            `${base}/css/cat.css`,
+            undefined,
+            '',
+            `${base}/css/food.css?hoge=fuga&piyo=`,
+            'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
+            `${base}/not-found.css`,
+            `${base}/en.html`,
+            `${base}/css/dog.css`
           ];
-          assert($('.lazy1').url(attr) === base + '/img/cat.png');
-          assert($('.lazy2').url(attr) === base + '/img/food.jpg');
-          assert($('.lazy3').url(attr) === base + '/img/sports.jpg');
-          done();
+          const actual = $('link').url([]);
+          expect(actual).toStrictEqual(expected);
+          resolve();
         });
-      });
-
-      it('存在しない属性 => srcのURLを絶対URLにして返す', function (done) {
-        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-          var base = helper.url('img');
-          var attr = [
-            'data-foo-bar'
-          ];
-          assert($('.lazy1').url(attr) === base + '/img/1x1.gif');
-          assert($('.lazy2').url(attr) === base + '/img/1x1.gif');
-          assert($('.lazy3').url(attr) === base + '/img/1x1.gif');
-          done();
-        });
-      });
-
-      it('空配列 => srcのURLを絶対URLにして返す', function (done) {
-        cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-          var base = helper.url('img');
-          assert($('.lazy1').url([]) === base + '/img/1x1.gif');
-          assert($('.lazy2').url([]) === base + '/img/1x1.gif');
-          assert($('.lazy3').url([]) === base + '/img/1x1.gif');
-          done();
-        });
-      });
-    });
-  });
-
-  describe('a要素とimg要素の複合', function () {
-    before(function () {
-      this.base64img = helper.toBase64('fixtures/img/img/sports.jpg');
-    });
-
-    it('各要素のhref/srcのURLを絶対URLにした配列を返す', function (done) {
-      var _this = this;
-      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-        var base = helper.url('img');
-        var expected = [
-          base + '/img/cat.png',
-          base + '/~mega',
-          base + '/img/1x1.gif',
-          base + '/img/1x1.gif',
-          base + '/img/1x1.gif',
-          undefined,
-          '',
-          base + '/img/food.jpg?hoge=fuga&piyo=',
-          'http://www.yahoo.co.jp/favicon.ico',
-          'javascript:getPicture();',
-          base + '/not-found.gif',
-          'data:image/jpg;base64,' + _this.base64img,
-          'http://www.google.co.jp/',
-          helper.url('~info?foo=1&bar=2&baz=3')
-        ];
-        var actual = $('img, a').url([]);
-        assert.deepEqual(actual, expected);
-        done();
-      });
-    });
-
-    it('filterオプション(外部リンクのみ取得)', function (done) {
-      cli.fetch(helper.url('img', 'index'), function (err, $, res, body) {
-        var expected = [
-          'http://www.yahoo.co.jp/favicon.ico',
-          'http://www.google.co.jp/'
-        ];
-        var actual = $('img, a').url({ relative: false, invalid: false });
-        assert.deepEqual(actual, expected);
-        done();
-      });
-    });
-  });
-
-  describe('script要素', function () {
-    it('単一要素 => srcに指定したURLを絶対URLにして返す', function (done) {
-      cli.fetch(helper.url('script', 'index'), function (err, $, res, body) {
-        var expected = helper.url('script', 'js/cat').replace(/\.html/, '.js');
-        var actual = $('.rel').url();
-        assert(actual === expected);
-        done();
-      });
-    });
-
-    it('単一のインラインでJavaScriptが書かれているscript要素 => srcには何も指定がないのでundefinedで返す', function (done) {
-      cli.fetch(helper.url('script', 'index'), function (err, $, res, body) {
-        var actual = $('.inline').url();
-        assert(typeOf(actual) === 'undefined');
-        done();
-      });
-    });
-
-    it('複数要素 => 各要素のsrcのURLを絶対URLにした配列を返す', function (done) {
-      cli.fetch(helper.url('script', 'index'), function (err, $, res, body) {
-        var base = helper.url('script');
-        var expected = [
-          base + '/js/cat.js',
-          undefined,
-          '',
-          base + '/js/food.js?hoge=fuga&piyo=',
-          'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js',
-          base + '/not-found.js',
-          undefined,
-          base + '/js/dog.js'
-        ];
-        var actual = $('script').url([]);
-        assert.deepEqual(actual, expected);
-        done();
-      });
-    });
-  });
-
-  describe('link要素', function () {
-    it('単一要素 => hrefに指定したURLを絶対URLにして返す', function (done) {
-      cli.fetch(helper.url('link', 'index'), function (err, $, res, body) {
-        var expected = helper.url('link', 'css/cat').replace(/\.html/, '.css');
-        var actual = $('.rel').url();
-        assert(actual === expected);
-        done();
-      });
-    });
-
-    it('複数要素 => 各要素のhrefのURLを絶対URLにした配列を返す', function (done) {
-      cli.fetch(helper.url('link', 'index'), function (err, $, res, body) {
-        var base = helper.url('link');
-        var expected = [
-          base + '/css/cat.css',
-          undefined,
-          '',
-          base + '/css/food.css?hoge=fuga&piyo=',
-          'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
-          base + '/not-found.css',
-          base + '/en.html',
-          base + '/css/dog.css'
-        ];
-        var actual = $('link').url([]);
-        assert.deepEqual(actual, expected);
-        done();
       });
     });
   });

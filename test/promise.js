@@ -1,491 +1,503 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0*/
-var assert = require('power-assert');
-var typeOf = require('type-of');
-var helper = require('./_helper');
-var cli    = require('../index');
+const helper = require('./_helper');
+const cli = require('../index');
+const typeOf = require('type-of');
+const endpoint = helper.endpoint();
 
-describe('promise:fetch', function () {
-  it('fetch時にコールバックを指定 => undefinedを返す', function (done) {
-    assert(! cli.fetch(helper.url('~info'), function () {
-      done();
-    }));
+describe('promise:fetch', () => {
+  test('fetch時にコールバックを指定 => undefinedを返す', () => {
+    expect(cli.fetch(`${endpoint}/~info`, () => {})).toBeUndefined();
   });
 
-  it('fetch時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
-    var promise = cli.fetch(helper.url('~info'));
-    assert(typeOf(promise) === 'object');
-    assert(typeOf(promise.then) === 'function');
-    assert(typeOf(promise.catch) === 'function');
-    assert(typeOf(promise.finally) === 'function');
-    promise.finally(done);
-  });
-
-  it('promiseによるfetchが正常に完了 => then->finallyが呼ばれる', function () {
-    var called = 0;
-    return cli.fetch(helper.url('auto', 'shift_jis'))
-    .then(function (result) {
-      called++;
-      assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-      assert(typeOf(result) === 'object');
-      assert(typeOf(result.response) === 'object');
-      assert(typeOf(result.$) === 'function');
-      assert(typeOf(result.body) === 'string');
-      assert(result.$('title').text() === '夏目漱石「私の個人主義」');
-    })
-    .finally(function () {
-      assert(called === 1);
+  test('fetch時にコールバックを指定しない => promiseオブジェクトを返す', () => {
+    return new Promise((resolve) => {
+      const promise = cli.fetch(`${endpoint}/~info`);
+      expect(typeOf(promise)).toStrictEqual('object');
+      expect(typeOf(promise.then)).toStrictEqual('function');
+      expect(typeOf(promise.catch)).toStrictEqual('function');
+      expect(typeOf(promise.finally)).toStrictEqual('function');
+      promise.finally(resolve);
     });
   });
 
-  it('promiseによるfetchでエラーが発生 => catch->finallyが呼ばれる', function () {
-    var called = { then: 0, catch: 0 };
-    var url = helper.url('error', 'not-found');
-    var param = { hoge: 'fuga' };
-    return cli.fetch(url, param)
-    .then(function (result) {
-      called.then++;
-    })
-    .catch(function (err) {
-      called.catch++;
-      assert(err instanceof Error);
-      assert.deepEqual(Object.keys(err).sort(), [ 'param', 'response', 'statusCode', 'url' ]);
-      assert.deepEqual(err.param, param);
-      assert(err.message === 'no content');
-      assert(err.statusCode === 404);
-      assert(err.url === url);
-      assert(typeOf(err.response) === 'object');
-    })
-    .finally(function () {
-      assert.deepEqual(called, { then: 0, catch: 1 });
+  test('promiseによるfetchが正常に完了 => then->finallyが呼ばれる', () => {
+    let called = 0;
+    return cli
+      .fetch(`${endpoint}/auto/shift_jis.html`)
+      .then((result) => {
+        called++;
+        expect(Object.keys(result).sort()).toStrictEqual(['$', 'body', 'response']);
+        expect(typeOf(result)).toStrictEqual('object');
+        expect(typeOf(result.response)).toStrictEqual('object');
+        expect(typeOf(result.$)).toStrictEqual('function');
+        expect(typeOf(result.body)).toStrictEqual('string');
+        expect(result.$('title').text()).toStrictEqual('夏目漱石「私の個人主義」');
+      })
+      .finally(() => {
+        expect(called).toStrictEqual(1);
+      });
+  });
+
+  test('promiseによるfetchでエラーが発生 => catch->finallyが呼ばれる', () => {
+    const called = { then: 0, catch: 0 };
+    const url = `${endpoint}/error/not-found.html`;
+    const param = { hoge: 'fuga' };
+    return cli
+      .fetch(url, param)
+      .then((result) => {
+        called.then++;
+      })
+      .catch((err) => {
+        called.catch++;
+        expect(err).toBeInstanceOf(Error);
+        expect(Object.keys(err).sort()).toStrictEqual(['param', 'response', 'statusCode', 'url']);
+        expect(err.param).toStrictEqual(param);
+        expect(err.message).toStrictEqual('no content');
+        expect(err.statusCode).toStrictEqual(404);
+        expect(err.url).toStrictEqual(url);
+        expect(typeOf(err.response)).toStrictEqual('object');
+      })
+      .finally(() => {
+        expect(called).toStrictEqual({ then: 0, catch: 1 });
+      });
+  });
+});
+
+describe('promise:click', () => {
+  describe('a要素', () => {
+    test('click時にコールバックを指定 => undefinedを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          expect($('a').click(() => {})).toBeUndefined();
+          resolve();
+        });
+      });
+    });
+
+    test('click時にコールバックを指定しない => promiseオブジェクトを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const promise = $('a').click();
+          expect(typeOf(promise)).toStrictEqual('object');
+          expect(typeOf(promise.then)).toStrictEqual('function');
+          expect(typeOf(promise.catch)).toStrictEqual('function');
+          expect(typeOf(promise.finally)).toStrictEqual('function');
+          promise.finally(resolve);
+        });
+      });
+    });
+
+    test('promiseによるclickが正常に完了 => then->finallyが呼ばれる', () => {
+      let called = 0;
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => result.$('.rel').click())
+        .then((result) => {
+          called++;
+          expect(Object.keys(result).sort()).toStrictEqual(['$', 'body', 'response']);
+          expect(typeOf(result)).toStrictEqual('object');
+          expect(typeOf(result.response)).toStrictEqual('object');
+          expect(typeOf(result.$)).toStrictEqual('function');
+          expect(typeOf(result.body)).toStrictEqual('string');
+          expect(result.$('title').text()).toStrictEqual('夏目漱石「私の個人主義」');
+        })
+        .finally(() => {
+          expect(called).toStrictEqual(1);
+        });
+    });
+
+    test('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', () => {
+      const called = { then: 0, catch: 0 };
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => result.$('.error').click())
+        .then((result) => {
+          called.then++;
+        })
+        .catch((err) => {
+          called.catch++;
+          expect(err).toBeInstanceOf(Error);
+          expect(Object.keys(err).sort()).toStrictEqual(['response', 'statusCode', 'url']);
+          expect(err.message).toStrictEqual('no content');
+          expect(err.statusCode).toStrictEqual(404);
+          expect(err.url).toStrictEqual(`${endpoint}/form/xxx.html`);
+          expect(typeOf(err.response)).toStrictEqual('object');
+        })
+        .finally(() => {
+          expect(called).toStrictEqual({ then: 0, catch: 1 });
+        });
+    });
+
+    test('promise作成前にclickエラーが発生 => catch->finallyが呼ばれる', () => {
+      const called = { then: 0, catch: 0 };
+      const url = `${endpoint}/form/utf-8.html`;
+      return cli
+        .fetch(url)
+        .then((result) => result.$('div').click())
+        .then((result) => {
+          called.then++;
+        })
+        .catch((err) => {
+          called.catch++;
+          expect(err).toBeInstanceOf(Error);
+          expect(Object.keys(err).sort()).toStrictEqual(['url']);
+          expect(err.message).toStrictEqual('element is not clickable');
+          expect(err.url).toStrictEqual(url);
+        })
+        .finally(() => {
+          expect(called).toStrictEqual({ then: 0, catch: 1 });
+        });
+    });
+  });
+
+  describe('input[type=submit]要素', () => {
+    test('click時にコールバックを指定 => undefinedを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=multi-submit]');
+          expect($form.find('[name=edit]').click(() => {})).toBeUndefined();
+          resolve();
+        });
+      });
+    });
+
+    test('click時にコールバックを指定しない => promiseオブジェクトを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=multi-submit]');
+          const promise = $form.find('[name=edit]').click();
+          expect(typeOf(promise)).toStrictEqual('object');
+          expect(typeOf(promise.then)).toStrictEqual('function');
+          expect(typeOf(promise.catch)).toStrictEqual('function');
+          expect(typeOf(promise.finally)).toStrictEqual('function');
+          promise.finally(resolve);
+        });
+      });
+    });
+
+    test('promiseによるclickが正常に完了 => then->finallyが呼ばれる', () => {
+      let called = 0;
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => {
+          const $form = result.$('form[name=multi-submit]');
+          return $form.find('[name=edit]').click();
+        })
+        .then((result) => {
+          called++;
+          expect(Object.keys(result).sort()).toStrictEqual(['$', 'body', 'response']);
+          expect(typeOf(result)).toStrictEqual('object');
+          expect(typeOf(result.response)).toStrictEqual('object');
+          expect(typeOf(result.$)).toStrictEqual('function');
+          expect(result.body).toStrictEqual('<html></html>');
+          const h = result.response.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+
+          const ep = `text=${encodeURIComponent(
+            'あいうえお'
+          )}&checkbox=bbb&edit=${encodeURIComponent('編集')}`;
+          expect(h['post-data']).toStrictEqual(ep);
+        })
+        .finally(() => {
+          expect(called).toStrictEqual(1);
+        });
+    });
+
+    test('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', () => {
+      const called = { then: 0, catch: 0 };
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => {
+          const $form = result.$('form[name=error]');
+          return $form.find('input[type=submit]').click();
+        })
+        .then((result) => {
+          called.then++;
+        })
+        .catch((err) => {
+          called.catch++;
+          expect(err).toBeInstanceOf(Error);
+          expect(Object.keys(err).sort()).toStrictEqual(['response', 'statusCode', 'url']);
+          expect(err.message).toStrictEqual('no content');
+          expect(err.statusCode).toStrictEqual(404);
+          expect(err.url).toStrictEqual(`${endpoint}/form/xxx.html`);
+          expect(typeOf(err.response)).toStrictEqual('object');
+        })
+        .finally(() => {
+          expect(called).toStrictEqual({ then: 0, catch: 1 });
+        });
+    });
+  });
+
+  describe('button[type=submit]要素', () => {
+    test('click時にコールバックを指定 => undefinedを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=multi-submit]');
+          expect($form.find('[name=delete]').click(() => {})).toBeUndefined();
+          resolve();
+        });
+      });
+    });
+
+    test('click時にコールバックを指定しない => promiseオブジェクトを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=multi-submit]');
+          const promise = $form.find('[name=delete]').click();
+          expect(typeOf(promise)).toStrictEqual('object');
+          expect(typeOf(promise.then)).toStrictEqual('function');
+          expect(typeOf(promise.catch)).toStrictEqual('function');
+          expect(typeOf(promise.finally)).toStrictEqual('function');
+          promise.finally(resolve);
+        });
+      });
+    });
+
+    test('promiseによるclickが正常に完了 => then->finallyが呼ばれる', () => {
+      let called = 0;
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => {
+          const $form = result.$('form[name=multi-submit]');
+          return $form.find('[name=delete]').click();
+        })
+        .then((result) => {
+          called++;
+          expect(Object.keys(result).sort()).toStrictEqual(['$', 'body', 'response']);
+          expect(typeOf(result)).toStrictEqual('object');
+          expect(typeOf(result.response)).toStrictEqual('object');
+          expect(typeOf(result.$)).toStrictEqual('function');
+          expect(result.body).toStrictEqual('<html></html>');
+          const h = result.response.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+
+          const ep = `text=${encodeURIComponent(
+            'あいうえお'
+          )}&checkbox=bbb&delete=${encodeURIComponent('削除')}`;
+          expect(h['post-data']).toStrictEqual(ep);
+        })
+        .finally(() => {
+          expect(called).toStrictEqual(1);
+        });
+    });
+
+    test('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', () => {
+      const called = { then: 0, catch: 0 };
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => {
+          const $form = result.$('form[name=error]');
+          return $form.find('button[type=submit]').click();
+        })
+        .then((result) => {
+          called.then++;
+        })
+        .catch((err) => {
+          called.catch++;
+          expect(err).toBeInstanceOf(Error);
+          expect(Object.keys(err).sort()).toStrictEqual(['response', 'statusCode', 'url']);
+          expect(err.message).toStrictEqual('no content');
+          expect(err.statusCode).toStrictEqual(404);
+          expect(err.url).toStrictEqual(`${endpoint}/form/xxx.html`);
+          expect(typeOf(err.response)).toStrictEqual('object');
+        })
+        .finally(() => {
+          expect(called).toStrictEqual({ then: 0, catch: 1 });
+        });
+    });
+  });
+
+  describe('input[type=image]要素', () => {
+    test('click時にコールバックを指定 => undefinedを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=multi-submit]');
+          expect($form.find('[name=tweet]').click(() => {})).toBeUndefined();
+          resolve();
+        });
+      });
+    });
+
+    test('click時にコールバックを指定しない => promiseオブジェクトを返す', () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          const $form = $('form[name=multi-submit]');
+          const promise = $form.find('[name=tweet]').click();
+          expect(typeOf(promise)).toStrictEqual('object');
+          expect(typeOf(promise.then)).toStrictEqual('function');
+          expect(typeOf(promise.catch)).toStrictEqual('function');
+          expect(typeOf(promise.finally)).toStrictEqual('function');
+          promise.finally(resolve);
+        });
+      });
+    });
+
+    test('promiseによるclickが正常に完了 => then->finallyが呼ばれる', () => {
+      let called = 0;
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => {
+          const $form = result.$('form[name=multi-submit]');
+          return $form.find('[name=tweet]').click();
+        })
+        .then((result) => {
+          called++;
+          expect(Object.keys(result).sort()).toStrictEqual(['$', 'body', 'response']);
+          expect(typeOf(result)).toStrictEqual('object');
+          expect(typeOf(result.response)).toStrictEqual('object');
+          expect(typeOf(result.$)).toStrictEqual('function');
+          expect(result.body).toStrictEqual('<html></html>');
+          const h = result.response.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+
+          const ep = `text=${encodeURIComponent('あいうえお')}&checkbox=bbb&tweet.x=0&tweet.y=0`;
+          expect(h['post-data']).toStrictEqual(ep);
+        })
+        .finally(() => {
+          expect(called).toStrictEqual(1);
+        });
+    });
+
+    test('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', () => {
+      const called = { then: 0, catch: 0 };
+      return cli
+        .fetch(`${endpoint}/form/utf-8.html`)
+        .then((result) => {
+          const $form = result.$('form[name=error]');
+          return $form.find('input[type=image]').click();
+        })
+        .then((result) => {
+          called.then++;
+        })
+        .catch((err) => {
+          called.catch++;
+          expect(err).toBeInstanceOf(Error);
+          expect(Object.keys(err).sort()).toStrictEqual(['response', 'statusCode', 'url']);
+          expect(err.message).toStrictEqual('no content');
+          expect(err.statusCode).toStrictEqual(404);
+          expect(err.url).toStrictEqual(`${endpoint}/form/xxx.html`);
+          expect(typeOf(err.response)).toStrictEqual('object');
+        })
+        .finally(() => {
+          expect(called).toStrictEqual({ then: 0, catch: 1 });
+        });
     });
   });
 });
 
-describe('promise:click', function () {
-  describe('a要素', function () {
-    it('click時にコールバックを指定 => undefinedを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        assert(! $('a').click(function () {
-          done();
-        }));
+describe('promise:submit', () => {
+  test('submit時にコールバックを指定 => undefinedを返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        expect($('form').submit(() => {})).toBeUndefined();
+        resolve();
       });
     });
+  });
 
-    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var promise = $('a').click();
-        assert(typeOf(promise) === 'object');
-        assert(typeOf(promise.then) === 'function');
-        assert(typeOf(promise.catch) === 'function');
-        assert(typeOf(promise.finally) === 'function');
-        promise.finally(done);
+  test('submit時にコールバックを指定しない => promiseオブジェクトを返す', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const promise = $('form').submit();
+        expect(typeOf(promise)).toStrictEqual('object');
+        expect(typeOf(promise.then)).toStrictEqual('function');
+        expect(typeOf(promise.catch)).toStrictEqual('function');
+        expect(typeOf(promise.finally)).toStrictEqual('function');
+        promise.finally(resolve);
       });
     });
+  });
 
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
-      var called = 0;
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        return result.$('.rel').click();
+  test('promiseによるsubmitが正常に完了 => then->finallyが呼ばれる', () => {
+    let called = 0;
+    return cli
+      .fetch(`${endpoint}/form/utf-8.html`)
+      .then((result) => {
+        return result.$('form[name=login]').submit({
+          user: 'hogehoge',
+          password: 'fugafuga'
+        });
       })
-      .then(function (result) {
+      .then((result) => {
         called++;
-        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(typeOf(result) === 'object');
-        assert(typeOf(result.response) === 'object');
-        assert(typeOf(result.$) === 'function');
-        assert(typeOf(result.body) === 'string');
-        assert(result.$('title').text() === '夏目漱石「私の個人主義」');
+        expect(Object.keys(result).sort()).toStrictEqual(['$', 'body', 'response']);
+        expect(typeOf(result)).toStrictEqual('object');
+        expect(typeOf(result.response)).toStrictEqual('object');
+        expect(typeOf(result.$)).toStrictEqual('function');
+        expect(typeOf(result.body)).toStrictEqual('string');
+        expect(typeOf(result.response.cookies)).toStrictEqual('object');
+        expect(result.response.cookies.user).toStrictEqual('hogehoge');
       })
-      .finally(function () {
-        assert(called === 1);
+      .finally(() => {
+        expect(called).toStrictEqual(1);
       });
-    });
+  });
 
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
-      var called = { then: 0, catch: 0 };
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        return result.$('.error').click();
-      })
-      .then(function (result) {
+  test('promiseによるsubmitでエラーが発生 => catch->finallyが呼ばれる(GET)', () => {
+    const called = { then: 0, catch: 0 };
+    return cli
+      .fetch(`${endpoint}/form/utf-8.html`)
+      .then((result) => result.$('form[name=error]').submit())
+      .then((result) => {
         called.then++;
       })
-      .catch(function (err) {
+      .catch((err) => {
         called.catch++;
-        assert(err instanceof Error);
-        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
-        assert(err.message === 'no content');
-        assert(err.statusCode === 404);
-        assert(err.url === helper.url('form', 'xxx'));
-        assert(typeOf(err.response) === 'object');
+        expect(err).toBeInstanceOf(Error);
+        expect(Object.keys(err).sort()).toStrictEqual(['response', 'statusCode', 'url']);
+        expect(err.message).toStrictEqual('no content');
+        expect(err.statusCode).toStrictEqual(404);
+        expect(err.url).toStrictEqual(`${endpoint}/form/xxx.html`);
+        expect(typeOf(err.response)).toStrictEqual('object');
       })
-      .finally(function () {
-        assert.deepEqual(called, { then: 0, catch: 1 });
+      .finally(() => {
+        expect(called).toStrictEqual({ then: 0, catch: 1 });
       });
-    });
+  });
 
-    it('promise作成前にclickエラーが発生 => catch->finallyが呼ばれる', function () {
-      var called = { then: 0, catch: 0 };
-      var url = helper.url('form', 'utf-8');
-      return cli.fetch(url)
-      .then(function (result) {
-        return result.$('div').click();
-      })
-      .then(function (result) {
+  test('promiseによるsubmitでエラーが発生 => catch->finallyが呼ばれる(POST)', () => {
+    const called = { then: 0, catch: 0 };
+    return cli
+      .fetch(`${endpoint}/form/utf-8.html`)
+      .then((result) => result.$('form[name="error-post"]').submit())
+      .then((result) => {
         called.then++;
       })
-      .catch(function (err) {
+      .catch((err) => {
         called.catch++;
-        assert(err instanceof Error);
-        assert.deepEqual(Object.keys(err).sort(), [ 'url' ]);
-        assert(err.message === 'element is not clickable');
-        assert(err.url === url);
+        expect(err).toBeInstanceOf(Error);
+        expect(Object.keys(err).sort()).toStrictEqual(['param', 'response', 'statusCode', 'url']);
+        expect(err.message).toStrictEqual('no content');
+        expect(err.statusCode).toStrictEqual(404);
+        expect(err.url).toStrictEqual(`${endpoint}/form/xxx.html`);
+        expect(typeOf(err.response)).toStrictEqual('object');
       })
-      .finally(function () {
-        assert.deepEqual(called, { then: 0, catch: 1 });
+      .finally(() => {
+        expect(called).toStrictEqual({ then: 0, catch: 1 });
       });
-    });
   });
 
-  describe('input[type=submit]要素', function () {
-    it('click時にコールバックを指定 => undefinedを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=multi-submit]');
-        assert(! $form.find('[name=edit]').click(function () {
-          done();
-        }));
-      });
-    });
-
-    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=multi-submit]');
-        var promise = $form.find('[name=edit]').click();
-        assert(typeOf(promise) === 'object');
-        assert(typeOf(promise.then) === 'function');
-        assert(typeOf(promise.catch) === 'function');
-        assert(typeOf(promise.finally) === 'function');
-        promise.finally(done);
-      });
-    });
-
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
-      var called = 0;
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        var $form = result.$('form[name=multi-submit]');
-        return $form.find('[name=edit]').click();
-      })
-      .then(function (result) {
-        called++;
-        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(typeOf(result) === 'object');
-        assert(typeOf(result.response) === 'object');
-        assert(typeOf(result.$) === 'function');
-        assert(result.body === '<html></html>');
-        var h = result.response.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-
-        var ep = 'text='
-        + encodeURIComponent('あいうえお')
-        + '&checkbox=bbb&edit='
-        + encodeURIComponent('編集');
-        assert(h['post-data'] === ep);
-      })
-      .finally(function () {
-        assert(called === 1);
-      });
-    });
-
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
-      var called = { then: 0, catch: 0 };
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        var $form = result.$('form[name=error]');
-        return $form.find('input[type=submit]').click();
-      })
-      .then(function (result) {
+  test('promise作成前にsubmitエラーが発生 => catch->finallyが呼ばれる', () => {
+    const called = { then: 0, catch: 0 };
+    const url = `${endpoint}/form/utf-8.html`;
+    return cli
+      .fetch(url)
+      .then((result) => result.$('div').submit())
+      .then((result) => {
         called.then++;
       })
-      .catch(function (err) {
+      .catch((err) => {
         called.catch++;
-        assert(err instanceof Error);
-        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
-        assert(err.message === 'no content');
-        assert(err.statusCode === 404);
-        assert(err.url === helper.url('form', 'xxx'));
-        assert(typeOf(err.response) === 'object');
+        expect(err).toBeInstanceOf(Error);
+        expect(Object.keys(err).sort()).toStrictEqual(['url']);
+        expect(err.message).toStrictEqual('element is not form');
+        expect(err.url).toStrictEqual(url);
       })
-      .finally(function () {
-        assert.deepEqual(called, { then: 0, catch: 1 });
+      .finally(() => {
+        expect(called).toStrictEqual({ then: 0, catch: 1 });
       });
-    });
-  });
-
-  describe('button[type=submit]要素', function () {
-    it('click時にコールバックを指定 => undefinedを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=multi-submit]');
-        assert(! $form.find('[name=delete]').click(function () {
-          done();
-        }));
-      });
-    });
-
-    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=multi-submit]');
-        var promise = $form.find('[name=delete]').click();
-        assert(typeOf(promise) === 'object');
-        assert(typeOf(promise.then) === 'function');
-        assert(typeOf(promise.catch) === 'function');
-        assert(typeOf(promise.finally) === 'function');
-        promise.finally(done);
-      });
-    });
-
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
-      var called = 0;
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        var $form = result.$('form[name=multi-submit]');
-        return $form.find('[name=delete]').click();
-      })
-      .then(function (result) {
-        called++;
-        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(typeOf(result) === 'object');
-        assert(typeOf(result.response) === 'object');
-        assert(typeOf(result.$) === 'function');
-        assert(result.body === '<html></html>');
-        var h = result.response.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-
-        var ep = 'text='
-        + encodeURIComponent('あいうえお')
-        + '&checkbox=bbb&delete='
-        + encodeURIComponent('削除');
-        assert(h['post-data'] === ep);
-      })
-      .finally(function () {
-        assert(called === 1);
-      });
-    });
-
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
-      var called = { then: 0, catch: 0 };
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        var $form = result.$('form[name=error]');
-        return $form.find('button[type=submit]').click();
-      })
-      .then(function (result) {
-        called.then++;
-      })
-      .catch(function (err) {
-        called.catch++;
-        assert(err instanceof Error);
-        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
-        assert(err.message === 'no content');
-        assert(err.statusCode === 404);
-        assert(err.url === helper.url('form', 'xxx'));
-        assert(typeOf(err.response) === 'object');
-      })
-      .finally(function () {
-        assert.deepEqual(called, { then: 0, catch: 1 });
-      });
-    });
-  });
-
-  describe('input[type=image]要素', function () {
-    it('click時にコールバックを指定 => undefinedを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=multi-submit]');
-        assert(! $form.find('[name=tweet]').click(function () {
-          done();
-        }));
-      });
-    });
-
-    it('click時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        var $form = $('form[name=multi-submit]');
-        var promise = $form.find('[name=tweet]').click();
-        assert(typeOf(promise) === 'object');
-        assert(typeOf(promise.then) === 'function');
-        assert(typeOf(promise.catch) === 'function');
-        assert(typeOf(promise.finally) === 'function');
-        promise.finally(done);
-      });
-    });
-
-    it('promiseによるclickが正常に完了 => then->finallyが呼ばれる', function () {
-      var called = 0;
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        var $form = result.$('form[name=multi-submit]');
-        return $form.find('[name=tweet]').click();
-      })
-      .then(function (result) {
-        called++;
-        assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-        assert(typeOf(result) === 'object');
-        assert(typeOf(result.response) === 'object');
-        assert(typeOf(result.$) === 'function');
-        assert(result.body === '<html></html>');
-        var h = result.response.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-
-        var ep = 'text='
-        + encodeURIComponent('あいうえお')
-        + '&checkbox=bbb&tweet.x=0&tweet.y=0';
-        assert(h['post-data'] === ep);
-      })
-      .finally(function () {
-        assert(called === 1);
-      });
-    });
-
-    it('promiseによるclickでエラーが発生 => catch->finallyが呼ばれる', function () {
-      var called = { then: 0, catch: 0 };
-      return cli.fetch(helper.url('form', 'utf-8'))
-      .then(function (result) {
-        var $form = result.$('form[name=error]');
-        return $form.find('input[type=image]').click();
-      })
-      .then(function (result) {
-        called.then++;
-      })
-      .catch(function (err) {
-        called.catch++;
-        assert(err instanceof Error);
-        assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
-        assert(err.message === 'no content');
-        assert(err.statusCode === 404);
-        assert(err.url === helper.url('form', 'xxx'));
-        assert(typeOf(err.response) === 'object');
-      })
-      .finally(function () {
-        assert.deepEqual(called, { then: 0, catch: 1 });
-      });
-    });
-  });
-});
-
-describe('promise:submit', function () {
-  it('submit時にコールバックを指定 => undefinedを返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      assert(! $('form').submit(function () {
-        done();
-      }));
-    });
-  });
-
-  it('submit時にコールバックを指定しない => promiseオブジェクトを返す', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var promise = $('form').submit();
-      assert(typeOf(promise) === 'object');
-      assert(typeOf(promise.then) === 'function');
-      assert(typeOf(promise.catch) === 'function');
-      assert(typeOf(promise.finally) === 'function');
-      promise.finally(done);
-    });
-  });
-
-  it('promiseによるsubmitが正常に完了 => then->finallyが呼ばれる', function () {
-    var called = 0;
-    return cli.fetch(helper.url('form', 'utf-8'))
-    .then(function (result) {
-      return result.$('form[name=login]').submit({
-        user: 'hogehoge',
-        password: 'fugafuga'
-      });
-    })
-    .then(function (result) {
-      called++;
-      assert.deepEqual(Object.keys(result).sort(), [ '$', 'body', 'response' ]);
-      assert(typeOf(result) === 'object');
-      assert(typeOf(result.response) === 'object');
-      assert(typeOf(result.$) === 'function');
-      assert(typeOf(result.body) === 'string');
-      assert(typeOf(result.response.cookies) === 'object');
-      assert(result.response.cookies.user === 'hogehoge');
-    })
-    .finally(function () {
-      assert(called === 1);
-    });
-  });
-
-  it('promiseによるsubmitでエラーが発生 => catch->finallyが呼ばれる(GET)', function () {
-    var called = { then: 0, catch: 0 };
-    return cli.fetch(helper.url('form', 'utf-8'))
-    .then(function (result) {
-      return result.$('form[name=error]').submit();
-    })
-    .then(function (result) {
-      called.then++;
-    })
-    .catch(function (err) {
-      called.catch++;
-      assert(err instanceof Error);
-      assert.deepEqual(Object.keys(err).sort(), [ 'response', 'statusCode', 'url' ]);
-      assert(err.message === 'no content');
-      assert(err.statusCode === 404);
-      assert(err.url === helper.url('form', 'xxx'));
-      assert(typeOf(err.response) === 'object');
-    })
-    .finally(function () {
-      assert.deepEqual(called, { then: 0, catch: 1 });
-    });
-  });
-
-  it('promiseによるsubmitでエラーが発生 => catch->finallyが呼ばれる(POST)', function () {
-    var called = { then: 0, catch: 0 };
-    return cli.fetch(helper.url('form', 'utf-8'))
-    .then(function (result) {
-      return result.$('form[name="error-post"]').submit();
-    })
-    .then(function (result) {
-      called.then++;
-    })
-    .catch(function (err) {
-      called.catch++;
-      assert(err instanceof Error);
-      assert.deepEqual(Object.keys(err).sort(), [ 'param', 'response', 'statusCode', 'url' ]);
-      assert(err.message === 'no content');
-      assert(err.statusCode === 404);
-      assert(err.url === helper.url('form', 'xxx'));
-      assert(typeOf(err.response) === 'object');
-    })
-    .finally(function () {
-      assert.deepEqual(called, { then: 0, catch: 1 });
-    });
-  });
-
-  it('promise作成前にsubmitエラーが発生 => catch->finallyが呼ばれる', function () {
-    var called = { then: 0, catch: 0 };
-    var url = helper.url('form', 'utf-8');
-    return cli.fetch(url)
-    .then(function (result) {
-      return result.$('div').submit();
-    })
-    .then(function (result) {
-      called.then++;
-    })
-    .catch(function (err) {
-      called.catch++;
-      assert(err instanceof Error);
-      assert.deepEqual(Object.keys(err).sort(), [ 'url' ]);
-      assert(err.message === 'element is not form');
-      assert(err.url === url);
-    })
-    .finally(function () {
-      assert.deepEqual(called, { then: 0, catch: 1 });
-    });
   });
 });

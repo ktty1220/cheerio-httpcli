@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*eslint no-invalid-this:0*/
 
 'use strict';
 
@@ -10,13 +9,12 @@
  */
 var word = 'チュパカブラ';
 
-
 var client = require('../index');
 
 // [重要] google検索の場合はfollowMetaRefreshをfalseにする(README.md参照)
 client.set('followMetaRefresh', false);
 
-console.info('--- Bingで検索 ---');
+console.log('--- Bingで検索 ---');
 var result1 = client.fetchSync('http://www.bing.com/search', { q: word });
 if (result1.error) {
   console.error(result1.error);
@@ -31,15 +29,14 @@ if (result1.error) {
     if (url) {
       results1.push({
         title: $h2.text(),
-        url: url,
-        description: $(this).find('.b_caption p').text()
+        url: url
       });
     }
   });
-  console.info(results1);
+  console.log(results1);
 }
 
-console.info('\n--- Googleで検索 ---');
+console.log('\n--- Googleで検索 ---');
 var result2 = client.fetchSync('http://www.google.co.jp/search', { q: word });
 if (result2.error) {
   console.error(result2.error);
@@ -47,17 +44,15 @@ if (result2.error) {
   var results2 = [];
   // 検索結果が個別に格納されている要素をループ
   var _$ = result2.$;
-  _$('#rso .g').each(function () {
-    // 各検索結果のタイトル部分とURL、概要を取得
-    var $h3 = _$(this).find('h3');
-    var url = $h3.find('a').attr('href');
+  _$('h3').each(function () {
+    // 各検索結果のタイトル部分とURLを取得
+    var url = _$(this).closest('a').attr('href');
     if (url) {
       results2.push({
-        title: $h3.text(),
-        url: url,
-        description: _$(this).find('.st').text()
+        title: _$(this).text(),
+        url: url
       });
     }
   });
-  console.info(results2);
+  console.log(results2);
 }

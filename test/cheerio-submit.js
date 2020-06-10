@@ -1,346 +1,406 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0, no-undefined:0, max-len:[1, 150, 2], max-nested-callbacks:[1, 6]*/
-var assert = require('power-assert');
-var typeOf = require('type-of');
-var each   = require('foreach');
-var helper = require('./_helper');
-var cli    = require('../index');
+const typeOf = require('type-of');
+const each = require('foreach');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('cheerio:submit', function () {
-  it('form要素以外 => エラー', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('div').eq(0).submit({ hoge: 'fuga' }, function (err, $, res, body) {
-        assert(err.message === 'element is not form');
-        assert(! $);
-        assert(! res);
-        assert(! body);
-        done();
+describe('cheerio:submit', () => {
+  test('form要素以外 => エラー', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('div')
+          .eq(0)
+          .submit({ hoge: 'fuga' }, (err, $, res, body) => {
+            expect(err.message).toStrictEqual('element is not form');
+            expect($).toBeUndefined();
+            expect(res).toBeUndefined();
+            expect(body).toBeUndefined();
+            resolve();
+          });
       });
     });
   });
 
-  it('要素数0 => エラー', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('header').submit({ hoge: 'fuga' }, function (err, $, res, body) {
-        assert(err.message === 'no elements');
-        assert(! $);
-        assert(! res);
-        assert(! body);
-        done();
-      });
-    });
-  });
-
-  it('form要素のaction, method属性でフォームが送信される(GET)', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=get]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga');
-        var h = res.headers;
-        assert(h['request-url'] === '/~info?hoge=fuga');
-        assert(h['request-method'] === 'GET');
-        assert(! h['post-data']);
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('form要素のaction, method属性でフォームが送信される(POST)', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=post]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'hoge=fuga');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('form要素のmethod属性がない => GETでフォームが送信される', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name="no-method"]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga');
-        var h = res.headers;
-        assert(h['request-url'] === '/~info?hoge=fuga');
-        assert(h['request-method'] === 'GET');
-        assert(! h['post-data']);
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('form要素のaction属性もmethod属性もない => GETかつ現ページに対してフォームが送信される', function (done) {
-    var url = helper.url('form', 'utf-8');
-    cli.fetch(url, function (err, $, res, body) {
-      $('form[name="no-action-no-method"]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === url + '?hoge=fuga');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('select要素を含んだフォームのselectedがフォーム送信パラメータのデフォルトになっている', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=select]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'single=2&multi=3&multi=5');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('checkbox要素を含んだフォームのcheckedがフォーム送信パラメータのデフォルトになっている', function (done) {
-    var param = '?check1=1&check2=&check3=&check4%5B%5D=';
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=checkbox]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info') + param);
-        var h = res.headers;
-        assert(h['request-url'] === '/~info' + param);
-        assert(h['request-method'] === 'GET');
-        assert(! h['post-data']);
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('radio要素を含んだフォームのcheckedがフォーム送信パラメータのデフォルトになっている', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=radio]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'radio1=yyy&radio2=');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('input[type=submit]とinput[type=image]はパラメータに含まれない', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name="multi-submit"]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'text=%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A&checkbox=bbb');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('input要素のvalueがない => 空文字となる', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=no-input-value]').submit(function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'hoge=');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('パラメータのvalueがnull/undefined/empty => "name="という形でURLに追加される', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=post]').submit({
-        foo: null, bar: undefined, baz: ''
-      }, function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'hoge=fuga&foo=&bar=&baz=');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  it('パラメータのvalueが数字の0 => "name=0"という形でURLに追加される', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      $('form[name=post]').submit({ hoge: 0 }, function (err, $, res, body) {
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === 'hoge=0');
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
-      });
-    });
-  });
-
-  each([ 0, 1, 2 ], function (idx) {
-    it('生のform要素 => フォーム送信される(' + idx + '番目)', function (done) {
-      cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-        $($('.form-group form')[idx]).submit(function (err, $, res, body) {
-          assert($.documentInfo().url === helper.url('~info') + '?hoge=fuga');
-          var h = res.headers;
-          assert(h['request-url'] === '/~info?hoge=fuga');
-          assert(h['request-method'] === 'GET');
-          assert(! h['post-data']);
-          assert(typeOf($) === 'function');
-          assert(typeOf(body) === 'string');
-          done();
+  test('要素数0 => エラー', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('header').submit({ hoge: 'fuga' }, (err, $, res, body) => {
+          expect(err.message).toStrictEqual('no elements');
+          expect($).toBeUndefined();
+          expect(res).toBeUndefined();
+          expect(body).toBeUndefined();
+          resolve();
         });
       });
     });
   });
 
-  it('無から作成したform要素(jQuery形式) => フォーム送信される', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var $form = $('<form/>').attr({
-        method: 'GET',
-        action: '/~info'
-      })
-      .append($('<input/>').attr({
-        type: 'hidden',
-        name: 'hoge',
-        value: 'fuga'
-      }))
-      .append($('<input/>').attr({
-        type: 'text',
-        name: 'foo',
-        value: 'あいうえお'
-      }));
-
-      $form.submit(function (err, $, res, body) {
-        var param = 'hoge=fuga&foo=' + encodeURIComponent('あいうえお');
-        assert($.documentInfo().url === helper.url('~info') + '?' + param);
-        var h = res.headers;
-        assert(h['request-url'] === '/~info?' + param);
-        assert(h['request-method'] === 'GET');
-        assert(! h['post-data']);
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
+  test('form要素のaction, method属性でフォームが送信される(GET)', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=get]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}?hoge=fuga`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info?hoge=fuga');
+          expect(h['request-method']).toStrictEqual('GET');
+          expect(h['post-data']).toBeUndefined();
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
       });
     });
   });
 
-  it('無から作成したform要素(HTML形式) => フォーム送信される', function (done) {
-    cli.fetch(helper.url('form', 'utf-8'), function (err, $, res, body) {
-      var $form = $([
-        '<form method="POST" action="/~info">',
-        '<input type="hidden" name="hoge" value="fuga" />',
-        '<input type="text" name="foo" value="あいうえお" />',
-        '</form>'
-      ].join('\n'));
-      $form.submit({ foo: 'かきくけこ' }, function (err, $, res, body) {
-        var param = 'hoge=fuga&foo=' + encodeURIComponent('かきくけこ');
-        assert($.documentInfo().url === helper.url('~info'));
-        var h = res.headers;
-        assert(h['request-url'] === '/~info');
-        assert(h['request-method'] === 'POST');
-        assert(h['post-data'] === param);
-        assert(typeOf($) === 'function');
-        assert(typeOf(body) === 'string');
-        done();
+  test('form要素のaction, method属性でフォームが送信される(POST)', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=post]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+          expect(h['post-data']).toStrictEqual('hoge=fuga');
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
       });
     });
   });
 
-  var escapes = helper.escapedParam();
-  each(helper.files('form'), function (enc) {
-    describe('cheerio:submit(' + enc + ')', function () {
-      it('デフォルトパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', function (done) {
-        cli.fetch(helper.url('form', enc), function (err, $, res, body) {
-          $('form[name=default-jp]').submit(function (err, $, res, body) {
-            var qp = helper.qsparse(res.headers['post-data']);
-            assert.deepEqual(Object.keys(qp).sort(), [
-              'checkbox', 'radio', 'select', 'text', 'textarea'
-            ]);
-            assert(qp.text === escapes['あいうえお'][enc]);
-            assert(qp.checkbox === escapes['かきくけこ'][enc]);
-            assert(qp.radio === escapes['なにぬねの'][enc]);
-            assert.deepEqual(qp.select, [ escapes['ふふふふふ'][enc], escapes['ほほほほほ'][enc] ]);
-            assert(qp.textarea === escapes['まみむめも'][enc]);
-            done();
+  test('form要素のmethod属性がない => GETでフォームが送信される', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name="no-method"]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}?hoge=fuga`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info?hoge=fuga');
+          expect(h['request-method']).toStrictEqual('GET');
+          expect(h['post-data']).toBeUndefined();
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('form要素のaction属性もmethod属性もない => GETかつ現ページに対してフォームが送信される', () => {
+    return new Promise((resolve) => {
+      const url = `${endpoint}/form/utf-8.html`;
+      cli.fetch(url, (err, $, res, body) => {
+        $('form[name="no-action-no-method"]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${url}?hoge=fuga`);
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('select要素を含んだフォームのselectedがフォーム送信パラメータのデフォルトになっている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=select]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+          expect(h['post-data']).toStrictEqual('single=2&multi=3&multi=5');
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('checkbox要素を含んだフォームのcheckedがフォーム送信パラメータのデフォルトになっている', () => {
+    return new Promise((resolve) => {
+      const param = '?check1=1&check2=&check3=&check4%5B%5D=';
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=checkbox]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}${param}`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual(`/~info${param}`);
+          expect(h['request-method']).toStrictEqual('GET');
+          expect(h['post-data']).toBeUndefined();
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('radio要素を含んだフォームのcheckedがフォーム送信パラメータのデフォルトになっている', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=radio]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+          expect(h['post-data']).toStrictEqual('radio1=yyy&radio2=');
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('input[type=submit]とinput[type=image]はパラメータに含まれない', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name="multi-submit"]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+          expect(h['post-data']).toStrictEqual(
+            'text=%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A&checkbox=bbb'
+          );
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('input要素のvalueがない => 空文字となる', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=no-input-value]').submit((err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+          expect(h['post-data']).toStrictEqual('hoge=');
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('パラメータのvalueがnull/undefined/empty => "name="という形でURLに追加される', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=post]').submit(
+          {
+            foo: null,
+            bar: undefined,
+            baz: ''
+          },
+          (err, $, res, body) => {
+            expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info');
+            expect(h['request-method']).toStrictEqual('POST');
+            expect(h['post-data']).toStrictEqual('hoge=fuga&foo=&bar=&baz=');
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          }
+        );
+      });
+    });
+  });
+
+  test('パラメータのvalueが数字の0 => "name=0"という形でURLに追加される', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        $('form[name=post]').submit({ hoge: 0 }, (err, $, res, body) => {
+          expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+          expect(h['post-data']).toStrictEqual('hoge=0');
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  each([0, 1, 2], (idx) => {
+    test(`生のform要素 => フォーム送信される(${idx}番目)`, () => {
+      return new Promise((resolve) => {
+        cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+          $($('.form-group form')[idx]).submit((err, $, res, body) => {
+            expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}?hoge=fuga`);
+            const h = res.headers;
+            expect(h['request-url']).toStrictEqual('/~info?hoge=fuga');
+            expect(h['request-method']).toStrictEqual('GET');
+            expect(h['post-data']).toBeUndefined();
+            expect(typeOf($)).toStrictEqual('function');
+            expect(typeOf(body)).toStrictEqual('string');
+            resolve();
+          });
+        });
+      });
+    });
+  });
+
+  test('無から作成したform要素(jQuery形式) => フォーム送信される', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const $form = $('<form/>')
+          .attr({
+            method: 'GET',
+            action: '/~info'
+          })
+          .append(
+            $('<input/>').attr({
+              type: 'hidden',
+              name: 'hoge',
+              value: 'fuga'
+            })
+          )
+          .append(
+            $('<input/>').attr({
+              type: 'text',
+              name: 'foo',
+              value: 'あいうえお'
+            })
+          );
+
+        $form.submit((err, $, res, body) => {
+          const param = `hoge=fuga&foo=${encodeURIComponent('あいうえお')}`;
+          expect($.documentInfo().url).toStrictEqual(`${`${endpoint}/~info`}?${param}`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual(`/~info?${param}`);
+          expect(h['request-method']).toStrictEqual('GET');
+          expect(h['post-data']).toBeUndefined();
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  test('無から作成したform要素(HTML形式) => フォーム送信される', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/form/utf-8.html`, (err, $, res, body) => {
+        const $form = $(
+          [
+            '<form method="POST" action="/~info">',
+            '<input type="hidden" name="hoge" value="fuga" />',
+            '<input type="text" name="foo" value="あいうえお" />',
+            '</form>'
+          ].join('\n')
+        );
+        $form.submit({ foo: 'かきくけこ' }, (err, $, res, body) => {
+          const param = `hoge=fuga&foo=${encodeURIComponent('かきくけこ')}`;
+          expect($.documentInfo().url).toStrictEqual(`${endpoint}/~info`);
+          const h = res.headers;
+          expect(h['request-url']).toStrictEqual('/~info');
+          expect(h['request-method']).toStrictEqual('POST');
+          expect(h['post-data']).toStrictEqual(param);
+          expect(typeOf($)).toStrictEqual('function');
+          expect(typeOf(body)).toStrictEqual('string');
+          resolve();
+        });
+      });
+    });
+  });
+
+  const escapes = helper.escapedParam();
+  each(helper.files('form'), (enc) => {
+    describe(`cheerio:submit(${enc})`, () => {
+      test('デフォルトパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', () => {
+        return new Promise((resolve) => {
+          cli.fetch(`${endpoint}/form/${enc}.html`, (err, $, res, body) => {
+            $('form[name=default-jp]').submit((err, $, res, body) => {
+              const qp = helper.qsparse(res.headers['post-data']);
+              expect(Object.keys(qp).sort()).toStrictEqual([
+                'checkbox',
+                'radio',
+                'select',
+                'text',
+                'textarea'
+              ]);
+              expect(qp.text).toStrictEqual(escapes['あいうえお'][enc]);
+              expect(qp.checkbox).toStrictEqual(escapes['かきくけこ'][enc]);
+              expect(qp.radio).toStrictEqual(escapes['なにぬねの'][enc]);
+              expect(qp.select).toStrictEqual([
+                escapes['ふふふふふ'][enc],
+                escapes['ほほほほほ'][enc]
+              ]);
+              expect(qp.textarea).toStrictEqual(escapes['まみむめも'][enc]);
+              resolve();
+            });
           });
         });
       });
 
-      it('上書きパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', function (done) {
-        var set = {
-          text: 'かきくけこ',
-          checkbox: null,
-          radio: 'たちつてと',
-          select: [ 'ははははは', 'へへへへへ' ],
-          textarea: ''
-        };
-        cli.fetch(helper.url('form', enc), function (err, $, res, body) {
-          $('form[name=default-jp]').submit(set, function (err, $, res, body) {
-            var qp = helper.qsparse(res.headers['post-data']);
-            assert.deepEqual(Object.keys(qp).sort(), [
-              'checkbox', 'radio', 'select', 'text', 'textarea'
-            ]);
-            assert(qp.text === escapes['かきくけこ'][enc]);
-            assert(qp.checkbox === '');
-            assert(qp.radio === escapes['たちつてと'][enc]);
-            assert.deepEqual(qp.select, [ escapes['ははははは'][enc], escapes['へへへへへ'][enc] ]);
-            assert(qp.textarea === '');
-            done();
+      test('上書きパラメータが日本語 => ページのエンコーディングに合わせたURLエンコードで送信される', () => {
+        return new Promise((resolve) => {
+          const set = {
+            text: 'かきくけこ',
+            checkbox: null,
+            radio: 'たちつてと',
+            select: ['ははははは', 'へへへへへ'],
+            textarea: ''
+          };
+          cli.fetch(`${endpoint}/form/${enc}.html`, (err, $, res, body) => {
+            $('form[name=default-jp]').submit(set, (err, $, res, body) => {
+              const qp = helper.qsparse(res.headers['post-data']);
+              expect(Object.keys(qp).sort()).toStrictEqual([
+                'checkbox',
+                'radio',
+                'select',
+                'text',
+                'textarea'
+              ]);
+              expect(qp.text).toStrictEqual(escapes['かきくけこ'][enc]);
+              expect(qp.checkbox).toStrictEqual('');
+              expect(qp.radio).toStrictEqual(escapes['たちつてと'][enc]);
+              expect(qp.select).toStrictEqual([
+                escapes['ははははは'][enc],
+                escapes['へへへへへ'][enc]
+              ]);
+              expect(qp.textarea).toStrictEqual('');
+              resolve();
+            });
           });
         });
       });
 
-      /*eslint-disable quote-props*/
-      var expectedEncodings = {
-        'shift_jis': 'utf-8',
+      const expectedEncodings = {
+        shift_jis: 'utf-8',
         'euc-jp': 'shift_jis',
         'utf-8': 'euc-jp'
       };
-      /*eslint-enable quote-props*/
-      it('accept-chaset属性あり => accept-charsetで指定されたURLエンコードで送信される(' + expectedEncodings[enc] + ')', function () {
-        var param = { q: 'かきくけこ' };
-        return cli.fetch(helper.url('form', enc))
-        .then(function (result1) {
-          return result1.$('form[name=charset]').submit(param);
-        })
-        .then(function (result2) {
-          var actual = result2.response.headers['request-url'];
-          var expected = '/~info?q=' + escapes[param.q][expectedEncodings[enc]];
-          assert(actual === expected);
-        });
+      test(`accept-chaset属性あり => accept-charsetで指定されたURLエンコードで送信される(${expectedEncodings[enc]})`, () => {
+        const param = { q: 'かきくけこ' };
+        return cli
+          .fetch(`${endpoint}/form/${enc}.html`)
+          .then((result1) => result1.$('form[name=charset]').submit(param))
+          .then((result2) => {
+            const actual = result2.response.headers['request-url'];
+            const expected = `/~info?q=${escapes[param.q][expectedEncodings[enc]]}`;
+            expect(actual).toStrictEqual(expected);
+          });
       });
 
-      it('accept-chaset属性あり(複数) => accept-charsetで指定された先頭のURLエンコードで送信される(' + expectedEncodings[enc] + ')', function () {
-        var param = { q: 'さしすせそ' };
-        return cli.fetch(helper.url('form', enc))
-        .then(function (result1) {
-          return result1.$('form[name="multi-charset"]').submit(param);
-        })
-        .then(function (result2) {
-          var actual = result2.response.headers['request-url'];
-          var expected = '/~info?q=' + escapes[param.q][expectedEncodings[enc]];
-          assert(actual === expected);
-        });
+      test(`accept-chaset属性あり(複数) => accept-charsetで指定された先頭のURLエンコードで送信される(${expectedEncodings[enc]})`, () => {
+        const param = { q: 'さしすせそ' };
+        return cli
+          .fetch(`${endpoint}/form/${enc}.html`)
+          .then((result1) => result1.$('form[name="multi-charset"]').submit(param))
+          .then((result2) => {
+            const actual = result2.response.headers['request-url'];
+            const expected = `/~info?q=${escapes[param.q][expectedEncodings[enc]]}`;
+            expect(actual).toStrictEqual(expected);
+          });
       });
     });
   });

@@ -1,30 +1,32 @@
-/*eslint-env mocha*/
-/*eslint no-invalid-this:0*/
-var assert   = require('power-assert');
-var helper   = require('./_helper');
-var cli      = require('../index');
+const helper = require('./_helper');
+const cli = require('../index');
+const endpoint = helper.endpoint();
 
-describe('maxdatasize', function () {
-  before(function () {
+describe('maxdatasize', () => {
+  beforeAll(() => {
     cli.set('timeout', 30000);
   });
 
-  it('デフォルトは受信無制限', function (done) {
-    cli.fetch(helper.url('~mega'), function (err, $, res, body) {
-      assert(! err);
-      assert(body.length === 1024 * 1024);
-      done();
+  test('デフォルトは受信無制限', () => {
+    return new Promise((resolve) => {
+      cli.fetch(`${endpoint}/~mega`, (err, $, res, body) => {
+        expect(err).toBeUndefined();
+        expect(body.length).toStrictEqual(1024 * 1024);
+        resolve();
+      });
     });
   });
 
-  it('maxDataSizeを指定 => 指定したバイト数で受信制限がかかる', function (done) {
-    cli.set('maxDataSize', 1024 * 64);
-    cli.fetch(helper.url('~mega'), function (err, $, res, body) {
-      assert(err.message === 'data size limit over');
-      assert(! $);
-      assert(! res);
-      assert(! body);
-      done();
+  test('maxDataSizeを指定 => 指定したバイト数で受信制限がかかる', () => {
+    return new Promise((resolve) => {
+      cli.set('maxDataSize', 1024 * 64);
+      cli.fetch(`${endpoint}/~mega`, (err, $, res, body) => {
+        expect(err.message).toStrictEqual('data size limit over');
+        expect($).toBeUndefined();
+        expect(res).toBeUndefined();
+        expect(body).toBeUndefined();
+        resolve();
+      });
     });
   });
 });
