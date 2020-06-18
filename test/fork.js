@@ -31,6 +31,19 @@ describe('fork', () => {
     });
   });
 
+  test('browserのcustom設定が警告されずに引き継がれる', () => {
+    const spy = jest.spyOn(console, 'warn');
+    spy.mockImplementation((x) => x);
+    const ie6 = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
+    cli.set('headers', { 'user-agent': ie6 });
+    const child = cli.fork();
+    expect(spy).toHaveBeenCalledTimes(0);
+    expect(child.browser).toStrictEqual('custom');
+    expect(child.headers['user-agent']).toStrictEqual(ie6);
+    spy.mockReset();
+    spy.mockRestore();
+  });
+
   test('親インスタンスのクッキーが引き継がれている', async () => {
     const r1 = await cli.fetch(sesUrl);
     const expected = cli.exportCookies();
