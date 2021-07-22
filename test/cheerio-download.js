@@ -632,7 +632,7 @@ describe('cheerio:download', () => {
     });
   });
 
-  xdescribe('srcAttrs', () => {
+  describe('srcAttrs', () => {
     test('無指定 => デフォルトの優先順で属性を検索してダウンロード', () => {
       return new Promise((resolve, reject) => {
         const expected = {
