@@ -14,6 +14,8 @@ module.exports = {
   extends: ['prettier-standard', 'plugin:jest/recommended'],
   rules: {
     'handle-callback-err': 'off',
-    'prettier/prettier': ['error', require('../.prettierrc.json')]
+    'prettier/prettier': ['error', require('../.prettierrc.json')],
+    'jest/no-test-prefixes': 'off',
+    'jest/no-disabled-tests': 'off'
   }
 };

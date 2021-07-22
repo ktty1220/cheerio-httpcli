@@ -70,7 +70,7 @@ describe('cookie', () => {
         value: 'Ipsum possimus nesciunt ut ad illum Nemo voluptatibus vel itaque',
         domain: '.example.com',
         path: '/',
-        expires: 1654419012,
+        expires: 2538085812,
         httpOnly: true,
         secure: true,
         sameSite: 'Lax'
@@ -92,7 +92,7 @@ describe('cookie', () => {
         value: 'xxx%20yyy%20zzz',
         domain: '.www.example.com',
         path: '/',
-        expires: 1613347847.352102,
+        expires: 2560086647.352102,
         httpOnly: false,
         secure: false
       }
@@ -109,7 +109,7 @@ describe('cookie', () => {
           value: 'Ipsum possimus nesciunt ut ad illum Nemo voluptatibus vel itaque',
           domain: 'example.com',
           path: '/',
-          expires: '2022-06-05T08:50:12.000Z',
+          expires: '2050-06-05T23:50:12.000Z',
           httpOnly: true,
           hostOnly: false,
           extensions: ['SameSite=lax'],
@@ -127,7 +127,7 @@ describe('cookie', () => {
           value: 'xxx%20yyy%20zzz',
           domain: 'www.example.com',
           path: '/',
-          expires: '2021-02-15T00:10:47.352Z',
+          expires: '2051-02-15T15:10:47.352Z',
           hostOnly: false,
           extensions: ['SameSite=none']
         }

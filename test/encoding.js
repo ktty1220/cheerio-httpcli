@@ -75,7 +75,8 @@ describe('encoding:unknown', () => {
     cli.set('iconv', 'iconv-lite');
   });
 
-  test('自動判定でも<head>タグからも文字コードが判別できない => UTF-8として処理される(utf-8)', () => {
+  // 判別性能が上がってテスト対象を用意できないためスキップ
+  xtest('自動判定でも<head>タグからも文字コードが判別できない => UTF-8として処理される(utf-8)', () => {
     return new Promise((resolve) => {
       const url = `${endpoint}/unknown/utf-8.html`;
       cli.fetch(url, (err, $, res, body) => {

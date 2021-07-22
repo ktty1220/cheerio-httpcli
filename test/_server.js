@@ -133,9 +133,8 @@ router.upload = (req, res) => {
       fields,
       files: []
     };
-    const upfiles = (!Array.isArray(files.upload_file)
-      ? [files.upload_file]
-      : files.upload_file
+    const upfiles = (
+      !Array.isArray(files.upload_file) ? [files.upload_file] : files.upload_file
     ).sort((a, b) => (a.name > b.name ? 1 : -1));
     each(upfiles, (uf) => {
       result.files.push({
